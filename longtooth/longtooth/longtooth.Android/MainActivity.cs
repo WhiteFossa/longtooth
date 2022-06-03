@@ -7,6 +7,8 @@ using Android.OS;
 using Nancy.TinyIoc;
 using longtooth.Abstractions.Interfaces.Models;
 using longtooth.Models;
+using longtooth.Server.Abstractions.Interfaces;
+using longtooth.Server.Implementations.Business;
 
 namespace longtooth.Droid
 {
@@ -20,6 +22,7 @@ namespace longtooth.Droid
             // Registering IoC stuff
             App.Container = new TinyIoCContainer();
             App.Container.Register<IMainModel, MainModel>().AsSingleton();
+            App.Container.Register<IServer, ServerImplementation>().AsSingleton();
 
             #endregion
 
