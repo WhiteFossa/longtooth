@@ -4,6 +4,9 @@ using Android.App;
 using Android.Content.PM;
 using Android.Runtime;
 using Android.OS;
+using Nancy.TinyIoc;
+using longtooth.Abstractions.Interfaces.Models;
+using longtooth.Models;
 
 namespace longtooth.Droid
 {
@@ -12,6 +15,14 @@ namespace longtooth.Droid
     {
         protected override void OnCreate(Bundle savedInstanceState)
         {
+            #region IoC
+
+            // Registering IoC stuff
+            App.Container = new TinyIoCContainer();
+            App.Container.Register<IMainModel, MainModel>().AsSingleton();
+
+            #endregion
+
             base.OnCreate(savedInstanceState);
 
             Xamarin.Essentials.Platform.Init(this, savedInstanceState);

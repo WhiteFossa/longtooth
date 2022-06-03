@@ -3,6 +3,64 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="longtooth.App">
     <Application.Resources>
+        <!-- Light colors -->
+        <Color x:Key="LightPrimaryColor">White</Color>
+        <Color x:Key="LightSecondaryColor">Black</Color>
 
+        <!-- Inner frames light colors -->
+        <Color x:Key="InnerFramesLightPrimaryColor">#F5F5F5</Color>
+        <Color x:Key="InnerFramesLightSecondaryColor">Black</Color>
+
+        <!-- Dark colors -->
+        <Color x:Key="DarkPrimaryColor">#404040</Color>
+        <Color x:Key="DarkSecondaryColor">White</Color>
+
+        <!-- Inner frames dark colors -->
+        <Color x:Key="InnerFramesDarkPrimaryColor">#505050</Color>
+        <Color x:Key="InnerFramesDarkSecondaryColor">White</Color>
+
+        <!-- Ordinary frames -->
+        <Style
+            x:Key="FramesStyle"
+            TargetType="Frame">
+            <Setter
+                Property="BackgroundColor"
+                Value="{AppThemeBinding Light={StaticResource LightPrimaryColor}, Dark={StaticResource DarkPrimaryColor}}" />
+
+            <Setter
+                Property="CornerRadius"
+                Value="10" />
+
+            <Setter
+                Property="HasShadow"
+                Value="True" />
+
+            <Setter
+                Property="Margin"
+                Value="5" />
+
+            <Setter
+                Property="Padding"
+                Value="5" />
+        </Style>
+
+        <!-- Inner frames -->
+        <Style
+            x:Key="InnerFramesStyle"
+            TargetType="Frame"
+            BasedOn="{StaticResource FramesStyle}">
+
+            <Setter
+                Property="BackgroundColor"
+                Value="{AppThemeBinding Light={StaticResource InnerFramesLightPrimaryColor}, Dark={StaticResource InnerFramesDarkPrimaryColor}}" />
+
+            <Setter
+                Property="Margin"
+                Value="0" />
+
+            <Setter
+                Property="Padding"
+                Value="10" />
+        </Style>
     </Application.Resources>
 </Application>
