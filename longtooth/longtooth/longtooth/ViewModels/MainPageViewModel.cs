@@ -1,7 +1,9 @@
 ﻿using longtooth.Abstractions.Interfaces.Models;
 using longtooth.Models;
+using longtooth.Server.Abstractions.DTOs;
 using longtooth.Server.Abstractions.Interfaces;
 using System.Diagnostics;
+using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Xamarin.Forms;
@@ -16,6 +18,11 @@ namespace longtooth.ViewModels
         /// Command, executed when user starts server
         /// </summary>
         public ICommand StartServerCommand { get; }
+
+        /// <summary>
+        /// Command, executed when user stops server
+        /// </summary>
+        public ICommand StopServerCommand { get; }
 
         #endregion
 
@@ -36,6 +43,7 @@ namespace longtooth.ViewModels
 
             // Binding commands to handlers
             StartServerCommand = new Command(async () => await OnServerStartAsync());
+            StopServerCommand = new Command(async() => await OnServerStopAsync());
         }
 
         /// <summary>
@@ -43,9 +51,23 @@ namespace longtooth.ViewModels
         /// </summary>
         public async Task OnServerStartAsync()
         {
-            Debug.WriteLine("Server starting...");
+            await _server.StartAsync(OnNewDataReadFromClient);
+        }
 
-            await _server.StartAsync();
+        /// <summary>
+        /// Called when we are receiving new data from client
+        /// </summary>
+        private void OnNewDataReadFromClient(ReadDataDto data)
+        {
+            Debug.WriteLine(Encoding.ASCII.GetString(data.Data.ToArray(), 0, data.Size));
+        }
+
+        /// <summary>
+        /// Called when user tries to stop server
+        /// </summary>
+        public async Task OnServerStopAsync()
+        {
+            _server.Stop();
         }
     }
 }

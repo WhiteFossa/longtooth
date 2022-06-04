@@ -24,7 +24,11 @@
                         <Button
                             Text="Start server"
                             Command="{Binding StartServerCommand}" />
-                        
+
+                        <Button
+                            Text="Stop server"
+                            Command="{Binding StopServerCommand}" />
+
                     </StackLayout>
                 </Frame>
                 <!-- End of service settings -->

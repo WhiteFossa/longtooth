@@ -1,5 +1,7 @@
-﻿using longtooth.Server.Abstractions.Interfaces;
+﻿using longtooth.Server.Abstractions.DTOs;
+using longtooth.Server.Abstractions.Interfaces;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
@@ -24,21 +26,41 @@ namespace longtooth.Server.Implementations.Business
         // Thread signal
         public static ManualResetEvent _allDone = new ManualResetEvent(false);
 
-        public async Task StartAsync()
+        private OnNewDataReadDelegate _readCallback;
+        private Socket _socket;
+        private IPEndPoint _endpoint;
+        private Thread _serverThread;
+
+        private bool _needToStopServer;
+
+        public async Task StartAsync(OnNewDataReadDelegate readCallback)
         {
+            _readCallback = readCallback ?? throw new ArgumentNullException(nameof(readCallback));
+
             var listenIp = IPAddress.Any;
-            var endPoint = new IPEndPoint(listenIp, ListenPort);
+            _endpoint = new IPEndPoint(listenIp, ListenPort);
 
-            var socket = new Socket(listenIp.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+            _socket = new Socket(listenIp.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
 
+            _needToStopServer = false;
+
+            _serverThread = new Thread(new ThreadStart(ServerThreadRun));
+            _serverThread.Start();
+        }
+
+        /// <summary>
+        /// Server thread entry point
+        /// </summary>
+        private void ServerThreadRun()
+        {
             try
             {
-                socket.Bind(endPoint);
-                socket.Listen(ListenQueueSize);
+                _socket.Bind(_endpoint);
+                _socket.Listen(ListenQueueSize);
 
                 _allDone.Reset();
 
-                socket.BeginAccept(new AsyncCallback(AcceptCallback), socket);
+                _socket.BeginAccept(new AsyncCallback(AcceptCallback), _socket);
 
                 _allDone.WaitOne();
             }
@@ -69,7 +91,7 @@ namespace longtooth.Server.Implementations.Business
                 state);
         }
 
-        public static void ReadCallback(IAsyncResult result)
+        public void ReadCallback(IAsyncResult result)
         {
             var state = result.AsyncState as StateObject;
             var socket = state.WorkSocket;
@@ -78,9 +100,18 @@ namespace longtooth.Server.Implementations.Business
 
             if (bytesRead > 0)
             {
-                var message = Encoding.ASCII.GetString(state.Buffer, 0, bytesRead);
+                var receivedData = new ReadDataDto(
+                    bytesRead,
+                    new List<byte>(state.Buffer).GetRange(0, bytesRead));
 
-                Debug.WriteLine(message);
+                _readCallback(receivedData);
+
+                if (_needToStopServer)
+                {
+                    socket.Close();
+                    _needToStopServer = false;
+                    return;
+                }
 
                 // Continuing to listen
                 socket.BeginReceive(
@@ -91,6 +122,13 @@ namespace longtooth.Server.Implementations.Business
                     new AsyncCallback(ReadCallback),
                     state);
             }
+        }
+
+        public void Stop()
+        {
+            _ = _serverThread ?? throw new InvalidOperationException("Server isn't running");
+
+            _needToStopServer = true;
         }
     }
 }
