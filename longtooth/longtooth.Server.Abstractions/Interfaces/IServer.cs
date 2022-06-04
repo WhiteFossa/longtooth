@@ -6,7 +6,7 @@ namespace longtooth.Server.Abstractions.Interfaces
     /// <summary>
     /// Delegate, called when new data comes from client
     /// </summary>
-    public delegate void OnNewDataReadDelegate(ReadDataDto data);
+    public delegate ResponseDto OnNewDataReadDelegate(ReadDataDto data);
 
     /// <summary>
     /// Longtooth server

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace longtooth.Server.Abstractions.DTOs
 {
@@ -20,7 +21,7 @@ namespace longtooth.Server.Abstractions.DTOs
         public ReadDataDto(int size, List<byte> data)
         {
             Size = size;
-            Data = data;
+            Data = data ?? throw new ArgumentNullException(nameof(data));
         }
     }
 }

@@ -104,14 +104,22 @@ namespace longtooth.Server.Implementations.Business
                     bytesRead,
                     new List<byte>(state.Buffer).GetRange(0, bytesRead));
 
-                _readCallback(receivedData);
+                var responseToClient = _readCallback(receivedData);
 
-                if (_needToStopServer)
+                if (!responseToClient.NeedToSendResponse || _needToStopServer)
                 {
                     socket.Close();
                     _needToStopServer = false;
                     return;
                 }
+
+                // Sending answer
+                socket.BeginSend(
+                    responseToClient.Response.ToArray(),
+                    0,
+                    responseToClient.Response.Count,
+                    0,
+                    new AsyncCallback(SendCallback), socket);
 
                 // Continuing to listen
                 socket.BeginReceive(
@@ -122,6 +130,13 @@ namespace longtooth.Server.Implementations.Business
                     new AsyncCallback(ReadCallback),
                     state);
             }
+        }
+
+        /// <summary>
+        /// Called after sending data to cient
+        /// </summary>
+        private void SendCallback(IAsyncResult result)
+        {
         }
 
         public void Stop()

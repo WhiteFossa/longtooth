@@ -2,6 +2,7 @@
 using longtooth.Models;
 using longtooth.Server.Abstractions.DTOs;
 using longtooth.Server.Abstractions.Interfaces;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
 using System.Threading.Tasks;
@@ -57,9 +58,15 @@ namespace longtooth.ViewModels
         /// <summary>
         /// Called when we are receiving new data from client
         /// </summary>
-        private void OnNewDataReadFromClient(ReadDataDto data)
+        private ResponseDto OnNewDataReadFromClient(ReadDataDto data)
         {
-            Debug.WriteLine(Encoding.ASCII.GetString(data.Data.ToArray(), 0, data.Size));
+            var incomingMessage = Encoding.ASCII.GetString(data.Data.ToArray(), 0, data.Size);
+
+            var result = ASCIIEncoding.ASCII.GetBytes($"Echo: { incomingMessage }");
+
+            var response = new ResponseDto(true, new List<byte>(result));
+
+            return response;
         }
 
         /// <summary>
