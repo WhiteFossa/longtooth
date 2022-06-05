@@ -1,0 +1,47 @@
+﻿<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="longtooth.Desktop.Views.MainWindow"
+        Title="Longtooth">
+    
+    <Window.Styles>
+        <StyleInclude Source="/Styles/Common.xaml" />
+    </Window.Styles>
+
+    <!-- Main grid -->
+    <Grid ColumnDefinitions="*" RowDefinitions="Auto, *" >
+
+        <!-- Connection to server -->
+        <Border Classes="VisibleBorders" Grid.Column="0" Grid.Row="0" >
+            <StackPanel>
+                <TextBlock Text="Server connection" />
+
+                <Grid ColumnDefinitions="Auto, Auto, Auto, Auto, Auto, Auto" RowDefinitions="Auto" >
+                    <TextBlock Text="Server:" Grid.Column="0" Grid.Row="0" Classes="VCenterRightMargin"/>
+
+                    <!-- IP -->
+                    <TextBox Watermark="IP address" Grid.Column="1" Grid.Row="0"
+                        Text="{Binding ServerIp}" />
+
+                    <TextBlock Text=":" Grid.Column="2" Grid.Row="0" Classes="VCenterLeftRightMargins" />
+
+                    <!-- Port -->
+                    <TextBox Watermark="Port" Grid.Column="3" Grid.Row="0"
+                        Text="{Binding ServerPort}" />
+
+                    <!-- Connect -->
+                    <Button Grid.Column="4" Grid.Row="0" Content="Connect" Classes="LeftMargin"
+						Command="{ Binding ConnectAsync }" />
+
+                    <!-- Disconnect -->
+                    <Button Grid.Column="5" Grid.Row="0" Content="Disconnect" Classes="LeftMargin"
+						Command="{ Binding DisconnectAsync }"/>
+                </Grid>
+
+            </StackPanel>
+        </Border>
+
+    </Grid>
+</Window>
