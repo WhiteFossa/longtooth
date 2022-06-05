@@ -1,6 +1,7 @@
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using longtooth.Desktop.Models;
 using longtooth.Desktop.ViewModels;
 using longtooth.Desktop.Views;
 
@@ -19,7 +20,7 @@ namespace longtooth.Desktop
             {
                 desktop.MainWindow = new MainWindow()
                 {
-                    DataContext = new MainWindowViewModel()
+                    DataContext = new MainWindowViewModel(new MainModel())
                 };
             }
 

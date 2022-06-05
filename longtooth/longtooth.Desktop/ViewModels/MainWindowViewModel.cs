@@ -1,7 +1,9 @@
-﻿using ReactiveUI;
+﻿using longtooth.Desktop.Models;
+using ReactiveUI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Reactive;
 using System.Text;
 using System.Threading.Tasks;
@@ -47,8 +49,16 @@ namespace longtooth.Desktop.ViewModels
 
         #endregion
 
-        public MainWindowViewModel()
+        /// <summary>
+        /// Main application model
+        /// </summary>
+        private MainModel _mainModel { get; }
+
+        public MainWindowViewModel(MainModel model) : base()
         {
+            _mainModel = model ?? throw new ArgumentNullException(nameof(model));
+
+
             #region Commands binding
 
             ConnectAsyncCommand = ReactiveCommand.Create(ConnectAsync);
@@ -62,6 +72,9 @@ namespace longtooth.Desktop.ViewModels
         /// </summary>
         public async void ConnectAsync()
         {
+            _mainModel.ServerIp = IPAddress.Parse(_serverIp);
+            _mainModel.ServerPort = uint.Parse(_serverPort);
+
             Console.WriteLine("Connecting");
         }
 
