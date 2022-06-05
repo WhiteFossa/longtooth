@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using ReactiveUI;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Reactive;
@@ -89,6 +90,14 @@ namespace longtooth.Desktop.ViewModels
         private readonly IClient _client;
         private readonly ILogger _logger;
 
+        private readonly List<byte> _experimentalMessage;
+
+        private const int _packetsCount = 10000;
+
+        private int _packetsCounter = 0;
+
+        private Stopwatch _stopWatch = new Stopwatch();
+
         public MainWindowViewModel(MainModel model) : base()
         {
             _mainModel = model ?? throw new ArgumentNullException(nameof(model));
@@ -109,6 +118,13 @@ namespace longtooth.Desktop.ViewModels
             SendTestMessageAsyncCommand = ReactiveCommand.Create(SendTestMessageAsync);
 
             #endregion
+
+            _experimentalMessage = new List<byte>();
+            var random = new Random();
+            for (var i = 0; i < 1024; i++)
+            {
+                _experimentalMessage.Add((byte)(random.Next() % 256));
+            }
         }
 
         /// <summary>
@@ -135,20 +151,42 @@ namespace longtooth.Desktop.ViewModels
         /// </summary>
         private async void SendTestMessageAsync()
         {
-            var message = "Test message";
+            await _logger.LogInfoAsync($"Sending { _packetsCount} x 1024 bytes");
 
-            await _logger.LogInfoAsync(message);
+            _stopWatch.Reset();
+            _stopWatch.Start();
 
-            var encodedMessage = new List<byte>(ASCIIEncoding.ASCII.GetBytes(message));
-
-            await _client.SendAsync(encodedMessage, OnServerResponse);
+            _packetsCounter = 0;
+            await _client.SendAsync(_experimentalMessage, OnServerResponse);
         }
 
         private async void OnServerResponse(List<byte> response)
         {
-            var message = Encoding.ASCII.GetString(response.ToArray(), 0, response.Count);
+            // Is data correct?
+            for(var i = 0; i < 1024; i++)
+            {
+                if (response[i] != _experimentalMessage[i])
+                {
+                    await _logger.LogErrorAsync("Wrong data received");
+                    return;
+                }
+            }
 
-            await _logger.LogInfoAsync(message);
+            _packetsCounter ++;
+
+            if (_packetsCounter >= _packetsCount)
+            {
+                await _logger.LogInfoAsync("Completed!");
+
+                _stopWatch.Stop();
+                var elapsed = _stopWatch.Elapsed;
+
+                await _logger.LogInfoAsync($"Elapsed: {elapsed.TotalSeconds }");
+
+                return;
+            }
+
+            await _client.SendAsync(_experimentalMessage, OnServerResponse);
         }
 
         /// <summary>
