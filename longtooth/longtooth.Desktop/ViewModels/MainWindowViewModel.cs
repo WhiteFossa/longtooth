@@ -1,5 +1,6 @@
 ﻿using longtooth.Client.Abstractions.DTOs;
 using longtooth.Client.Abstractions.Interfaces;
+using longtooth.Desktop.Business.Interfaces;
 using longtooth.Desktop.Models;
 using Microsoft.Extensions.DependencyInjection;
 using ReactiveUI;
@@ -20,6 +21,8 @@ namespace longtooth.Desktop.ViewModels
 
         private string _serverIp;
         private string _serverPort;
+        private string _consoleText;
+        private int _consoleCaretIndex;
 
         /// <summary>
         /// Server IP
@@ -37,6 +40,24 @@ namespace longtooth.Desktop.ViewModels
         {
             get => _serverPort;
             set => this.RaiseAndSetIfChanged(ref _serverPort, value);
+        }
+
+        /// <summary>
+        /// Text in console
+        /// </summary>
+        public string ConsoleText
+        {
+            get => _consoleText;
+            set => this.RaiseAndSetIfChanged(ref _consoleText, value);
+        }
+
+        /// <summary>
+        /// Consone caret index (to scroll programmatically)
+        /// </summary>
+        public int ConsoleCaretIndex
+        {
+            get => _consoleCaretIndex;
+            set => this.RaiseAndSetIfChanged(ref _consoleCaretIndex, value);
         }
 
         #endregion
@@ -66,6 +87,7 @@ namespace longtooth.Desktop.ViewModels
         private MainModel _mainModel { get; }
 
         private readonly IClient _client;
+        private readonly ILogger _logger;
 
         public MainWindowViewModel(MainModel model) : base()
         {
@@ -74,8 +96,11 @@ namespace longtooth.Desktop.ViewModels
             #region DI
 
             _client = Program.Di.GetService<IClient>();
+            _logger = Program.Di.GetService<ILogger>();
 
             #endregion
+
+            _logger.SetLoggingFunction(AddLineToConsole);
 
             #region Commands binding
 
@@ -110,14 +135,30 @@ namespace longtooth.Desktop.ViewModels
         /// </summary>
         private async void SendTestMessageAsync()
         {
-            var message = new List<byte>(ASCIIEncoding.ASCII.GetBytes("Test message"));
+            var message = "Test message";
 
-           await _client.SendAsync(message, OnServerResponse);
+            await _logger.LogInfoAsync(message);
+
+            var encodedMessage = new List<byte>(ASCIIEncoding.ASCII.GetBytes(message));
+
+            await _client.SendAsync(encodedMessage, OnServerResponse);
         }
 
         private async void OnServerResponse(List<byte> response)
         {
             var message = Encoding.ASCII.GetString(response.ToArray(), 0, response.Count);
+
+            await _logger.LogInfoAsync(message);
+        }
+
+        /// <summary>
+        /// Adds a new text line to console. Feed it to logger
+        /// </summary>
+        public void AddLineToConsole(string line)
+        {
+            ConsoleText += $"{line}{Environment.NewLine}";
+
+            ConsoleCaretIndex = ConsoleText.Length;
         }
     }
 }

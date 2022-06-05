@@ -1,6 +1,8 @@
 ﻿using Avalonia;
 using longtooth.Client.Abstractions.Interfaces;
 using longtooth.Client.Implementations.Business;
+using longtooth.Desktop.Business.Implementations;
+using longtooth.Desktop.Business.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 
@@ -39,6 +41,7 @@ namespace longtooth.Desktop
             IServiceCollection services = new ServiceCollection();
 
             services.AddSingleton<IClient, ClientImplementation>();
+            services.AddSingleton<ILogger, Logger>();
 
             return services;
         }

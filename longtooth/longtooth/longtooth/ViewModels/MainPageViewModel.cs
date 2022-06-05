@@ -60,11 +60,7 @@ namespace longtooth.ViewModels
         /// </summary>
         private ResponseDto OnNewDataReadFromClient(ReadDataDto data)
         {
-            var incomingMessage = Encoding.ASCII.GetString(data.Data.ToArray(), 0, data.Size);
-
-            var result = ASCIIEncoding.ASCII.GetBytes($"Echo: { incomingMessage }");
-
-            var response = new ResponseDto(true, new List<byte>(result));
+            var response = new ResponseDto(true, data.Data);
 
             return response;
         }

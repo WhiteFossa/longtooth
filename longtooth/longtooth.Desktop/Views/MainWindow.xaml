@@ -58,5 +58,14 @@
             </StackPanel>
         </Border>
 
+        <!-- Logs -->
+        <Border Classes="VisibleBorders" Grid.Column="0" Grid.Row="2" >
+            <DockPanel>
+                <TextBlock Text="Logs" DockPanel.Dock="Top" />
+
+                <TextBox AcceptsReturn="True" IsReadOnly="True" Text="{Binding ConsoleText}" CaretIndex="{Binding ConsoleCaretIndex}" />
+            </DockPanel>
+        </Border>
+
     </Grid>
 </Window>
