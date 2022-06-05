@@ -13,6 +13,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "longtooth.Server.Implementa
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "longtooth.Desktop", "longtooth.Desktop\longtooth.Desktop.csproj", "{F1EA00A7-F2C0-4DD4-B72E-93F732A8425E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "longtooth.Client.Abstractions", "longtooth.Client.Abstractions\longtooth.Client.Abstractions.csproj", "{9239ACE3-853F-4FE4-9DD5-D53EA494C188}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "longtooth.Client.Implementations", "longtooth.Client.Implementations\longtooth.Client.Implementations.csproj", "{AC108FC2-7653-4055-9113-6716A31615CA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -43,6 +47,14 @@ Global
 		{F1EA00A7-F2C0-4DD4-B72E-93F732A8425E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F1EA00A7-F2C0-4DD4-B72E-93F732A8425E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F1EA00A7-F2C0-4DD4-B72E-93F732A8425E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9239ACE3-853F-4FE4-9DD5-D53EA494C188}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9239ACE3-853F-4FE4-9DD5-D53EA494C188}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9239ACE3-853F-4FE4-9DD5-D53EA494C188}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9239ACE3-853F-4FE4-9DD5-D53EA494C188}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AC108FC2-7653-4055-9113-6716A31615CA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AC108FC2-7653-4055-9113-6716A31615CA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AC108FC2-7653-4055-9113-6716A31615CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AC108FC2-7653-4055-9113-6716A31615CA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

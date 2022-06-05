@@ -11,7 +11,7 @@
     </Window.Styles>
 
     <!-- Main grid -->
-    <Grid ColumnDefinitions="*" RowDefinitions="Auto, *" >
+    <Grid ColumnDefinitions="*" RowDefinitions="Auto, Auto, *" >
 
         <!-- Connection to server -->
         <Border Classes="VisibleBorders" Grid.Column="0" Grid.Row="0" >
@@ -40,6 +40,21 @@
 						Command="{ Binding DisconnectAsync }"/>
                 </Grid>
 
+            </StackPanel>
+        </Border>
+
+        <!-- Experiments -->
+        <Border Classes="VisibleBorders" Grid.Column="0" Grid.Row="1" >
+            <StackPanel>
+                <TextBlock Text="Experiments" />
+
+                <Grid ColumnDefinitions="Auto" RowDefinitions="Auto" >
+
+                    <!-- Test message -->
+                    <Button Grid.Column="0" Grid.Row="0" Content="Test message"
+						Command="{ Binding SendTestMessageAsync }" />
+
+                </Grid>
             </StackPanel>
         </Border>
 

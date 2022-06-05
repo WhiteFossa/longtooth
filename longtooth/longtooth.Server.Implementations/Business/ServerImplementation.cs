@@ -24,7 +24,7 @@ namespace longtooth.Server.Implementations.Business
         private const int ListenQueueSize = 100;
 
         // Thread signal
-        public static ManualResetEvent _allDone = new ManualResetEvent(false);
+        private ManualResetEvent _allDone = new ManualResetEvent(false);
 
         private OnNewDataReadDelegate _readCallback;
         private Socket _socket;

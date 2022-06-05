@@ -1,6 +1,6 @@
 ﻿using System.Net.Sockets;
 
-namespace longtooth.Server.Implementations.Business
+namespace longtooth.Client.Implementations.Business
 {
     /// <summary>
     /// State object for reading client data asynchronously
@@ -8,18 +8,18 @@ namespace longtooth.Server.Implementations.Business
     public class StateObject
     {
         /// <summary>
-        /// Read data buffer size
+        /// Client socket
+        /// </summary>
+        public Socket WorkSocket { get; set; }
+
+        /// <summary>
+        /// Receive buffer size
         /// </summary>
         public const int BufferSize = 1024;
 
         /// <summary>
-        /// Read data buffer
+        /// Receive buffer
         /// </summary>
         public byte[] Buffer = new byte[BufferSize];
-
-        /// <summary>
-        /// Server socket
-        /// </summary>
-        public Socket WorkSocket;
     }
 }
