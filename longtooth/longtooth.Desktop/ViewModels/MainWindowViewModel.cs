@@ -92,7 +92,8 @@ namespace longtooth.Desktop.ViewModels
 
         private readonly List<byte> _experimentalMessage;
 
-        private const int _packetsCount = 10000;
+        private const int PacketSize = 1500;
+        private const int PacketsCount = 10000;
 
         private int _packetsCounter = 0;
 
@@ -121,7 +122,7 @@ namespace longtooth.Desktop.ViewModels
 
             _experimentalMessage = new List<byte>();
             var random = new Random();
-            for (var i = 0; i < 1024; i++)
+            for (var i = 0; i < PacketSize; i++)
             {
                 _experimentalMessage.Add((byte)(random.Next() % 256));
             }
@@ -151,7 +152,7 @@ namespace longtooth.Desktop.ViewModels
         /// </summary>
         private async void SendTestMessageAsync()
         {
-            await _logger.LogInfoAsync($"Sending { _packetsCount} x 1024 bytes");
+            await _logger.LogInfoAsync($"Sending { PacketsCount} x { PacketSize } bytes");
 
             _stopWatch.Reset();
             _stopWatch.Start();
@@ -163,25 +164,32 @@ namespace longtooth.Desktop.ViewModels
         private async void OnServerResponse(List<byte> response)
         {
             // Is data correct?
-            for(var i = 0; i < 1024; i++)
+            if (response.Count != 2
+                ||
+                response[0] != 79
+                ||
+                response[1] != 75
+                )
             {
-                if (response[i] != _experimentalMessage[i])
-                {
-                    await _logger.LogErrorAsync("Wrong data received");
-                    return;
-                }
+                await _logger.LogErrorAsync("Wrong data received");
+                return;
             }
 
             _packetsCounter ++;
 
-            if (_packetsCounter >= _packetsCount)
+            if (_packetsCounter >= PacketsCount)
             {
                 await _logger.LogInfoAsync("Completed!");
 
                 _stopWatch.Stop();
                 var elapsed = _stopWatch.Elapsed;
 
-                await _logger.LogInfoAsync($"Elapsed: {elapsed.TotalSeconds }");
+                await _logger.LogInfoAsync($"Elapsed: { elapsed.TotalSeconds }");
+
+                var totalBytes = PacketsCount * PacketSize;
+                var speed = totalBytes / elapsed.TotalSeconds;
+
+                await _logger.LogInfoAsync($"Speed: { speed }");
 
                 return;
             }

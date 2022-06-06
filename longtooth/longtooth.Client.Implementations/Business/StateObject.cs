@@ -15,7 +15,7 @@ namespace longtooth.Client.Implementations.Business
         /// <summary>
         /// Receive buffer size
         /// </summary>
-        public const int BufferSize = 1024;
+        public const int BufferSize = 10000;
 
         /// <summary>
         /// Receive buffer

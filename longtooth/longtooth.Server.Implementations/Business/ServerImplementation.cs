@@ -21,7 +21,7 @@ namespace longtooth.Server.Implementations.Business
         /// <summary>
         /// Listen queue size (number of concurrent connections)
         /// </summary>
-        private const int ListenQueueSize = 100;
+        private const int ListenQueueSize = 10;
 
         // Thread signal
         private ManualResetEvent _allDone = new ManualResetEvent(false);
@@ -119,7 +119,8 @@ namespace longtooth.Server.Implementations.Business
                     0,
                     responseToClient.Response.Count,
                     0,
-                    new AsyncCallback(SendCallback), socket);
+                    new AsyncCallback(SendCallback),
+                    socket);
 
                 // Continuing to listen
                 socket.BeginReceive(
@@ -137,6 +138,9 @@ namespace longtooth.Server.Implementations.Business
         /// </summary>
         private void SendCallback(IAsyncResult result)
         {
+            var socket = result.AsyncState as Socket;
+
+            var sentCount = socket.EndSend(result);
         }
 
         public void Stop()

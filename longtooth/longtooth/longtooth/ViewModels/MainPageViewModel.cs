@@ -60,7 +60,11 @@ namespace longtooth.ViewModels
         /// </summary>
         private ResponseDto OnNewDataReadFromClient(ReadDataDto data)
         {
-            var response = new ResponseDto(true, data.Data);
+            var responseMessage = new List<byte>();
+            responseMessage.Add(79);
+            responseMessage.Add(75);
+
+            var response = new ResponseDto(true, responseMessage);
 
             return response;
         }
