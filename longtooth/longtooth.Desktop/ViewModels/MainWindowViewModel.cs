@@ -92,8 +92,8 @@ namespace longtooth.Desktop.ViewModels
 
         private readonly List<byte> _experimentalMessage;
 
-        private const int PacketSize = 1500;
-        private const int PacketsCount = 10000;
+        private const int PacketSize = 1048576;
+        private const int PacketsCount = 1000;
 
         private int _packetsCounter = 0;
 
@@ -164,16 +164,12 @@ namespace longtooth.Desktop.ViewModels
         private async void OnServerResponse(List<byte> response)
         {
             // Is data correct?
-            if (response.Count != 2
-                ||
-                response[0] != 79
-                ||
-                response[1] != 75
-                )
-            {
-                await _logger.LogErrorAsync("Wrong data received");
-                return;
-            }
+            //if (!response.SequenceEqual(_experimentalMessage)
+            //    )
+            //{
+            //    await _logger.LogErrorAsync("Wrong data received");
+            //    return;
+            //}
 
             _packetsCounter ++;
 

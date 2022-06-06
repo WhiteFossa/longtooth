@@ -10,7 +10,7 @@ namespace longtooth.Server.Implementations.Business
         /// <summary>
         /// Read data buffer size
         /// </summary>
-        public const int BufferSize = 10000;
+        public const int BufferSize = 1048576;
 
         /// <summary>
         /// Read data buffer
