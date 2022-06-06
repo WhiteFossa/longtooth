@@ -1,4 +1,5 @@
 ﻿using longtooth.Server.Abstractions.DTOs;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace longtooth.Server.Abstractions.Interfaces
@@ -6,7 +7,7 @@ namespace longtooth.Server.Abstractions.Interfaces
     /// <summary>
     /// Delegate, called when new data comes from client
     /// </summary>
-    public delegate ResponseDto OnNewDataReadDelegate(ReadDataDto data);
+    public delegate ResponseDto OnNewDataReadDelegate(List<byte> data);
 
     /// <summary>
     /// Longtooth server

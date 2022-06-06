@@ -1,4 +1,6 @@
 ﻿using longtooth.Abstractions.Interfaces.Models;
+using longtooth.Common.Abstractions.Interfaces.MessagesProcessor;
+using longtooth.Common.Implementations.MessagesProcessor;
 using longtooth.Models;
 using longtooth.Server.Abstractions.DTOs;
 using longtooth.Server.Abstractions.Interfaces;
@@ -33,6 +35,7 @@ namespace longtooth.ViewModels
         public MainModel MainModel;
 
         private IServer _server;
+        private IMessagesProcessor _messagesProcessor;
 
         /// <summary>
         /// Constructor
@@ -41,6 +44,7 @@ namespace longtooth.ViewModels
         {
             MainModel = App.Container.Resolve<IMainModel>() as MainModel;
             _server = App.Container.Resolve<IServer>();
+            _messagesProcessor = App.Container.Resolve<IMessagesProcessor>();
 
             // Binding commands to handlers
             StartServerCommand = new Command(async () => await OnServerStartAsync());
@@ -58,9 +62,19 @@ namespace longtooth.ViewModels
         /// <summary>
         /// Called when we are receiving new data from client
         /// </summary>
-        private ResponseDto OnNewDataReadFromClient(ReadDataDto data)
+        private ResponseDto OnNewDataReadFromClient(List<byte> data)
         {
-            var response = new ResponseDto(true, data.Data);
+            var decodedMessage = _messagesProcessor.OnNewMessageArriveServer(data);
+
+            if (decodedMessage == null)
+            {
+                // We aren't ready to response now
+                return new ResponseDto(false, false, new List<byte>());
+            }
+
+            // Encoding outgoing message
+            var encodedMessage = _messagesProcessor.PrepareMessageToSend(decodedMessage);
+            var response = new ResponseDto(true, false, encodedMessage);
 
             return response;
         }

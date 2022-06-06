@@ -9,18 +9,24 @@ namespace longtooth.Server.Abstractions.DTOs
     public class ResponseDto
     {
         /// <summary>
-        /// If true, then response will be sent to client, otherwise connection will be closed
+        /// If true, then response will be sent to client
         /// </summary>
         public bool NeedToSendResponse { get; private set; }
+
+        /// <summary>
+        /// If true, then server will close connection
+        /// </summary>
+        public bool NeedToClose { get; private set; }
 
         /// <summary>
         /// Response to a client
         /// </summary>
         public List<byte> Response { get; private set; }
 
-        public ResponseDto(bool needToSendResponse, List<byte> response)
+        public ResponseDto(bool needToSendResponse, bool needToClose, List<byte> response)
         {
             NeedToSendResponse = needToSendResponse;
+            NeedToClose = needToClose;
             Response = response ?? throw new ArgumentNullException(nameof(response));
         }
     }

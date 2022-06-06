@@ -17,6 +17,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\longtooth.Common.Abstractions\longtooth.Common.Abstractions.csproj" />
+    <ProjectReference Include="..\..\longtooth.Common.Implementations\longtooth.Common.Implementations.csproj" />
     <ProjectReference Include="..\..\longtooth.Server.Abstractions\longtooth.Server.Abstractions.csproj" />
   </ItemGroup>
 

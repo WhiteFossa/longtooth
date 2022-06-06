@@ -1,6 +1,10 @@
 ﻿using Avalonia;
 using longtooth.Client.Abstractions.Interfaces;
 using longtooth.Client.Implementations.Business;
+using longtooth.Common.Abstractions.Interfaces.MessagesProcessor;
+using longtooth.Common.Abstractions.Interfaces.MessagesProtocol;
+using longtooth.Common.Implementations.MessagesProcessor;
+using longtooth.Common.Implementations.MessagesProtocol;
 using longtooth.Desktop.Business.Implementations;
 using longtooth.Desktop.Business.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
@@ -42,6 +46,8 @@ namespace longtooth.Desktop
 
             services.AddSingleton<IClient, ClientImplementation>();
             services.AddSingleton<ILogger, Logger>();
+            services.AddSingleton<IMessagesProtocol, MessagesProtocol>();
+            services.AddTransient<IMessagesProcessor, MessagesProcessor>();
 
             return services;
         }

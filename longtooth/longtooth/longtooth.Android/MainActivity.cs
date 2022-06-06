@@ -9,6 +9,10 @@ using longtooth.Abstractions.Interfaces.Models;
 using longtooth.Models;
 using longtooth.Server.Abstractions.Interfaces;
 using longtooth.Server.Implementations.Business;
+using longtooth.Common.Abstractions.Interfaces.MessagesProcessor;
+using longtooth.Common.Implementations.MessagesProcessor;
+using longtooth.Common.Abstractions.Interfaces.MessagesProtocol;
+using longtooth.Common.Implementations.MessagesProtocol;
 
 namespace longtooth.Droid
 {
@@ -23,6 +27,8 @@ namespace longtooth.Droid
             App.Container = new TinyIoCContainer();
             App.Container.Register<IMainModel, MainModel>().AsSingleton();
             App.Container.Register<IServer, ServerImplementation>().AsSingleton();
+            App.Container.Register<IMessagesProtocol, MessagesProtocol>().AsSingleton();
+            App.Container.Register<IMessagesProcessor, MessagesProcessor>().AsMultiInstance();
 
             #endregion
 

@@ -1,13 +1,7 @@
 ﻿using longtooth.Client.Abstractions.DTOs;
 using longtooth.Client.Abstractions.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.Text;
-using System.Threading.Tasks;
-using longtooth.Client.Abstractions.Interfaces;
 using static longtooth.Client.Abstractions.Interfaces.IClient;
 
 namespace longtooth.Client.Implementations.Business
@@ -113,6 +107,8 @@ namespace longtooth.Client.Implementations.Business
         /// </summary>
         private void ReceiveCallback(IAsyncResult result)
         {
+            _ = _responseHandler ?? throw new ArgumentNullException(nameof(result));
+
             var state = result.AsyncState as StateObject;
             var socket = state.WorkSocket;
 
@@ -120,8 +116,17 @@ namespace longtooth.Client.Implementations.Business
 
             _receiveDone.Set();
 
-            _ = _responseHandler ?? throw new ArgumentNullException(nameof(result));
+            // Delivering data to user
             _responseHandler(new List<byte>(state.Buffer).GetRange(0, readCount));
+
+            // Continue to listen
+            _socket.BeginReceive(
+                state.Buffer,
+                0,
+                StateObject.BufferSize,
+                0,
+                new AsyncCallback(ReceiveCallback),
+                state);
         }
     }
 }

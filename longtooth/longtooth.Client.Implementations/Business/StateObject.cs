@@ -1,4 +1,5 @@
-﻿using System.Net.Sockets;
+﻿using longtooth.Common.Abstractions;
+using System.Net.Sockets;
 
 namespace longtooth.Client.Implementations.Business
 {
@@ -15,7 +16,7 @@ namespace longtooth.Client.Implementations.Business
         /// <summary>
         /// Receive buffer size
         /// </summary>
-        public const int BufferSize = 1048576;
+        public const int BufferSize = Constants.MaxPacketSize;
 
         /// <summary>
         /// Receive buffer

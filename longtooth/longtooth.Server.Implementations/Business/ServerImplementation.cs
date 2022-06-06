@@ -100,27 +100,26 @@ namespace longtooth.Server.Implementations.Business
 
             if (bytesRead > 0)
             {
-                var receivedData = new ReadDataDto(
-                    bytesRead,
-                    new List<byte>(state.Buffer).GetRange(0, bytesRead));
+                var responseToClient = _readCallback(new List<byte>(state.Buffer).GetRange(0, bytesRead));
 
-                var responseToClient = _readCallback(receivedData);
-
-                if (!responseToClient.NeedToSendResponse || _needToStopServer)
+                // Sending answer if needed
+                if (responseToClient.NeedToSendResponse)
                 {
-                    socket.Close();
-                    _needToStopServer = false;
-                    return;
-                }
-
-                // Sending answer
-                socket.BeginSend(
+                    socket.BeginSend(
                     responseToClient.Response.ToArray(),
                     0,
                     responseToClient.Response.Count,
                     0,
                     new AsyncCallback(SendCallback),
                     socket);
+                }
+
+                if (responseToClient.NeedToClose || _needToStopServer)
+                {
+                    socket.Close();
+                    _needToStopServer = false;
+                    return;
+                }
 
                 // Continuing to listen
                 socket.BeginReceive(

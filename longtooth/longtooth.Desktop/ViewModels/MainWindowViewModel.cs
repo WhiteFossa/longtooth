@@ -1,5 +1,6 @@
 ﻿using longtooth.Client.Abstractions.DTOs;
 using longtooth.Client.Abstractions.Interfaces;
+using longtooth.Common.Abstractions.Interfaces.MessagesProcessor;
 using longtooth.Desktop.Business.Interfaces;
 using longtooth.Desktop.Models;
 using Microsoft.Extensions.DependencyInjection;
@@ -10,8 +11,6 @@ using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Reactive;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace longtooth.Desktop.ViewModels
 {
@@ -89,10 +88,11 @@ namespace longtooth.Desktop.ViewModels
 
         private readonly IClient _client;
         private readonly ILogger _logger;
+        private readonly IMessagesProcessor _messagesProcessor;
 
         private readonly List<byte> _experimentalMessage;
 
-        private const int PacketSize = 1048576;
+        private const int PacketSize = 16384;
         private const int PacketsCount = 1000;
 
         private int _packetsCounter = 0;
@@ -107,6 +107,9 @@ namespace longtooth.Desktop.ViewModels
 
             _client = Program.Di.GetService<IClient>();
             _logger = Program.Di.GetService<ILogger>();
+
+            _messagesProcessor = Program.Di.GetService<IMessagesProcessor>();
+            _messagesProcessor.SetupOnNewMessageDelegate(OnNewMessageAsync);
 
             #endregion
 
@@ -158,39 +161,13 @@ namespace longtooth.Desktop.ViewModels
             _stopWatch.Start();
 
             _packetsCounter = 0;
-            await _client.SendAsync(_experimentalMessage, OnServerResponse);
+            var encodedMessage = _messagesProcessor.PrepareMessageToSend(_experimentalMessage);
+            await _client.SendAsync(encodedMessage, OnServerResponse);
         }
 
         private async void OnServerResponse(List<byte> response)
         {
-            // Is data correct?
-            //if (!response.SequenceEqual(_experimentalMessage)
-            //    )
-            //{
-            //    await _logger.LogErrorAsync("Wrong data received");
-            //    return;
-            //}
-
-            _packetsCounter ++;
-
-            if (_packetsCounter >= PacketsCount)
-            {
-                await _logger.LogInfoAsync("Completed!");
-
-                _stopWatch.Stop();
-                var elapsed = _stopWatch.Elapsed;
-
-                await _logger.LogInfoAsync($"Elapsed: { elapsed.TotalSeconds }");
-
-                var totalBytes = PacketsCount * PacketSize;
-                var speed = totalBytes / elapsed.TotalSeconds;
-
-                await _logger.LogInfoAsync($"Speed: { speed }");
-
-                return;
-            }
-
-            await _client.SendAsync(_experimentalMessage, OnServerResponse);
+            _messagesProcessor.OnNewMessageArrive(response);
         }
 
         /// <summary>
@@ -201,6 +178,37 @@ namespace longtooth.Desktop.ViewModels
             ConsoleText += $"{line}{Environment.NewLine}";
 
             ConsoleCaretIndex = ConsoleText.Length;
+        }
+
+        private async void OnNewMessageAsync(List<byte> decodedMessage)
+        {
+            // Is data correct ?
+            if (!decodedMessage.SequenceEqual(_experimentalMessage))
+            {
+                await _logger.LogErrorAsync("Wrong data received");
+                return;
+            }
+
+            _packetsCounter++;
+
+            if (_packetsCounter >= PacketsCount)
+            {
+                await _logger.LogInfoAsync("Completed!");
+
+                _stopWatch.Stop();
+                var elapsed = _stopWatch.Elapsed;
+
+                await _logger.LogInfoAsync($"Elapsed: {elapsed.TotalSeconds}");
+
+                var totalBytes = PacketsCount * PacketSize;
+                var speed = totalBytes / elapsed.TotalSeconds;
+
+                await _logger.LogInfoAsync($"Speed: {speed}");
+
+                return;
+            }
+            var encodedMessage = _messagesProcessor.PrepareMessageToSend(_experimentalMessage);
+            await _client.SendAsync(encodedMessage, OnServerResponse);
         }
     }
 }
