@@ -1,4 +1,5 @@
-﻿using longtooth.Server.Abstractions.DTOs;
+﻿using longtooth.Common.Abstractions;
+using longtooth.Server.Abstractions.DTOs;
 using longtooth.Server.Abstractions.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -32,6 +33,11 @@ namespace longtooth.Server.Implementations.Business
         private Thread _serverThread;
 
         private bool _needToStopServer;
+
+        /// <summary>
+        /// Receive buffer
+        /// </summary>
+        public byte[] _buffer = new byte[Constants.MaxPacketSize];
 
         public async Task StartAsync(OnNewDataReadDelegate readCallback)
         {
@@ -75,60 +81,61 @@ namespace longtooth.Server.Implementations.Business
         private void AcceptCallback(IAsyncResult result)
         {
             var socket = result.AsyncState as Socket;
-            var handler = socket.EndAccept(result);
+            var connectionSocket = socket.EndAccept(result);
 
             _allDone.Set();
 
-            var state = new StateObject();
-            state.WorkSocket = handler;
-
-            handler.BeginReceive(
-                state.Buffer,
+            connectionSocket.BeginReceive(
+                _buffer,
                 0,
-                StateObject.BufferSize,
+                _buffer.Length,
                 0,
                 new AsyncCallback(ReadCallback),
-                state);
+                connectionSocket);
         }
 
         public void ReadCallback(IAsyncResult result)
         {
-            var state = result.AsyncState as StateObject;
-            var socket = state.WorkSocket;
-
-            int bytesRead = socket.EndReceive(result);
+            var connectionSocket = result.AsyncState as Socket;
+            int bytesRead = connectionSocket.EndReceive(result);
 
             if (bytesRead > 0)
             {
-                var responseToClient = _readCallback(new List<byte>(state.Buffer).GetRange(0, bytesRead));
+                var responseToClient = _readCallback(new List<byte>(_buffer).GetRange(0, bytesRead));
 
                 // Sending answer if needed
                 if (responseToClient.NeedToSendResponse)
                 {
-                    socket.BeginSend(
+                    connectionSocket.BeginSend(
                     responseToClient.Response.ToArray(),
                     0,
                     responseToClient.Response.Count,
                     0,
                     new AsyncCallback(SendCallback),
-                    socket);
+                    connectionSocket);
                 }
 
-                if (responseToClient.NeedToClose || _needToStopServer)
+                if (responseToClient.NeedToClose)
                 {
-                    socket.Close();
+                    connectionSocket.Close();
+                    return;
+                }
+
+                if (_needToStopServer)
+                {
+                    _socket.Close();
                     _needToStopServer = false;
                     return;
                 }
 
                 // Continuing to listen
-                socket.BeginReceive(
-                    state.Buffer,
+                connectionSocket.BeginReceive(
+                    _buffer,
                     0,
-                    StateObject.BufferSize,
+                    _buffer.Length,
                     0,
                     new AsyncCallback(ReadCallback),
-                    state);
+                    connectionSocket);
             }
         }
 
@@ -137,9 +144,8 @@ namespace longtooth.Server.Implementations.Business
         /// </summary>
         private void SendCallback(IAsyncResult result)
         {
-            var socket = result.AsyncState as Socket;
-
-            var sentCount = socket.EndSend(result);
+            var connectionSocket = result.AsyncState as Socket;
+            connectionSocket.EndSend(result);
         }
 
         public void Stop()
