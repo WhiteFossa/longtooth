@@ -1,8 +1,13 @@
 ﻿using longtooth.Client.Abstractions.DTOs;
 using longtooth.Client.Abstractions.Interfaces;
 using longtooth.Common.Abstractions;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Text;
+using System.Threading.Tasks;
 using static longtooth.Client.Abstractions.Interfaces.IClient;
 
 namespace longtooth.Client.Implementations.Business
@@ -20,111 +25,83 @@ namespace longtooth.Client.Implementations.Business
         private OnResponseDelegate _responseHandler;
 
         /// <summary>
-        /// Connect done event signal
+        /// Thread for reading messages in an infinite loop
         /// </summary>
-        private ManualResetEvent _connectDone = new ManualResetEvent(false);
+        private Thread _readerThread;
 
         /// <summary>
-        /// Send done event signal
+        /// Buffer for getting inbound messages
         /// </summary>
-        private ManualResetEvent _sendDone = new ManualResetEvent(false);
-
-        /// <summary>
-        /// Receive done event signal
-        /// </summary>
-        private ManualResetEvent _receiveDone = new ManualResetEvent(false);
-
-        /// <summary>
-        /// Receive buffer
-        /// </summary>
-        public byte[] _buffer = new byte[Constants.MaxPacketSize];
+        private byte[] _readBuffer = new byte[Constants.MaxPacketSize];
 
         public async Task ConnectAsync(ConnectionDto connectionParams)
         {
+            if (_socket != null)
+            {
+                throw new InvalidOperationException("Can't connect because we are already connected!");
+            }
+
             _ = connectionParams ?? throw new ArgumentNullException(nameof(connectionParams));
 
             var endpoint = new IPEndPoint(connectionParams.Address, (int)connectionParams.Port);
 
             _socket = new Socket(connectionParams.Address.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+            _socket.ReceiveBufferSize = Constants.MaxPacketSize;
+            _socket.SendBufferSize = Constants.MaxPacketSize;
 
-            _socket.BeginConnect(endpoint, new AsyncCallback(ConnectCallback), _socket);
+            _socket.Connect(endpoint);
 
-            _connectDone.WaitOne();
-        }
-
-        /// <summary>
-        /// Called when connection estailished
-        /// </summary>
-        private void ConnectCallback(IAsyncResult result)
-        {
-            var socket = result.AsyncState as Socket;
-
-            socket.EndConnect(result);
-
-            _connectDone.Set();
+            // Starting reader thread
+            _readerThread = new Thread(new ThreadStart(ReaderThreadRun));
+            _readerThread.Start();
         }
 
         public async Task DisconnectAsync()
         {
-            if (_socket == null || !_socket.Connected)
-            {
-                throw new InvalidOperationException("Client not connected to server");
-            }
+            _ = _socket ?? throw new InvalidOperationException("Can't disconnect because socket not connected!");
+
+            _readerThread.Abort();
 
             _socket.Shutdown(SocketShutdown.Both);
             _socket.Close();
+
+            _socket = null;
         }
 
-        public async Task SendAsync(List<byte> message, OnResponseDelegate responseCallback)
+        public async Task SendAsync(List<byte> message)
+        {
+            var buffer = message.ToArray();
+
+            var totalSent = 0;
+
+            while(totalSent < buffer.Length)
+            {
+                var bytesSent = _socket.Send(buffer, totalSent, buffer.Length - totalSent, SocketFlags.None);
+
+                totalSent += bytesSent;
+            }
+        }
+
+        public void SetupResponseCallback(OnResponseDelegate responseCallback)
         {
             _responseHandler = responseCallback ?? throw new ArgumentNullException(nameof(responseCallback));
-
-            _socket.BeginSend(
-                message.ToArray(),
-                0,
-                message.Count,
-                0,
-                new AsyncCallback(SendCallback),
-                null);
-        }
-
-        private void SendCallback(IAsyncResult result)
-        {
-            _socket.EndSend(result);
-            _sendDone.Set();
-
-            // Waiting for response
-            _socket.BeginReceive(
-                _buffer,
-                0,
-                _buffer.Length,
-                0,
-                new AsyncCallback(ReceiveCallback),
-                null);
         }
 
         /// <summary>
-        /// Called when data received
+        /// Entry point for reader thread
         /// </summary>
-        private void ReceiveCallback(IAsyncResult result)
+        private void ReaderThreadRun()
         {
-            _ = _responseHandler ?? throw new ArgumentNullException(nameof(result));
+            while (true)
+            {
+                var bytesRead = _socket.Receive(_readBuffer);
 
-            var readCount = _socket.EndReceive(result);
+                var result = new byte[bytesRead];
+                Array.Copy(_readBuffer, result, bytesRead);
 
-            _receiveDone.Set();
-
-            // Delivering data to user
-            _responseHandler(new List<byte>(_buffer).GetRange(0, readCount));
-
-            // Continue to listen
-            _socket.BeginReceive(
-               _buffer,
-               0,
-               _buffer.Length,
-               0,
-               new AsyncCallback(ReceiveCallback),
-               null);
+                _ = _responseHandler ?? throw new InvalidOperationException("Call SetupResponseCallback() first!");
+                _responseHandler(new List<byte>(result));
+            }
         }
     }
 }
