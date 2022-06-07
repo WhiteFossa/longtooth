@@ -92,7 +92,7 @@ namespace longtooth.Desktop.ViewModels
 
         private readonly List<byte> _experimentalMessage;
 
-        private const int PacketSize = 16384;
+        private const int PacketSize = 1000000;
         private const int PacketsCount = 1000;
 
         private int _packetsCounter = 0;
@@ -106,6 +106,8 @@ namespace longtooth.Desktop.ViewModels
             #region DI
 
             _client = Program.Di.GetService<IClient>();
+            _client.SetupResponseCallback(OnServerResponse);
+
             _logger = Program.Di.GetService<ILogger>();
 
             _messagesProcessor = Program.Di.GetService<IMessagesProcessor>();
@@ -162,7 +164,7 @@ namespace longtooth.Desktop.ViewModels
 
             _packetsCounter = 0;
             var encodedMessage = _messagesProcessor.PrepareMessageToSend(_experimentalMessage);
-            await _client.SendAsync(encodedMessage, OnServerResponse);
+            await _client.SendAsync(encodedMessage);
         }
 
         private async void OnServerResponse(List<byte> response)
@@ -187,14 +189,14 @@ namespace longtooth.Desktop.ViewModels
             {
                 await _logger.LogErrorAsync("Wrong data received");
 
-                for (var i = 0; i < decodedMessage.Count; i++)
-                {
-                    if (decodedMessage[i] != _experimentalMessage[i])
-                    {
-                        await _logger.LogErrorAsync(
-                            $"I = { i }, decoded = {decodedMessage[i]}, experimental = {_experimentalMessage[i] }");
-                    }
-                }
+                //for (var i = 0; i < decodedMessage.Count; i++)
+                //{
+                //    if (decodedMessage[i] != _experimentalMessage[i])
+                //    {
+                //        await _logger.LogErrorAsync(
+                //            $"I = { i }, decoded = {decodedMessage[i]}, experimental = {_experimentalMessage[i] }");
+                //    }
+                //}
 
                 return;
             }
@@ -218,7 +220,7 @@ namespace longtooth.Desktop.ViewModels
                 return;
             }
             var encodedMessage = _messagesProcessor.PrepareMessageToSend(_experimentalMessage);
-            await _client.SendAsync(encodedMessage, OnServerResponse);
+            await _client.SendAsync(encodedMessage);
         }
     }
 }
