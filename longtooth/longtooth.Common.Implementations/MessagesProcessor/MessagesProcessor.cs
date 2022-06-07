@@ -40,14 +40,15 @@ namespace longtooth.Common.Implementations.MessagesProcessor
 
             while(true)
             {
-                var decodedMessage = _messagesProtocol.ExtractFirstMessage(ref _accumulator);
+                var decodedMessage = _messagesProtocol.ExtractFirstMessage(_accumulator);
+                _accumulator = decodedMessage.NewBuffer;
 
-                if (decodedMessage == null)
+                if (decodedMessage.Message == null)
                 {
                     return; // We need more data
                 }
 
-                _onNewMessage(decodedMessage);
+                _onNewMessage(decodedMessage.Message);
             };
         }
 
@@ -59,14 +60,15 @@ namespace longtooth.Common.Implementations.MessagesProcessor
 
             while (true)
             {
-                var decodedMessage = _messagesProtocol.ExtractFirstMessage(ref _accumulator);
+                var decodedMessage = _messagesProtocol.ExtractFirstMessage(_accumulator);
+                _accumulator = decodedMessage.NewBuffer;
 
-                if (decodedMessage == null)
+                if (decodedMessage.Message == null)
                 {
                     return null; // We need more data
                 }
 
-                return decodedMessage;
+                return decodedMessage.Message;
             };
         }
     }

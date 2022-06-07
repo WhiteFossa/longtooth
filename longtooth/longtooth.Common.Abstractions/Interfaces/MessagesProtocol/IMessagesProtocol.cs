@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using longtooth.Common.Abstractions.DTOs.MessagesProtocol;
+using System.Collections.Generic;
 
 namespace longtooth.Common.Abstractions.Interfaces.MessagesProtocol
 {
@@ -13,9 +14,8 @@ namespace longtooth.Common.Abstractions.Interfaces.MessagesProtocol
         List<byte> GenerateMessage(List<byte> message);
 
         /// <summary>
-        /// Searches buffer for the first message, and if message found - removes it from buffer and
-        /// returns it. If buffer doesn't contain a message - returns null
+        /// Searches buffer for the first message
         /// </summary>
-        List<byte> ExtractFirstMessage(ref List<byte> buffer);
+        FirstMessageDto ExtractFirstMessage(List<byte> buffer);
     }
 }

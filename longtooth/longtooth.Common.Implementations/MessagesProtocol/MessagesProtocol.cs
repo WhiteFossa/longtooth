@@ -1,4 +1,5 @@
 ﻿using longtooth.Common.Abstractions;
+using longtooth.Common.Abstractions.DTOs.MessagesProtocol;
 using longtooth.Common.Abstractions.Interfaces.MessagesProtocol;
 using longtooth.Common.Implementations.Extensions;
 using System;
@@ -52,7 +53,7 @@ namespace longtooth.Common.Implementations.MessagesProtocol
             return result;
         }
 
-        public List<byte> ExtractFirstMessage(ref List<byte> buffer)
+        public FirstMessageDto ExtractFirstMessage(List<byte> buffer)
         {
             _ = buffer ?? throw new ArgumentNullException(nameof(buffer));
 
@@ -61,14 +62,14 @@ namespace longtooth.Common.Implementations.MessagesProtocol
 
             if (messageStartIndex == -1)
             {
-                return null;
+                return new FirstMessageDto(null, buffer);
             }
 
             var messageEndIndex = buffer.FindFirstSubarray(MessageEndSignatureArray);
 
             if (messageEndIndex == -1 || messageEndIndex <= messageStartIndex)
             {
-                return null;
+                return new FirstMessageDto(null, buffer);
             }
 
             var startIndex = messageStartIndex + MessageBeginSignatureArray.Count;
@@ -80,9 +81,8 @@ namespace longtooth.Common.Implementations.MessagesProtocol
             var remainingLength = messageEndIndex + MessageEndSignatureArray.Count;
             var newBuffer = buffer.GetRange(0, messageStartIndex);
             newBuffer.AddRange(buffer.GetRange(remainingLength, buffer.Count - remainingLength));
-            buffer = newBuffer;
 
-            return result;
+            return new FirstMessageDto(result, newBuffer);
         }
 
 

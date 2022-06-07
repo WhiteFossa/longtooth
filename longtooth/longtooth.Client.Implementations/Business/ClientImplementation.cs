@@ -1,5 +1,6 @@
 ﻿using longtooth.Client.Abstractions.DTOs;
 using longtooth.Client.Abstractions.Interfaces;
+using longtooth.Common.Abstractions;
 using System.Net;
 using System.Net.Sockets;
 using static longtooth.Client.Abstractions.Interfaces.IClient;
@@ -32,6 +33,11 @@ namespace longtooth.Client.Implementations.Business
         /// Receive done event signal
         /// </summary>
         private ManualResetEvent _receiveDone = new ManualResetEvent(false);
+
+        /// <summary>
+        /// Receive buffer
+        /// </summary>
+        public byte[] _buffer = new byte[Constants.MaxPacketSize];
 
         public async Task ConnectAsync(ConnectionDto connectionParams)
         {
@@ -79,27 +85,22 @@ namespace longtooth.Client.Implementations.Business
                 message.Count,
                 0,
                 new AsyncCallback(SendCallback),
-                _socket);
+                null);
         }
 
         private void SendCallback(IAsyncResult result)
         {
-            var socket = result.AsyncState as Socket;
-
-            socket.EndSend(result);
+            _socket.EndSend(result);
             _sendDone.Set();
 
             // Waiting for response
-            var state = new StateObject();
-            state.WorkSocket = socket;
-
             _socket.BeginReceive(
-                state.Buffer,
+                _buffer,
                 0,
-                StateObject.BufferSize,
+                _buffer.Length,
                 0,
                 new AsyncCallback(ReceiveCallback),
-                state);
+                null);
         }
 
         /// <summary>
@@ -109,24 +110,21 @@ namespace longtooth.Client.Implementations.Business
         {
             _ = _responseHandler ?? throw new ArgumentNullException(nameof(result));
 
-            var state = result.AsyncState as StateObject;
-            var socket = state.WorkSocket;
-
-            var readCount = socket.EndReceive(result);
+            var readCount = _socket.EndReceive(result);
 
             _receiveDone.Set();
 
             // Delivering data to user
-            _responseHandler(new List<byte>(state.Buffer).GetRange(0, readCount));
+            _responseHandler(new List<byte>(_buffer).GetRange(0, readCount));
 
             // Continue to listen
             _socket.BeginReceive(
-                state.Buffer,
-                0,
-                StateObject.BufferSize,
-                0,
-                new AsyncCallback(ReceiveCallback),
-                state);
+               _buffer,
+               0,
+               _buffer.Length,
+               0,
+               new AsyncCallback(ReceiveCallback),
+               null);
         }
     }
 }

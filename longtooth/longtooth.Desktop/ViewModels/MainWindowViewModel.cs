@@ -186,6 +186,16 @@ namespace longtooth.Desktop.ViewModels
             if (!decodedMessage.SequenceEqual(_experimentalMessage))
             {
                 await _logger.LogErrorAsync("Wrong data received");
+
+                for (var i = 0; i < decodedMessage.Count; i++)
+                {
+                    if (decodedMessage[i] != _experimentalMessage[i])
+                    {
+                        await _logger.LogErrorAsync(
+                            $"I = { i }, decoded = {decodedMessage[i]}, experimental = {_experimentalMessage[i] }");
+                    }
+                }
+
                 return;
             }
 
