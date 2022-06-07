@@ -34,11 +34,6 @@ namespace longtooth.Client.Implementations.Business
         /// </summary>
         private byte[] _readBuffer = new byte[Constants.MaxPacketSize];
 
-        /// <summary>
-        /// Cancellation token to abort read thread
-        /// </summary>
-        private CancellationTokenSource _readThreadCancellationToken = new CancellationTokenSource();
-
         public async Task ConnectAsync(ConnectionDto connectionParams)
         {
             if (_socket != null)
@@ -57,18 +52,15 @@ namespace longtooth.Client.Implementations.Business
             _socket.Connect(endpoint);
 
             // Starting reader thread
-            _readerThread = new Thread(new ParameterizedThreadStart(ReaderThreadRun));
-            _readerThread.Start(_readThreadCancellationToken);
+            _readerThread = new Thread(new ThreadStart(ReaderThreadRun));
+            _readerThread.Start();
         }
 
         public async Task DisconnectAsync()
         {
             _ = _socket ?? throw new InvalidOperationException("Can't disconnect because socket not connected!");
 
-            _readThreadCancellationToken.Cancel();
-
-            _socket.Shutdown(SocketShutdown.Both);
-            _socket.Close();
+            _readerThread.Interrupt();
 
             _socket = null;
         }
@@ -95,15 +87,19 @@ namespace longtooth.Client.Implementations.Business
         /// <summary>
         /// Entry point for reader thread
         /// </summary>
-        private void ReaderThreadRun(Object cts)
+        private void ReaderThreadRun()
         {
-            var cancellationToken = cts as CancellationTokenSource;
-
-            while (!cancellationToken.IsCancellationRequested)
+            while (true)
             {
                 try
                 {
                     var bytesRead = _socket.Receive(_readBuffer);
+
+                    if (_socket == null)
+                    {
+                        // Thread was killed during the disconnection
+                        return;
+                    }
 
                     var result = new byte[bytesRead];
                     Array.Copy(_readBuffer, result, bytesRead);
@@ -113,7 +109,8 @@ namespace longtooth.Client.Implementations.Business
                 }
                 catch (SocketException)
                 {
-                    // We were disconnected, do nothing
+                    _socket.Shutdown(SocketShutdown.Both);
+                    _socket.Close();
                 }
             }
         }
