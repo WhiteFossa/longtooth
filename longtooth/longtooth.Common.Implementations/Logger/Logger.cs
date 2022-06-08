@@ -1,11 +1,8 @@
-﻿using longtooth.Desktop.Business.Interfaces;
+﻿using longtooth.Common.Abstractions.Interfaces.Logger;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
-namespace longtooth.Desktop.Business.Implementations
+namespace longtooth.Common.Implementations.Logger
 {
     public class Logger : ILogger
     {

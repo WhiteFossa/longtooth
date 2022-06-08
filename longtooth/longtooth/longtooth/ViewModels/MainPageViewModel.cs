@@ -2,6 +2,7 @@
 using longtooth.Common.Abstractions.Interfaces.MessagesProcessor;
 using longtooth.Common.Implementations.MessagesProcessor;
 using longtooth.Models;
+using longtooth.Protocol.Abstractions.Interfaces;
 using longtooth.Server.Abstractions.DTOs;
 using longtooth.Server.Abstractions.Interfaces;
 using System.Collections.Generic;
@@ -36,6 +37,7 @@ namespace longtooth.ViewModels
 
         private IServer _server;
         private IMessagesProcessor _messagesProcessor;
+        private IServerSideMessagesProcessor _serverSideMessagesProcessor;
 
         /// <summary>
         /// Constructor
@@ -45,6 +47,7 @@ namespace longtooth.ViewModels
             MainModel = App.Container.Resolve<IMainModel>() as MainModel;
             _server = App.Container.Resolve<IServer>();
             _messagesProcessor = App.Container.Resolve<IMessagesProcessor>();
+            _serverSideMessagesProcessor = App.Container.Resolve<IServerSideMessagesProcessor>();
 
             // Binding commands to handlers
             StartServerCommand = new Command(async () => await OnServerStartAsync());
@@ -72,11 +75,7 @@ namespace longtooth.ViewModels
                 return new ResponseDto(false, false, new List<byte>());
             }
 
-            // Encoding outgoing message
-            var encodedMessage = _messagesProcessor.PrepareMessageToSend(decodedMessage);
-            var response = new ResponseDto(true, false, encodedMessage);
-
-            return response;
+            return _serverSideMessagesProcessor.ParseMessage(decodedMessage);
         }
 
         /// <summary>

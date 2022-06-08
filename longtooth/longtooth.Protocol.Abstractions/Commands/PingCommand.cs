@@ -1,5 +1,9 @@
-﻿using longtooth.Protocol.Abstractions.DataStructures;
+﻿using longtooth.Common.Abstractions.Interfaces.MessagesProcessor;
+using longtooth.Protocol.Abstractions.DataStructures;
 using longtooth.Protocol.Abstractions.Enums;
+using longtooth.Protocol.Abstractions.Interfaces;
+using longtooth.Server.Abstractions.DTOs;
+using System.Collections.Generic;
 
 namespace longtooth.Protocol.Abstractions.Commands
 {
@@ -8,8 +12,24 @@ namespace longtooth.Protocol.Abstractions.Commands
     /// </summary>
     public class PingCommand : CommandHeader
     {
-        public PingCommand() : base(CommandType.Ping)
+        private readonly IMessagesProcessor _messagesProcessor;
+        private readonly IResponseToClientHeaderGenerator _responseToClientHeaderGenerator;
+
+        public PingCommand(IMessagesProcessor messagesProcessor,
+            IResponseToClientHeaderGenerator responseToClientHeaderGenerator) : base(CommandType.Ping)
         {
+            _messagesProcessor = messagesProcessor;
+            _responseToClientHeaderGenerator = responseToClientHeaderGenerator;
+        }
+
+        public ResponseDto Parse(string header)
+        {
+            // Do work here
+            var response = _responseToClientHeaderGenerator.GeneratePingResponse();
+
+            var responseMessage = _messagesProcessor.PrepareMessageToSend(new List<byte>(response));
+
+            return new ResponseDto(true, false, responseMessage);
         }
     }
 }

@@ -98,6 +98,14 @@
       <Project>{6756AAB9-06B8-4B9F-905D-D74A05D4CEBD}</Project>
       <Name>longtooth.Common.Implementations</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\longtooth.Protocol.Abstractions\longtooth.Protocol.Abstractions.csproj">
+      <Project>{59DCFA75-CCC3-4E33-AACD-27C4C71A350A}</Project>
+      <Name>longtooth.Protocol.Abstractions</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\longtooth.Protocol.Implementations\longtooth.Protocol.Implementations.csproj">
+      <Project>{0F20C7EC-ECF0-4602-820D-FE70A926603D}</Project>
+      <Name>longtooth.Protocol.Implementations</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\longtooth.Server.Abstractions\longtooth.Server.Abstractions.csproj">
       <Project>{20D0C8C0-F105-4A58-9D6C-60EE9B4AEFE4}</Project>
       <Name>longtooth.Server.Abstractions</Name>

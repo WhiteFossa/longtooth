@@ -13,6 +13,8 @@ using longtooth.Common.Abstractions.Interfaces.MessagesProcessor;
 using longtooth.Common.Implementations.MessagesProcessor;
 using longtooth.Common.Abstractions.Interfaces.MessagesProtocol;
 using longtooth.Common.Implementations.MessagesProtocol;
+using longtooth.Protocol.Abstractions.Interfaces;
+using longtooth.Protocol.Implementations.Implementations;
 
 namespace longtooth.Droid
 {
@@ -29,6 +31,8 @@ namespace longtooth.Droid
             App.Container.Register<IServer, ServerImplementation>().AsSingleton();
             App.Container.Register<IMessagesProtocol, MessagesProtocol>().AsSingleton();
             App.Container.Register<IMessagesProcessor, MessagesProcessor>().AsMultiInstance();
+            App.Container.Register<IServerSideMessagesProcessor, ServerSideMessagesProcessor>().AsSingleton();
+            App.Container.Register<IResponseToClientHeaderGenerator, ResponseToClientHeaderGenerator>().AsSingleton();
 
             #endregion
 

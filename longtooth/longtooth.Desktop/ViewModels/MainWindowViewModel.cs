@@ -1,15 +1,13 @@
 ﻿using longtooth.Client.Abstractions.DTOs;
 using longtooth.Client.Abstractions.Interfaces;
+using longtooth.Common.Abstractions.Interfaces.Logger;
 using longtooth.Common.Abstractions.Interfaces.MessagesProcessor;
-using longtooth.Desktop.Business.Interfaces;
 using longtooth.Desktop.Models;
 using longtooth.Protocol.Abstractions.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using ReactiveUI;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
 using System.Net;
 using System.Reactive;
 
@@ -91,6 +89,7 @@ namespace longtooth.Desktop.ViewModels
         private readonly ILogger _logger;
         private readonly IMessagesProcessor _messagesProcessor;
         private readonly ICommandToServerHeaderGenerator _commandGenerator;
+        private readonly IClientSideMessagesProcessor _clientSideMessagesProcessor;
 
         public MainWindowViewModel(MainModel model) : base()
         {
@@ -107,6 +106,7 @@ namespace longtooth.Desktop.ViewModels
             _messagesProcessor.SetupOnNewMessageDelegate(OnNewMessageAsync);
 
             _commandGenerator = Program.Di.GetService<ICommandToServerHeaderGenerator>();
+            _clientSideMessagesProcessor = Program.Di.GetService<IClientSideMessagesProcessor>();
 
             #endregion
 
@@ -157,7 +157,8 @@ namespace longtooth.Desktop.ViewModels
 
         private async void OnNewMessageAsync(List<byte> decodedMessage)
         {
-            int a = 10;
+            var response = _clientSideMessagesProcessor.ParseMessage(decodedMessage);
+            await response.RunAsync(_logger);
         }
 
         /// <summary>

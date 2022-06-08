@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 
-namespace longtooth.Desktop.Business.Interfaces
+namespace longtooth.Common.Abstractions.Interfaces.Logger
 {
     public interface ILogger
     {
