@@ -93,7 +93,7 @@ namespace longtooth.Desktop.ViewModels
         private readonly List<byte> _experimentalMessage;
 
         private const int PacketSize = 1000000;
-        private const int PacketsCount = 1000;
+        private const int PacketsCount = 10;
 
         private int _packetsCounter = 0;
 

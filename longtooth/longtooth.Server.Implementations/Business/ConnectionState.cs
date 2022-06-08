@@ -17,7 +17,7 @@ namespace longtooth.Server.Implementations.Business
         /// <summary>
         /// Buffer for this connection
         /// </summary>
-        public byte[] Buffer { get; private set; }
+        public byte[] Buffer { get; private set; } = new byte[Constants.MaxPacketSize];
 
         public ConnectionState(Socket clientSocket)
         {

@@ -32,11 +32,6 @@ namespace longtooth.Server.Implementations.Business
 
         private bool _needToStopServer;
 
-        /// <summary>
-        /// Receive buffer
-        /// </summary>
-        public byte[] _buffer = new byte[Constants.MaxPacketSize];
-
         public async Task StartAsync(OnNewDataReadDelegate readCallback)
         {
             _readCallback = readCallback ?? throw new ArgumentNullException(nameof(readCallback));
@@ -83,14 +78,19 @@ namespace longtooth.Server.Implementations.Business
 
             _allDone.Set();
 
+            // Waiting for data from client
             var connectionState = new ConnectionState(connectionSocket);
             connectionSocket.BeginReceive(
-                _buffer,
+                connectionState.Buffer,
                 0,
-                _buffer.Length,
+                connectionState.Buffer.Length,
                 0,
                 new AsyncCallback(ReadCallback),
                 connectionState);
+
+            // And starting to listen again
+            socket.BeginAccept(new AsyncCallback(AcceptCallback), socket);
+
         }
 
         public void ReadCallback(IAsyncResult result)
@@ -100,7 +100,7 @@ namespace longtooth.Server.Implementations.Business
 
             if (bytesRead > 0)
             {
-                var responseToClient = _readCallback(new List<byte>(_buffer).GetRange(0, bytesRead));
+                var responseToClient = _readCallback(new List<byte>(connectionState.Buffer).GetRange(0, bytesRead));
 
                 // Sending answer if needed
                 if (responseToClient.NeedToSendResponse)
@@ -129,9 +129,9 @@ namespace longtooth.Server.Implementations.Business
 
                 // Continuing to listen
                 connectionState.ClientSocket.BeginReceive(
-                    _buffer,
+                    connectionState.Buffer,
                     0,
-                    _buffer.Length,
+                    connectionState.Buffer.Length,
                     0,
                     new AsyncCallback(ReadCallback),
                     connectionState);
