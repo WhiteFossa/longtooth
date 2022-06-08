@@ -15,14 +15,29 @@ namespace longtooth.Server.Implementations.Business
         public Socket ClientSocket { get; private set; }
 
         /// <summary>
-        /// Buffer for this connection
+        /// Buffer for this connection (read)
         /// </summary>
-        public byte[] Buffer { get; private set; } = new byte[Constants.MaxPacketSize];
+        public byte[] ReadBuffer { get; private set; } = new byte[Constants.MaxPacketSize];
+
+        /// <summary>
+        /// How much data do we need to send?
+        /// </summary>
+        public int WriteAmount { get; set; }
+
+        /// <summary>
+        /// Position in write buffer
+        /// </summary>
+        public int WriteBufferOffset { get; set; }
+
+        /// <summary>
+        /// Buffer for this connection (write)
+        /// </summary>
+        public byte[] WriteBuffer { get; private set; } = new byte[Constants.MaxPacketSize];
 
         public ConnectionState(Socket clientSocket)
         {
             ClientSocket = clientSocket ?? throw new ArgumentNullException(nameof(clientSocket));
-            Buffer = new byte[Constants.MaxPacketSize];
+            ReadBuffer = new byte[Constants.MaxPacketSize];
         }
     }
 }

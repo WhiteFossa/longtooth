@@ -7,6 +7,8 @@ using longtooth.Common.Implementations.MessagesProcessor;
 using longtooth.Common.Implementations.MessagesProtocol;
 using longtooth.Desktop.Business.Implementations;
 using longtooth.Desktop.Business.Interfaces;
+using longtooth.Protocol.Abstractions.Interfaces;
+using longtooth.Protocol.Implementations.Implementations;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 
@@ -48,6 +50,7 @@ namespace longtooth.Desktop
             services.AddSingleton<ILogger, Logger>();
             services.AddSingleton<IMessagesProtocol, MessagesProtocol>();
             services.AddTransient<IMessagesProcessor, MessagesProcessor>();
+            services.AddSingleton<ICommandToServerHeaderGenerator, CommandToServerHeaderGenerator>();
 
             return services;
         }

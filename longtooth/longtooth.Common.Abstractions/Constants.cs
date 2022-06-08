@@ -8,6 +8,6 @@
         /// <summary>
         /// Maximal packet size, which can be transferred by network
         /// </summary>
-        public const int MaxPacketSize = 1048576;
+        public const int MaxPacketSize = 1024 * 1024;
     }
 }

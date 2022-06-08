@@ -3,6 +3,7 @@ using longtooth.Client.Abstractions.Interfaces;
 using longtooth.Common.Abstractions.Interfaces.MessagesProcessor;
 using longtooth.Desktop.Business.Interfaces;
 using longtooth.Desktop.Models;
+using longtooth.Protocol.Abstractions.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using ReactiveUI;
 using System;
@@ -73,11 +74,11 @@ namespace longtooth.Desktop.ViewModels
         /// Disconnect from server command
         /// </summary>
         public ReactiveCommand<Unit, Unit> DisconnectAsyncCommand { get; }
-
+        
         /// <summary>
-        /// Send test message
+        /// Ping server
         /// </summary>
-        public ReactiveCommand<Unit, Unit> SendTestMessageAsyncCommand { get; }
+        public ReactiveCommand<Unit, Unit> PingAsyncCommand { get; }
 
         #endregion
 
@@ -89,15 +90,7 @@ namespace longtooth.Desktop.ViewModels
         private readonly IClient _client;
         private readonly ILogger _logger;
         private readonly IMessagesProcessor _messagesProcessor;
-
-        private readonly List<byte> _experimentalMessage;
-
-        private const int PacketSize = 1000000;
-        private const int PacketsCount = 10;
-
-        private int _packetsCounter = 0;
-
-        private Stopwatch _stopWatch = new Stopwatch();
+        private readonly ICommandToServerHeaderGenerator _commandGenerator;
 
         public MainWindowViewModel(MainModel model) : base()
         {
@@ -113,6 +106,8 @@ namespace longtooth.Desktop.ViewModels
             _messagesProcessor = Program.Di.GetService<IMessagesProcessor>();
             _messagesProcessor.SetupOnNewMessageDelegate(OnNewMessageAsync);
 
+            _commandGenerator = Program.Di.GetService<ICommandToServerHeaderGenerator>();
+
             #endregion
 
             _logger.SetLoggingFunction(AddLineToConsole);
@@ -121,16 +116,9 @@ namespace longtooth.Desktop.ViewModels
 
             ConnectAsyncCommand = ReactiveCommand.Create(ConnectAsync);
             DisconnectAsyncCommand = ReactiveCommand.Create(DisconnectAsync);
-            SendTestMessageAsyncCommand = ReactiveCommand.Create(SendTestMessageAsync);
+            PingAsyncCommand = ReactiveCommand.Create(PingAsync);
 
             #endregion
-
-            _experimentalMessage = new List<byte>();
-            var random = new Random();
-            for (var i = 0; i < PacketSize; i++)
-            {
-                _experimentalMessage.Add((byte)(random.Next() % 256));
-            }
         }
 
         /// <summary>
@@ -152,21 +140,6 @@ namespace longtooth.Desktop.ViewModels
             await _client.DisconnectAsync();
         }
 
-        /// <summary>
-        /// Send test message
-        /// </summary>
-        private async void SendTestMessageAsync()
-        {
-            await _logger.LogInfoAsync($"Sending { PacketsCount} x { PacketSize } bytes");
-
-            _stopWatch.Reset();
-            _stopWatch.Start();
-
-            _packetsCounter = 0;
-            var encodedMessage = _messagesProcessor.PrepareMessageToSend(_experimentalMessage);
-            await _client.SendAsync(encodedMessage);
-        }
-
         private async void OnServerResponse(List<byte> response)
         {
             _messagesProcessor.OnNewMessageArrive(response);
@@ -184,42 +157,17 @@ namespace longtooth.Desktop.ViewModels
 
         private async void OnNewMessageAsync(List<byte> decodedMessage)
         {
-            // Is data correct ?
-            if (!decodedMessage.SequenceEqual(_experimentalMessage))
-            {
-                await _logger.LogErrorAsync("Wrong data received");
+            int a = 10;
+        }
 
-                //for (var i = 0; i < decodedMessage.Count; i++)
-                //{
-                //    if (decodedMessage[i] != _experimentalMessage[i])
-                //    {
-                //        await _logger.LogErrorAsync(
-                //            $"I = { i }, decoded = {decodedMessage[i]}, experimental = {_experimentalMessage[i] }");
-                //    }
-                //}
+        /// <summary>
+        /// Ping server
+        /// </summary>
+        private async void PingAsync()
+        {
+            var pingCommandMessage = _commandGenerator.GeneratePingCommand();
 
-                return;
-            }
-
-            _packetsCounter++;
-
-            if (_packetsCounter >= PacketsCount)
-            {
-                await _logger.LogInfoAsync("Completed!");
-
-                _stopWatch.Stop();
-                var elapsed = _stopWatch.Elapsed;
-
-                await _logger.LogInfoAsync($"Elapsed: {elapsed.TotalSeconds}");
-
-                var totalBytes = PacketsCount * PacketSize;
-                var speed = totalBytes / elapsed.TotalSeconds;
-
-                await _logger.LogInfoAsync($"Speed: {speed}");
-
-                return;
-            }
-            var encodedMessage = _messagesProcessor.PrepareMessageToSend(_experimentalMessage);
+            var encodedMessage = _messagesProcessor.PrepareMessageToSend(new List<byte>(pingCommandMessage));
             await _client.SendAsync(encodedMessage);
         }
     }

@@ -50,9 +50,9 @@
 
                 <Grid ColumnDefinitions="Auto" RowDefinitions="Auto" >
 
-                    <!-- Test message -->
-                    <Button Grid.Column="0" Grid.Row="0" Content="Test message"
-						Command="{ Binding SendTestMessageAsync }" />
+                    <!-- Ping -->
+                    <Button Grid.Column="0" Grid.Row="0" Content="Ping"
+						Command="{ Binding PingAsync }" />
 
                 </Grid>
             </StackPanel>

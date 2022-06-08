@@ -75,15 +75,17 @@ namespace longtooth.Server.Implementations.Business
         {
             var socket = result.AsyncState as Socket;
             var connectionSocket = socket.EndAccept(result);
+            connectionSocket.ReceiveBufferSize = Constants.MaxPacketSize;
+            connectionSocket.SendBufferSize = Constants.MaxPacketSize;
 
             _allDone.Set();
 
             // Waiting for data from client
             var connectionState = new ConnectionState(connectionSocket);
             connectionSocket.BeginReceive(
-                connectionState.Buffer,
+                connectionState.ReadBuffer,
                 0,
-                connectionState.Buffer.Length,
+                connectionState.ReadBuffer.Length,
                 0,
                 new AsyncCallback(ReadCallback),
                 connectionState);
@@ -100,18 +102,23 @@ namespace longtooth.Server.Implementations.Business
 
             if (bytesRead > 0)
             {
-                var responseToClient = _readCallback(new List<byte>(connectionState.Buffer).GetRange(0, bytesRead));
+                var responseToClient = _readCallback(new List<byte>(connectionState.ReadBuffer).GetRange(0, bytesRead));
 
                 // Sending answer if needed
                 if (responseToClient.NeedToSendResponse)
                 {
+                    connectionState.WriteAmount = responseToClient.Response.Count;
+                    connectionState.WriteBufferOffset = 0;
+
+                    Array.Copy(responseToClient.Response.ToArray(), connectionState.WriteBuffer, connectionState.WriteAmount);
+
                     connectionState.ClientSocket.BeginSend(
-                    responseToClient.Response.ToArray(),
-                    0,
-                    responseToClient.Response.Count,
-                    0,
-                    new AsyncCallback(SendCallback),
-                    connectionState);
+                        connectionState.WriteBuffer,
+                        0,
+                        connectionState.WriteAmount,
+                        0,
+                        new AsyncCallback(SendCallback),
+                        connectionState);
                 }
 
                 if (responseToClient.NeedToClose)
@@ -129,9 +136,9 @@ namespace longtooth.Server.Implementations.Business
 
                 // Continuing to listen
                 connectionState.ClientSocket.BeginReceive(
-                    connectionState.Buffer,
+                    connectionState.ReadBuffer,
                     0,
-                    connectionState.Buffer.Length,
+                    connectionState.ReadBuffer.Length,
                     0,
                     new AsyncCallback(ReadCallback),
                     connectionState);
@@ -144,7 +151,21 @@ namespace longtooth.Server.Implementations.Business
         private void SendCallback(IAsyncResult result)
         {
             var connectionState = result.AsyncState as ConnectionState;
-            connectionState.ClientSocket.EndSend(result);
+            var sentAmount = connectionState.ClientSocket.EndSend(result);
+
+            connectionState.WriteBufferOffset += sentAmount;
+
+            if (connectionState.WriteBufferOffset < connectionState.WriteAmount)
+            {
+                // Continuing transmission, we was unable to send data via one call
+                connectionState.ClientSocket.BeginSend(
+                        connectionState.WriteBuffer,
+                        connectionState.WriteBufferOffset,
+                        connectionState.WriteAmount,
+                        0,
+                        new AsyncCallback(SendCallback),
+                        connectionState);
+            }
         }
 
         public void Stop()
