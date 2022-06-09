@@ -63,9 +63,10 @@
         <!-- Files manager -->
         <Border Classes="VisibleBorders" Grid.Column="0" Grid.Row="2" >
             <Grid>
-                <DataGrid Items="{ Binding Directories }">
+                <DataGrid Items="{ Binding Mountpoints }">
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="Directory" Binding="{ Binding Name }"/>
+                        <DataGridTextColumn Header="Mountpoint" Binding="{ Binding Name }" />
+                        <DataGridTextColumn Header="Path" Binding="{ Binding ServerSidePath }" />
                     </DataGrid.Columns>
                 </DataGrid>
             </Grid>

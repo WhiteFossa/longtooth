@@ -1,5 +1,6 @@
 ﻿using longtooth.Client.Abstractions.DTOs;
 using longtooth.Client.Abstractions.Interfaces;
+using longtooth.Common.Abstractions.DTOs;
 using longtooth.Common.Abstractions.DTOs.Responses;
 using longtooth.Common.Abstractions.Enums;
 using longtooth.Common.Abstractions.Interfaces.Logger;
@@ -11,6 +12,7 @@ using Microsoft.Extensions.DependencyInjection;
 using ReactiveUI;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Net;
 using System.Reactive;
 using System.Threading.Tasks;
@@ -26,6 +28,7 @@ namespace longtooth.Desktop.ViewModels
         private string _serverPort;
         private string _consoleText;
         private int _consoleCaretIndex;
+        private ObservableCollection<MountpointDto> _mountpoints = new ObservableCollection<MountpointDto>();
 
         /// <summary>
         /// Server IP
@@ -61,6 +64,12 @@ namespace longtooth.Desktop.ViewModels
         {
             get => _consoleCaretIndex;
             set => this.RaiseAndSetIfChanged(ref _consoleCaretIndex, value);
+        }
+
+        public ObservableCollection<MountpointDto> Mountpoints
+        {
+            get => _mountpoints;
+            set => this.RaiseAndSetIfChanged(ref _mountpoints, value);
         }
 
         #endregion
@@ -105,6 +114,7 @@ namespace longtooth.Desktop.ViewModels
         private readonly ICommandToServerHeaderGenerator _commandGenerator;
         private readonly IClientSideMessagesProcessor _clientSideMessagesProcessor;
         private readonly IFilesManager _filesManager;
+
 
         public MainWindowViewModel(MainModel model) : base()
         {
@@ -193,13 +203,7 @@ namespace longtooth.Desktop.ViewModels
                 case CommandType.GetMountpoints:
 
                     var getMountpointsResponse = runResult as GetMountpointsRunResult;
-
-                    await _logger.LogInfoAsync("Mountpoints:");
-
-                    foreach(var mountpoint in getMountpointsResponse.Mountpoints)
-                    {
-                        await _logger.LogInfoAsync($"Name: { mountpoint.Name }, path: { mountpoint.ServerSidePath }");
-                    }
+                    Mountpoints = new ObservableCollection<MountpointDto>(getMountpointsResponse.Mountpoints);
 
                     break;
 
