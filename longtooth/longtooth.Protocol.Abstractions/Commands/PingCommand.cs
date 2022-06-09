@@ -1,6 +1,6 @@
-﻿using longtooth.Common.Abstractions.Interfaces.MessagesProcessor;
+﻿using longtooth.Common.Abstractions.Enums;
+using longtooth.Common.Abstractions.Interfaces.MessagesProcessor;
 using longtooth.Protocol.Abstractions.DataStructures;
-using longtooth.Protocol.Abstractions.Enums;
 using longtooth.Protocol.Abstractions.Interfaces;
 using longtooth.Server.Abstractions.DTOs;
 using System.Collections.Generic;

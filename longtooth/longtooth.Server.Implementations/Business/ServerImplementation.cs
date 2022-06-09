@@ -87,7 +87,7 @@ namespace longtooth.Server.Implementations.Business
                 0,
                 connectionState.ReadBuffer.Length,
                 0,
-                new AsyncCallback(ReadCallback),
+                new AsyncCallback(ReadCallbackAsync),
                 connectionState);
 
             // And starting to listen again
@@ -95,14 +95,14 @@ namespace longtooth.Server.Implementations.Business
 
         }
 
-        public void ReadCallback(IAsyncResult result)
+        public async void ReadCallbackAsync(IAsyncResult result)
         {
             var connectionState = result.AsyncState as ConnectionState;
             int bytesRead = connectionState.ClientSocket.EndReceive(result);
 
             if (bytesRead > 0)
             {
-                var responseToClient = _readCallback(new List<byte>(connectionState.ReadBuffer).GetRange(0, bytesRead));
+                var responseToClient = await _readCallback(new List<byte>(connectionState.ReadBuffer).GetRange(0, bytesRead));
 
                 // Sending answer if needed
                 if (responseToClient.NeedToSendResponse)
@@ -143,7 +143,7 @@ namespace longtooth.Server.Implementations.Business
                     0,
                     connectionState.ReadBuffer.Length,
                     0,
-                    new AsyncCallback(ReadCallback),
+                    new AsyncCallback(ReadCallbackAsync),
                     connectionState);
             }
         }

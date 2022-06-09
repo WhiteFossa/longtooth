@@ -1,4 +1,4 @@
-﻿using longtooth.Protocol.Abstractions.Enums;
+﻿using longtooth.Common.Abstractions.Enums;
 using System.Text.Json.Serialization;
 
 namespace longtooth.Protocol.Abstractions.DataStructures

@@ -1,10 +1,12 @@
 ﻿using longtooth.Client.Abstractions.DTOs;
 using longtooth.Client.Abstractions.Interfaces;
+using longtooth.Common.Abstractions.DTOs.Responses;
+using longtooth.Common.Abstractions.Enums;
 using longtooth.Common.Abstractions.Interfaces.Logger;
 using longtooth.Common.Abstractions.Interfaces.MessagesProcessor;
-using longtooth.Desktop.Models;
+using longtooth.Common.Abstractions.Models;
+using longtooth.FilesManager.Abstractions.Interfaces;
 using longtooth.Protocol.Abstractions.Interfaces;
-using longtooth.Protocol.Abstractions.Responses;
 using Microsoft.Extensions.DependencyInjection;
 using ReactiveUI;
 using System;
@@ -85,6 +87,11 @@ namespace longtooth.Desktop.ViewModels
         /// </summary>
         public ReactiveCommand<Unit, Unit> GracefulDisconnectAsyncCommand { get; }
 
+        /// <summary>
+        /// Command to list mountpoints
+        /// </summary>
+        public ReactiveCommand<Unit, Unit> GetMountpointsAsyncCommand { get; }
+
         #endregion
 
         /// <summary>
@@ -97,6 +104,7 @@ namespace longtooth.Desktop.ViewModels
         private readonly IMessagesProcessor _messagesProcessor;
         private readonly ICommandToServerHeaderGenerator _commandGenerator;
         private readonly IClientSideMessagesProcessor _clientSideMessagesProcessor;
+        private readonly IFilesManager _filesManager;
 
         public MainWindowViewModel(MainModel model) : base()
         {
@@ -115,6 +123,8 @@ namespace longtooth.Desktop.ViewModels
             _commandGenerator = Program.Di.GetService<ICommandToServerHeaderGenerator>();
             _clientSideMessagesProcessor = Program.Di.GetService<IClientSideMessagesProcessor>();
 
+            _filesManager = Program.Di.GetService<IFilesManager>();
+
             #endregion
 
             _logger.SetLoggingFunction(AddLineToConsole);
@@ -125,6 +135,7 @@ namespace longtooth.Desktop.ViewModels
             DisconnectAsyncCommand = ReactiveCommand.Create(DisconnectAsync);
             PingAsyncCommand = ReactiveCommand.Create(PingAsync);
             GracefulDisconnectAsyncCommand = ReactiveCommand.Create(GracefulDisconnectAsync);
+            GetMountpointsAsyncCommand = ReactiveCommand.Create(GetMountpointsAsync);
 
             #endregion
         }
@@ -166,7 +177,35 @@ namespace longtooth.Desktop.ViewModels
         private async void OnNewMessageAsync(List<byte> decodedMessage)
         {
             var response = _clientSideMessagesProcessor.ParseMessage(decodedMessage);
-            await response.RunAsync(_logger, _client);
+            var runResult = await response.RunAsync();
+
+            switch (runResult.ResponseToCommand)
+            {
+                case CommandType.Ping:
+                    await _logger.LogInfoAsync("Pong!");
+                    break;
+
+                case CommandType.Exit:
+                    await _client.DisconnectGracefullyAsync();
+                    await _logger.LogInfoAsync("Disconnected");
+                    break;
+
+                case CommandType.GetMountpoints:
+
+                    var getMountpointsResponse = runResult as GetMountpointsRunResult;
+
+                    await _logger.LogInfoAsync("Mountpoints:");
+
+                    foreach(var mountpoint in getMountpointsResponse.Mountpoints)
+                    {
+                        await _logger.LogInfoAsync($"Name: { mountpoint.Name }, path: { mountpoint.ServerSidePath }");
+                    }
+
+                    break;
+
+                default:
+                    throw new InvalidOperationException("Incorrect command type in response!");
+            }
         }
 
         private async Task PrepareAndSendCommand(byte[] commandMessage)
@@ -192,12 +231,23 @@ namespace longtooth.Desktop.ViewModels
         /// </summary>
         private async void GracefulDisconnectAsync()
         {
-            // TODO: Remove code duplicates
-            await _logger.LogInfoAsync("Exiting...");
+            await _logger.LogInfoAsync("Disconnecting");
 
             var exitCommandMessage = _commandGenerator.GenerateExitCommand();
 
             await PrepareAndSendCommand(exitCommandMessage);
+        }
+
+        /// <summary>
+        /// Get mountpoints list
+        /// </summary>
+        private async void GetMountpointsAsync()
+        {
+            var mountpoints = await _filesManager.GetMountpointsAsync();
+
+            var getMountpointsMessage = _commandGenerator.GenerateGetMountpointsCommand(mountpoints);
+
+            await PrepareAndSendCommand(getMountpointsMessage);
         }
     }
 }

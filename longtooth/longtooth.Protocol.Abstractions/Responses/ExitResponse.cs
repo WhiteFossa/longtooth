@@ -1,7 +1,6 @@
-﻿using longtooth.Client.Abstractions.Interfaces;
-using longtooth.Common.Abstractions.Interfaces.Logger;
+﻿using longtooth.Common.Abstractions.DTOs.Responses;
+using longtooth.Common.Abstractions.Enums;
 using longtooth.Protocol.Abstractions.DataStructures;
-using longtooth.Protocol.Abstractions.Enums;
 using System;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -25,11 +24,9 @@ namespace longtooth.Protocol.Abstractions.Responses
 
         }
 
-        public async override Task RunAsync(ILogger logger, IClient client)
+        public async override Task<ResponseRunResult> RunAsync()
         {
-            await logger.LogInfoAsync("Exited");
-
-            await client.DisconnectGracefullyAsync();
+            return new ResponseRunResult(Command);
         }
     }
 }

@@ -1,5 +1,5 @@
-﻿using longtooth.Protocol.Abstractions.DataStructures;
-using longtooth.Protocol.Abstractions.Enums;
+﻿using longtooth.Common.Abstractions.Enums;
+using longtooth.Protocol.Abstractions.DataStructures;
 using longtooth.Protocol.Abstractions.Interfaces;
 using longtooth.Protocol.Abstractions.Responses;
 using System;
@@ -33,6 +33,9 @@ namespace longtooth.Protocol.Implementations.Implementations
 
                 case CommandType.Exit:
                     return ExitResponse.Parse(stringHeader);
+
+                case CommandType.GetMountpoints:
+                    return GetMountpointsResponse.Parse(stringHeader);
 
                 default:
                     throw new InvalidOperationException($"Response to unknown command. Type: {header.Command}");

@@ -1,13 +1,15 @@
-﻿using longtooth.Common.Abstractions.Interfaces.MessagesProcessor;
+﻿using longtooth.Common.Abstractions.Enums;
+using longtooth.Common.Abstractions.Interfaces.MessagesProcessor;
+using longtooth.FilesManager.Abstractions.Interfaces;
 using longtooth.Protocol.Abstractions.Commands;
 using longtooth.Protocol.Abstractions.DataStructures;
-using longtooth.Protocol.Abstractions.Enums;
 using longtooth.Protocol.Abstractions.Interfaces;
 using longtooth.Server.Abstractions.DTOs;
 using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Text.Json;
+using System.Threading.Tasks;
 
 namespace longtooth.Protocol.Implementations.Implementations
 {
@@ -15,15 +17,18 @@ namespace longtooth.Protocol.Implementations.Implementations
     {
         private readonly IMessagesProcessor _messagesProcessor;
         private readonly IResponseToClientHeaderGenerator _responseToClientHeaderGenerator;
+        private readonly IFilesManager _filesManager;
 
         public ServerSideMessagesProcessor(IMessagesProcessor messagesProcessor,
-            IResponseToClientHeaderGenerator responseToClientHeaderGenerator)
+            IResponseToClientHeaderGenerator responseToClientHeaderGenerator,
+            IFilesManager filesManager)
         {
             _messagesProcessor = messagesProcessor;
             _responseToClientHeaderGenerator = responseToClientHeaderGenerator;
+            _filesManager = filesManager;
         }
 
-        public ResponseDto ParseMessage(List<byte> message)
+        public async Task<ResponseDto> ParseMessageAsync(List<byte> message)
         {
             var headerSize = BitConverter.ToInt32(message.GetRange(0, sizeof(Int32)).ToArray(), 0);
 
@@ -47,6 +52,12 @@ namespace longtooth.Protocol.Implementations.Implementations
 
                 case CommandType.Exit:
                     result = new ExitCommand(_messagesProcessor, _responseToClientHeaderGenerator).Parse(stringHeader);
+
+                    break;
+
+                case CommandType.GetMountpoints:
+                    result = await new GetMountpointsCommand(_messagesProcessor, _responseToClientHeaderGenerator, _filesManager)
+                        .ParseAsync(stringHeader);
 
                     break;
 

@@ -1,4 +1,4 @@
-﻿namespace longtooth.Protocol.Abstractions.Enums
+﻿namespace longtooth.Common.Abstractions.Enums
 {
     /// <summary>
     /// Possible commands from client to server
@@ -13,6 +13,11 @@
         /// <summary>
         /// Check connection
         /// </summary>
-        Ping = 1
+        Ping = 1,
+
+        /// <summary>
+        /// Ask phone for mountpoints
+        /// </summary>
+        GetMountpoints = 2,
     }
 }

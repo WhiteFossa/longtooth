@@ -1,6 +1,8 @@
-﻿using System.Net;
+﻿using longtooth.Common.Abstractions.DTOs;
+using System.Collections.Generic;
+using System.Net;
 
-namespace longtooth.Desktop.Models
+namespace longtooth.Common.Abstractions.Models
 {
     /// <summary>
     /// Main model
@@ -16,5 +18,10 @@ namespace longtooth.Desktop.Models
         /// Server port
         /// </summary>
         public uint ServerPort { get; set; }
+
+        /// <summary>
+        /// Share phone's mountpoints
+        /// </summary>
+        public List<MountpointDto> Mountpoints { get; set; }
     }
 }

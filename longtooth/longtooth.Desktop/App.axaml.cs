@@ -1,7 +1,7 @@
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
-using longtooth.Desktop.Models;
+using longtooth.Common.Abstractions.Models;
 using longtooth.Desktop.ViewModels;
 using longtooth.Desktop.Views;
 

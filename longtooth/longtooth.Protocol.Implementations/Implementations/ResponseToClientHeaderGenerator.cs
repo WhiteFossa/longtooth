@@ -1,7 +1,9 @@
-﻿using longtooth.Common.Abstractions.Interfaces.MessagesProcessor;
+﻿using longtooth.Common.Abstractions.DTOs;
+using longtooth.Common.Abstractions.Interfaces.MessagesProcessor;
 using longtooth.Protocol.Abstractions.DataStructures;
 using longtooth.Protocol.Abstractions.Interfaces;
 using longtooth.Protocol.Abstractions.Responses;
+using System.Collections.Generic;
 using System.Text;
 using System.Text.Json;
 
@@ -38,6 +40,13 @@ namespace longtooth.Protocol.Implementations.Implementations
             var exitResponse = new ExitResponse();
 
             return EncodeResponse(exitResponse, null);
+        }
+
+        public byte[] GenerateGetMountpointsResponse(List<MountpointDto> mountpoints)
+        {
+            var getMountpointsResponse = new GetMountpointsResponse(mountpoints);
+
+            return EncodeResponse(getMountpointsResponse, null);
         }
     }
 }

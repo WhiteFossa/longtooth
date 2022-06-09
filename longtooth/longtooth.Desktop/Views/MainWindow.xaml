@@ -11,7 +11,7 @@
     </Window.Styles>
 
     <!-- Main grid -->
-    <Grid ColumnDefinitions="*" RowDefinitions="Auto, Auto, *" >
+    <Grid ColumnDefinitions="*" RowDefinitions="Auto, Auto, *, 300" >
 
         <!-- Connection to server -->
         <Border Classes="VisibleBorders" Grid.Column="0" Grid.Row="0" >
@@ -32,12 +32,10 @@
                         Text="{Binding ServerPort}" />
 
                     <!-- Connect -->
-                    <Button Grid.Column="4" Grid.Row="0" Content="Connect" Classes="LeftMargin"
-						Command="{ Binding ConnectAsync }" />
+                    <Button Grid.Column="4" Grid.Row="0" Content="Connect" Classes="LeftMargin" Command="{ Binding ConnectAsync }" />
 
                     <!-- Disconnect -->
-                    <Button Grid.Column="5" Grid.Row="0" Content="Disconnect" Classes="LeftMargin"
-						Command="{ Binding DisconnectAsync }"/>
+                    <Button Grid.Column="5" Grid.Row="0" Content="Disconnect" Classes="LeftMargin" Command="{ Binding DisconnectAsync }"/>
                 </Grid>
 
             </StackPanel>
@@ -48,21 +46,33 @@
             <StackPanel>
                 <TextBlock Text="Experiments" />
 
-                <Grid ColumnDefinitions="Auto, Auto" RowDefinitions="Auto" >
+                <Grid ColumnDefinitions="Auto, Auto, Auto" RowDefinitions="Auto" >
 
                     <!-- Ping -->
-                    <Button Grid.Column="0" Grid.Row="0" Content="Ping"
-						Command="{ Binding PingAsync }" />
+                    <Button Grid.Column="0" Grid.Row="0" Content="Ping" Command="{ Binding PingAsync }" />
 
                     <!-- Graceful disconnect -->
-                    <Button Grid.Column="1" Grid.Row="0" Content="Graceful disconnect"
-						Command="{ Binding GracefulDisconnectAsync }" />
+                    <Button Grid.Column="1" Grid.Row="0" Content="Graceful disconnect" Command="{ Binding GracefulDisconnectAsync }" />
+
+                    <!-- Get mountpoints -->
+                    <Button Grid.Column="2" Grid.Row="0" Content="Get mountpoints" Command="{ Binding GetMountpointsAsync }" />
                 </Grid>
             </StackPanel>
         </Border>
 
-        <!-- Logs -->
+        <!-- Files manager -->
         <Border Classes="VisibleBorders" Grid.Column="0" Grid.Row="2" >
+            <Grid>
+                <DataGrid Items="{ Binding Directories }">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Directory" Binding="{ Binding Name }"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Grid>
+        </Border>
+        
+        <!-- Logs -->
+        <Border Classes="VisibleBorders" Grid.Column="0" Grid.Row="3" >
             <DockPanel>
                 <TextBlock Text="Logs" DockPanel.Dock="Top" />
 

@@ -1,4 +1,7 @@
-﻿namespace longtooth.Protocol.Abstractions.Interfaces
+﻿using longtooth.Common.Abstractions.DTOs;
+using System.Collections.Generic;
+
+namespace longtooth.Protocol.Abstractions.Interfaces
 {
     /// <summary>
     /// Interface to generate commands to server
@@ -13,7 +16,11 @@
         /// <summary>
         /// Gracefully close the connection
         /// </summary>
-        /// <returns></returns>
         byte[] GenerateExitCommand();
+
+        /// <summary>
+        /// Generates response with the list of mountpoints
+        /// </summary>
+        byte[] GenerateGetMountpointsCommand(List<MountpointDto> mountpoints);
     }
 }

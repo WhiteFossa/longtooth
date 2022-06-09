@@ -59,13 +59,13 @@ namespace longtooth.ViewModels
         /// </summary>
         public async Task OnServerStartAsync()
         {
-            await _server.StartAsync(OnNewDataReadFromClient);
+            await _server.StartAsync(OnNewDataReadFromClientAsync);
         }
 
         /// <summary>
         /// Called when we are receiving new data from client
         /// </summary>
-        private ResponseDto OnNewDataReadFromClient(List<byte> data)
+        private async Task<ResponseDto> OnNewDataReadFromClientAsync(List<byte> data)
         {
             var decodedMessage = _messagesProcessor.OnNewMessageArriveServer(data);
 
@@ -75,7 +75,7 @@ namespace longtooth.ViewModels
                 return new ResponseDto(false, false, new List<byte>());
             }
 
-            return _serverSideMessagesProcessor.ParseMessage(decodedMessage);
+            return await _serverSideMessagesProcessor.ParseMessageAsync(decodedMessage);
         }
 
         /// <summary>

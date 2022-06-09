@@ -1,5 +1,6 @@
 ﻿using longtooth.Server.Abstractions.DTOs;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace longtooth.Protocol.Abstractions.Interfaces
 {
@@ -11,6 +12,6 @@ namespace longtooth.Protocol.Abstractions.Interfaces
         /// <summary>
         /// Call this when new message arrive
         /// </summary>
-        ResponseDto ParseMessage(List<byte> message);
+        Task<ResponseDto> ParseMessageAsync(List<byte> message);
     }
 }
