@@ -8,7 +8,7 @@
         /// <summary>
         /// Gracefully close connection
         /// </summary>
-        Close = 0,
+        Exit = 0,
 
         /// <summary>
         /// Check connection

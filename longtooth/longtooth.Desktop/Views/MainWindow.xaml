@@ -48,12 +48,15 @@
             <StackPanel>
                 <TextBlock Text="Experiments" />
 
-                <Grid ColumnDefinitions="Auto" RowDefinitions="Auto" >
+                <Grid ColumnDefinitions="Auto, Auto" RowDefinitions="Auto" >
 
                     <!-- Ping -->
                     <Button Grid.Column="0" Grid.Row="0" Content="Ping"
 						Command="{ Binding PingAsync }" />
 
+                    <!-- Graceful disconnect -->
+                    <Button Grid.Column="1" Grid.Row="0" Content="Graceful disconnect"
+						Command="{ Binding GracefulDisconnectAsync }" />
                 </Grid>
             </StackPanel>
         </Border>

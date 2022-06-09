@@ -45,6 +45,11 @@ namespace longtooth.Protocol.Implementations.Implementations
 
                     break;
 
+                case CommandType.Exit:
+                    result = new ExitCommand(_messagesProcessor, _responseToClientHeaderGenerator).Parse(stringHeader);
+
+                    break;
+
                 default:
                     throw new InvalidOperationException($"Unknown command type: { header.Command }");
             }

@@ -1,4 +1,5 @@
-﻿using longtooth.Common.Abstractions.Interfaces.Logger;
+﻿using longtooth.Client.Abstractions.Interfaces;
+using longtooth.Common.Abstractions.Interfaces.Logger;
 using longtooth.Protocol.Abstractions.Enums;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
@@ -24,7 +25,7 @@ namespace longtooth.Protocol.Abstractions.DataStructures
         /// <summary>
         /// Implement me in children
         /// </summary>
-        public virtual async Task RunAsync(ILogger logger)
+        public virtual async Task RunAsync(ILogger logger, IClient client)
         {
 
         }

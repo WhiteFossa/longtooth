@@ -9,5 +9,11 @@
         /// Generates ping command
         /// </summary>
         byte[] GeneratePingCommand();
+
+        /// <summary>
+        /// Gracefully close the connection
+        /// </summary>
+        /// <returns></returns>
+        byte[] GenerateExitCommand();
     }
 }

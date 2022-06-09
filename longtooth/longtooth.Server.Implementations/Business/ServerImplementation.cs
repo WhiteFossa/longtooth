@@ -121,8 +121,11 @@ namespace longtooth.Server.Implementations.Business
                         connectionState);
                 }
 
+                connectionState.IsShutdownRequired = responseToClient.NeedToClose;
+
                 if (responseToClient.NeedToClose)
                 {
+                    connectionState.ClientSocket.Shutdown(SocketShutdown.Both);
                     connectionState.ClientSocket.Close();
                     return;
                 }
@@ -151,6 +154,7 @@ namespace longtooth.Server.Implementations.Business
         private void SendCallback(IAsyncResult result)
         {
             var connectionState = result.AsyncState as ConnectionState;
+
             var sentAmount = connectionState.ClientSocket.EndSend(result);
 
             connectionState.WriteBufferOffset += sentAmount;
@@ -166,6 +170,14 @@ namespace longtooth.Server.Implementations.Business
                         new AsyncCallback(SendCallback),
                         connectionState);
             }
+            else
+            {
+                // Current transmission completed
+                if (connectionState.IsShutdownRequired)
+                {
+                    ShutdownClientConnection(connectionState.ClientSocket);
+                }
+            }
         }
 
         public void Stop()
@@ -173,6 +185,12 @@ namespace longtooth.Server.Implementations.Business
             _ = _serverThread ?? throw new InvalidOperationException("Server isn't running");
 
             _needToStopServer = true;
+        }
+
+        private void ShutdownClientConnection(Socket clientSocket)
+        {
+            clientSocket.Shutdown(SocketShutdown.Both);
+            clientSocket.Close();
         }
     }
 }

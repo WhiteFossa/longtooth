@@ -10,6 +10,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\longtooth.Client.Abstractions\longtooth.Client.Abstractions.csproj" />
     <ProjectReference Include="..\longtooth.Common.Abstractions\longtooth.Common.Abstractions.csproj" />
     <ProjectReference Include="..\longtooth.Server.Abstractions\longtooth.Server.Abstractions.csproj" />
   </ItemGroup>

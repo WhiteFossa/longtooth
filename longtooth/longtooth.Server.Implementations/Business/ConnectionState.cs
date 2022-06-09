@@ -34,6 +34,11 @@ namespace longtooth.Server.Implementations.Business
         /// </summary>
         public byte[] WriteBuffer { get; private set; } = new byte[Constants.MaxPacketSize];
 
+        /// <summary>
+        /// If true, then connection with client will be shut down after current write completion
+        /// </summary>
+        public bool IsShutdownRequired;
+
         public ConnectionState(Socket clientSocket)
         {
             ClientSocket = clientSocket ?? throw new ArgumentNullException(nameof(clientSocket));

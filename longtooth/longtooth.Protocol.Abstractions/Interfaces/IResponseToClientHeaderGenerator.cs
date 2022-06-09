@@ -9,5 +9,11 @@
         /// Generates response to ping command
         /// </summary>
         byte[] GeneratePingResponse();
+
+        /// <summary>
+        /// Generates response to exit command
+        /// </summary>
+        /// <returns></returns>
+        byte[] GenerateExitResponse();
     }
 }

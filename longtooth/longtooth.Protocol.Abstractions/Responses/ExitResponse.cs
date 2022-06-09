@@ -9,25 +9,27 @@ using System.Threading.Tasks;
 namespace longtooth.Protocol.Abstractions.Responses
 {
     /// <summary>
-    /// Response to ping command
+    /// Response to graceful exit command
     /// </summary>
-    public class PingResponse : ResponseHeader
+    public class ExitResponse : ResponseHeader
     {
-        public static PingResponse Parse(string header)
+        public static ExitResponse Parse(string header)
         {
             _ = header ?? throw new ArgumentNullException(nameof(header));
 
-            return JsonSerializer.Deserialize<PingResponse>(header);
+            return JsonSerializer.Deserialize<ExitResponse>(header);
         }
 
-        public PingResponse() : base(CommandType.Ping)
+        public ExitResponse() : base(CommandType.Exit)
         {
 
         }
 
-        public override async Task RunAsync(ILogger logger, IClient client)
+        public async override Task RunAsync(ILogger logger, IClient client)
         {
-            await logger.LogInfoAsync("Pong!");
+            await logger.LogInfoAsync("Exited");
+
+            await client.DisconnectGracefullyAsync();
         }
     }
 }

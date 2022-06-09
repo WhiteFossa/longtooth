@@ -19,16 +19,28 @@ namespace longtooth.Protocol.Implementations.Implementations
             _responseToClientHeaderGenerator = responseToClientHeaderGenerator;
         }
 
-        public byte[] GeneratePingCommand()
+        private byte[] EncodeCommand(object command)
         {
-            var pingCommand = new PingCommand(_messagesProcessor, _responseToClientHeaderGenerator);
-
-            var header = JsonSerializer.Serialize(pingCommand);
+            var header = JsonSerializer.Serialize(command);
             var serializedHeader = Encoding.UTF8.GetBytes(header);
 
             var message = new Message(serializedHeader, null);
 
             return message.ToDataPacket();
+        }
+
+        public byte[] GeneratePingCommand()
+        {
+            var pingCommand = new PingCommand(_messagesProcessor, _responseToClientHeaderGenerator);
+
+            return EncodeCommand(pingCommand);
+        }
+
+        public byte[] GenerateExitCommand()
+        {
+            var exitCommand = new ExitCommand(_messagesProcessor, _responseToClientHeaderGenerator);
+
+            return EncodeCommand(exitCommand);
         }
     }
 }

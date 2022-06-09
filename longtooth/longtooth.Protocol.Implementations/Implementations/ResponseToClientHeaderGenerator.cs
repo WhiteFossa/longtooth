@@ -16,16 +16,28 @@ namespace longtooth.Protocol.Implementations.Implementations
             _messagesProcessor = messagesProcessor;
         }
 
+        private byte[] EncodeResponse(object response, byte[] binaryData)
+        {
+            var header = JsonSerializer.Serialize(response);
+            var serializedHeader = Encoding.UTF8.GetBytes(header);
+
+            var message = new Message(serializedHeader, binaryData);
+
+            return message.ToDataPacket();
+        }
+
         public byte[] GeneratePingResponse()
         {
             var pingResponse = new PingResponse();
 
-            var header = JsonSerializer.Serialize(pingResponse);
-            var serializedHeader = Encoding.UTF8.GetBytes(header);
+            return EncodeResponse(pingResponse, null);
+        }
 
-            var message = new Message(serializedHeader, null);
+        public byte[] GenerateExitResponse()
+        {
+            var exitResponse = new ExitResponse();
 
-            return message.ToDataPacket();
+            return EncodeResponse(exitResponse, null);
         }
     }
 }

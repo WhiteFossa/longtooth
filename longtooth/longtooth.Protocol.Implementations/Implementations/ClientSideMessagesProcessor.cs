@@ -31,6 +31,8 @@ namespace longtooth.Protocol.Implementations.Implementations
                 case CommandType.Ping:
                     return PingResponse.Parse(stringHeader);
 
+                case CommandType.Exit:
+                    return ExitResponse.Parse(stringHeader);
 
                 default:
                     throw new InvalidOperationException($"Response to unknown command. Type: {header.Command}");

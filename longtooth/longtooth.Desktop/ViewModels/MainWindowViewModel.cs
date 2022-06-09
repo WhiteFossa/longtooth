@@ -4,12 +4,14 @@ using longtooth.Common.Abstractions.Interfaces.Logger;
 using longtooth.Common.Abstractions.Interfaces.MessagesProcessor;
 using longtooth.Desktop.Models;
 using longtooth.Protocol.Abstractions.Interfaces;
+using longtooth.Protocol.Abstractions.Responses;
 using Microsoft.Extensions.DependencyInjection;
 using ReactiveUI;
 using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Reactive;
+using System.Threading.Tasks;
 
 namespace longtooth.Desktop.ViewModels
 {
@@ -78,6 +80,11 @@ namespace longtooth.Desktop.ViewModels
         /// </summary>
         public ReactiveCommand<Unit, Unit> PingAsyncCommand { get; }
 
+        /// <summary>
+        /// Disconnect from server gracefully
+        /// </summary>
+        public ReactiveCommand<Unit, Unit> GracefulDisconnectAsyncCommand { get; }
+
         #endregion
 
         /// <summary>
@@ -117,6 +124,7 @@ namespace longtooth.Desktop.ViewModels
             ConnectAsyncCommand = ReactiveCommand.Create(ConnectAsync);
             DisconnectAsyncCommand = ReactiveCommand.Create(DisconnectAsync);
             PingAsyncCommand = ReactiveCommand.Create(PingAsync);
+            GracefulDisconnectAsyncCommand = ReactiveCommand.Create(GracefulDisconnectAsync);
 
             #endregion
         }
@@ -158,7 +166,13 @@ namespace longtooth.Desktop.ViewModels
         private async void OnNewMessageAsync(List<byte> decodedMessage)
         {
             var response = _clientSideMessagesProcessor.ParseMessage(decodedMessage);
-            await response.RunAsync(_logger);
+            await response.RunAsync(_logger, _client);
+        }
+
+        private async Task PrepareAndSendCommand(byte[] commandMessage)
+        {
+            var encodedMessage = _messagesProcessor.PrepareMessageToSend(new List<byte>(commandMessage));
+            await _client.SendAsync(encodedMessage);
         }
 
         /// <summary>
@@ -166,10 +180,24 @@ namespace longtooth.Desktop.ViewModels
         /// </summary>
         private async void PingAsync()
         {
+            await _logger.LogInfoAsync("Ping");
+
             var pingCommandMessage = _commandGenerator.GeneratePingCommand();
 
-            var encodedMessage = _messagesProcessor.PrepareMessageToSend(new List<byte>(pingCommandMessage));
-            await _client.SendAsync(encodedMessage);
+            await PrepareAndSendCommand(pingCommandMessage);
+        }
+
+        /// <summary>
+        /// Exit gracefully
+        /// </summary>
+        private async void GracefulDisconnectAsync()
+        {
+            // TODO: Remove code duplicates
+            await _logger.LogInfoAsync("Exiting...");
+
+            var exitCommandMessage = _commandGenerator.GenerateExitCommand();
+
+            await PrepareAndSendCommand(exitCommandMessage);
         }
     }
 }

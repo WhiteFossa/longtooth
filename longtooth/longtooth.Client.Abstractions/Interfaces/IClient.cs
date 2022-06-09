@@ -1,4 +1,6 @@
 ﻿using longtooth.Client.Abstractions.DTOs;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace longtooth.Client.Abstractions.Interfaces
 {
@@ -25,8 +27,14 @@ namespace longtooth.Client.Abstractions.Interfaces
         Task SendAsync(List<byte> message);
 
         /// <summary>
-        /// Disconnect from server
+        /// Disconnect from server (hard, forced)
         /// </summary>
         Task DisconnectAsync();
+
+        /// <summary>
+        /// Disconnect from server (graceful)
+        /// </summary>
+        /// <returns></returns>
+        Task DisconnectGracefullyAsync();
     }
 }

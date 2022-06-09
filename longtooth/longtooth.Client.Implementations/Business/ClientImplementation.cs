@@ -34,6 +34,11 @@ namespace longtooth.Client.Implementations.Business
         /// </summary>
         private byte[] _readBuffer = new byte[Constants.MaxPacketSize];
 
+        /// <summary>
+        /// If true, then next operation will cause disconnection
+        /// </summary>
+        private bool _isDisconnectRequired;
+
         public async Task ConnectAsync(ConnectionDto connectionParams)
         {
             if (_socket != null)
@@ -42,6 +47,8 @@ namespace longtooth.Client.Implementations.Business
             }
 
             _ = connectionParams ?? throw new ArgumentNullException(nameof(connectionParams));
+
+            _isDisconnectRequired = false;
 
             var endpoint = new IPEndPoint(connectionParams.Address, (int)connectionParams.Port);
 
@@ -65,6 +72,11 @@ namespace longtooth.Client.Implementations.Business
             _socket = null;
         }
 
+        public async Task DisconnectGracefullyAsync()
+        {
+            _isDisconnectRequired = true;
+        }
+
         public async Task SendAsync(List<byte> message)
         {
             var buffer = message.ToArray();
@@ -76,6 +88,12 @@ namespace longtooth.Client.Implementations.Business
                 var bytesSent = _socket.Send(buffer, totalSent, buffer.Length - totalSent, SocketFlags.None);
 
                 totalSent += bytesSent;
+            }
+
+            if (_isDisconnectRequired)
+            {
+                DoDisconnect();
+                return;
             }
         }
 
@@ -95,6 +113,12 @@ namespace longtooth.Client.Implementations.Business
                 {
                     var bytesRead = _socket.Receive(_readBuffer);
 
+                    if (_isDisconnectRequired)
+                    {
+                        DoDisconnect();
+                        return;
+                    }
+
                     if (_socket == null)
                     {
                         // Thread was killed during the disconnection
@@ -109,10 +133,22 @@ namespace longtooth.Client.Implementations.Business
                 }
                 catch (SocketException)
                 {
-                    _socket.Shutdown(SocketShutdown.Both);
-                    _socket.Close();
+                    DoDisconnect();
+
+                    return;
+                }
+                catch (NullReferenceException)
+                {
+                    // Socket got closed abruptly
+                    return;
                 }
             }
+        }
+
+        private void DoDisconnect()
+        {
+            _socket.Shutdown(SocketShutdown.Both);
+            _socket.Close();
         }
     }
 }
