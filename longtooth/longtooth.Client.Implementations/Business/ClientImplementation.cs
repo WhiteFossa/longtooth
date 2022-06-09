@@ -137,11 +137,6 @@ namespace longtooth.Client.Implementations.Business
 
                     return;
                 }
-                catch (NullReferenceException)
-                {
-                    // Socket got closed abruptly
-                    return;
-                }
             }
         }
 
