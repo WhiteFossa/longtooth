@@ -19,5 +19,10 @@
         /// Ask phone for mountpoints
         /// </summary>
         GetMountpoints = 2,
+
+        /// <summary>
+        /// Get server directory content
+        /// </summary>
+        GetDirectoryContent = 3,
     }
 }

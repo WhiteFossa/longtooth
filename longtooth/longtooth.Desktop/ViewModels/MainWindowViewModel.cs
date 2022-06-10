@@ -29,6 +29,7 @@ namespace longtooth.Desktop.ViewModels
         private string _consoleText;
         private int _consoleCaretIndex;
         private ObservableCollection<MountpointDto> _mountpoints = new ObservableCollection<MountpointDto>();
+        private ObservableCollection<DirectoryContentItemDto> _directoryContent = new ObservableCollection<DirectoryContentItemDto>();
 
         /// <summary>
         /// Server IP
@@ -66,10 +67,22 @@ namespace longtooth.Desktop.ViewModels
             set => this.RaiseAndSetIfChanged(ref _consoleCaretIndex, value);
         }
 
+        /// <summary>
+        /// Mountpoints, exported by server
+        /// </summary>
         public ObservableCollection<MountpointDto> Mountpoints
         {
             get => _mountpoints;
             set => this.RaiseAndSetIfChanged(ref _mountpoints, value);
+        }
+
+        /// <summary>
+        /// Directories and files of current level
+        /// </summary>
+        public ObservableCollection<DirectoryContentItemDto> DirectoryContent
+        {
+            get => _directoryContent;
+            set => this.RaiseAndSetIfChanged(ref _directoryContent, value);
         }
 
         #endregion
@@ -201,10 +214,19 @@ namespace longtooth.Desktop.ViewModels
                     break;
 
                 case CommandType.GetMountpoints:
-
                     var getMountpointsResponse = runResult as GetMountpointsRunResult;
                     Mountpoints = new ObservableCollection<MountpointDto>(getMountpointsResponse.Mountpoints);
+                    break;
 
+                case CommandType.GetDirectoryContent:
+                    var getDirectoryContentResponse = runResult as GetDirectoryContentRunResult;
+                    if (!getDirectoryContentResponse.DirectoryContent.IsSuccessful)
+                    {
+                        await _logger.LogErrorAsync("Failed to get directory content!");
+                        return;
+                    }
+
+                    DirectoryContent = new ObservableCollection<DirectoryContentItemDto>(getDirectoryContentResponse.DirectoryContent.Items);
                     break;
 
                 default:
@@ -247,11 +269,19 @@ namespace longtooth.Desktop.ViewModels
         /// </summary>
         private async void GetMountpointsAsync()
         {
-            var mountpoints = await _filesManager.GetMountpointsAsync();
-
-            var getMountpointsMessage = _commandGenerator.GenerateGetMountpointsCommand(mountpoints);
+            var getMountpointsMessage = _commandGenerator.GenerateGetMountpointsCommand();
 
             await PrepareAndSendCommand(getMountpointsMessage);
+        }
+
+        /// <summary>
+        /// Mountpoint changed - need to display content for given mountpoint
+        /// </summary>
+        public async Task OnMountpointChanged(string serverSidePath)
+        {
+            var getDirectoryContentCommand = _commandGenerator.GenerateGetDirectoryContentCommand(serverSidePath);
+
+            await PrepareAndSendCommand(getDirectoryContentCommand);
         }
     }
 }

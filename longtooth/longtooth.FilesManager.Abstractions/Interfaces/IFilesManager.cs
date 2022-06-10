@@ -13,5 +13,10 @@ namespace longtooth.FilesManager.Abstractions.Interfaces
         /// Returns mountpoints, shared on server
         /// </summary>
         Task<List<MountpointDto>> GetMountpointsAsync();
+
+        /// <summary>
+        /// Returns directory content
+        /// </summary>
+        Task<DirectoryContentDto> GetDirectoryContentAsync(string serverSidePath);
     }
 }

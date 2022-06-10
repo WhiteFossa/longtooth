@@ -61,6 +61,15 @@ namespace longtooth.Protocol.Implementations.Implementations
 
                     break;
 
+                case CommandType.GetDirectoryContent:
+                    result = await new GetDirectoryContentCommand(string.Empty,
+                        _messagesProcessor,
+                        _responseToClientHeaderGenerator,
+                        _filesManager)
+                        .ParseAsync(stringHeader);
+
+                    break;
+
                 default:
                     throw new InvalidOperationException($"Unknown command type: { header.Command }");
             }

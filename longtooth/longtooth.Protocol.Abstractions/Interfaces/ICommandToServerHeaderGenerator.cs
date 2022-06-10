@@ -19,8 +19,13 @@ namespace longtooth.Protocol.Abstractions.Interfaces
         byte[] GenerateExitCommand();
 
         /// <summary>
-        /// Generates response with the list of mountpoints
+        /// Get mountpoints list from server
         /// </summary>
-        byte[] GenerateGetMountpointsCommand(List<MountpointDto> mountpoints);
+        byte[] GenerateGetMountpointsCommand();
+
+        /// <summary>
+        /// Get server directory content
+        /// </summary>
+        byte[] GenerateGetDirectoryContentCommand(string serverSidePath);
     }
 }

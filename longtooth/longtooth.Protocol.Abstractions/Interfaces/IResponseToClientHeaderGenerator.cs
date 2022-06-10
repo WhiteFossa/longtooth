@@ -23,5 +23,10 @@ namespace longtooth.Protocol.Abstractions.Interfaces
         /// Generates response with the list of server's mountpoints
         /// </summary>
         byte[] GenerateGetMountpointsResponse(List<MountpointDto> mountpoints);
+
+        /// <summary>
+        /// Generates directory content response
+        /// </summary>
+        byte[] GenerateGetDirectoryContentResponse(DirectoryContentDto directoryContent);
     }
 }

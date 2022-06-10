@@ -48,5 +48,12 @@ namespace longtooth.Protocol.Implementations.Implementations
 
             return EncodeResponse(getMountpointsResponse, null);
         }
+
+        public byte[] GenerateGetDirectoryContentResponse(DirectoryContentDto directoryContent)
+        {
+            var getDirectoryContentResponse = new GetDirectoryContentResponse(directoryContent);
+
+            return EncodeResponse(getDirectoryContentResponse, null);
+        }
     }
 }

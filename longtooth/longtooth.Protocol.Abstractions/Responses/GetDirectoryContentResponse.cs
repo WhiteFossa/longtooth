@@ -4,35 +4,36 @@ using longtooth.Common.Abstractions.Enums;
 using longtooth.Protocol.Abstractions.DataStructures;
 using System;
 using System.Collections.Generic;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace longtooth.Protocol.Abstractions.Responses
 {
-    public class GetMountpointsResponse : ResponseHeader
+    public class GetDirectoryContentResponse : ResponseHeader
     {
         /// <summary>
-        /// List of mountpoints
+        /// Directory content
         /// </summary>
-        [JsonPropertyName("Mountpoints")]
-        public List<MountpointDto> Mountpoints { get; set; }
+        [JsonPropertyName("Content")]
+        public DirectoryContentDto Content { get; set; }
 
-        public GetMountpointsResponse(List<MountpointDto> mountpoints) : base(CommandType.GetMountpoints)
+        public GetDirectoryContentResponse(DirectoryContentDto content) : base(CommandType.GetDirectoryContent)
         {
-            Mountpoints = mountpoints ?? throw new ArgumentNullException(nameof(mountpoints));
+            Content = content ?? throw new ArgumentNullException(nameof(content));
         }
 
-        public static GetMountpointsResponse Parse(string header)
+        public static GetDirectoryContentResponse Parse(string header)
         {
             _ = header ?? throw new ArgumentNullException(nameof(header));
 
-            return JsonSerializer.Deserialize<GetMountpointsResponse>(header);
+            return JsonSerializer.Deserialize<GetDirectoryContentResponse>(header);
         }
 
         public async override Task<ResponseRunResult> RunAsync()
         {
-            return new GetMountpointsRunResult(Mountpoints);
+            return new GetDirectoryContentRunResult(Content);
         }
     }
 }

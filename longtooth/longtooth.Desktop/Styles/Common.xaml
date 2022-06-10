@@ -35,4 +35,10 @@
         <Setter Property="VerticalAlignment" Value="Center" />
         <Setter Property="Margin" Value="5, 0, 5, 0" />
     </Style>
+
+    <!-- Visible borders (for cells) -->
+    <Style Selector="Border.VisibleCellsBorders">
+        <Setter Property="BorderBrush" Value="Black" />
+        <Setter Property="BorderThickness" Value="1" />
+    </Style>
 </Styles> 

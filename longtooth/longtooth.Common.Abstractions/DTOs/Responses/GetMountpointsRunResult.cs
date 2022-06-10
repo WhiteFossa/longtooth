@@ -11,7 +11,7 @@ namespace longtooth.Common.Abstractions.DTOs.Responses
     {
         public List<MountpointDto> Mountpoints { get; private set; }
 
-        public GetMountpointsRunResult(CommandType command, List<MountpointDto> mountpoints) : base(command)
+        public GetMountpointsRunResult(List<MountpointDto> mountpoints) : base(CommandType.GetMountpoints)
         {
             Mountpoints = mountpoints ?? throw new ArgumentNullException(nameof(mountpoints));
         }

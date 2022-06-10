@@ -37,6 +37,9 @@ namespace longtooth.Protocol.Implementations.Implementations
                 case CommandType.GetMountpoints:
                     return GetMountpointsResponse.Parse(stringHeader);
 
+                case CommandType.GetDirectoryContent:
+                    return GetDirectoryContentResponse.Parse(stringHeader);
+
                 default:
                     throw new InvalidOperationException($"Response to unknown command. Type: {header.Command}");
             }

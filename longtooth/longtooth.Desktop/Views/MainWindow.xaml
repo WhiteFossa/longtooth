@@ -62,13 +62,42 @@
 
         <!-- Files manager -->
         <Border Classes="VisibleBorders" Grid.Column="0" Grid.Row="2" >
-            <Grid>
-                <DataGrid Items="{ Binding Mountpoints }">
-                    <DataGrid.Columns>
-                        <DataGridTextColumn Header="Mountpoint" Binding="{ Binding Name }" />
-                        <DataGridTextColumn Header="Path" Binding="{ Binding ServerSidePath }" />
-                    </DataGrid.Columns>
-                </DataGrid>
+            <Grid ColumnDefinitions="Auto, *" RowDefinitions="*">
+                
+                <!-- Mountpoints -->
+                <Border Classes="VisibleBorders" Grid.Column="0" Grid.Row="0">
+                    <DataGrid
+                          Items="{ Binding Mountpoints }"
+                          HeadersVisibility="All"
+                          GridLinesVisibility="All"
+                          CurrentCellChanged="OnMountpointCellChangedAsync"
+                          >
+
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Mountpoint" Binding="{ Binding Name }" />
+                            <DataGridTextColumn Header="Path" Binding="{ Binding ServerSidePath }" MinWidth="300"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Border>
+
+                <!-- Files and directories -->
+                <StackPanel Grid.Column="1" Grid.Row="0">
+
+                    <Border Classes="VisibleBorders">
+                    <DataGrid
+                          Items="{ Binding DirectoryContent }"
+                          HeadersVisibility="All"
+                          GridLinesVisibility="All"
+                          >
+
+                        <DataGrid.Columns>
+                                <DataGridTextColumn Binding="{ Binding Name }" />
+                            </DataGrid.Columns>
+                    </DataGrid>
+        </Border>
+
+        </StackPanel>
+
             </Grid>
         </Border>
         
