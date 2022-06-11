@@ -81,22 +81,22 @@
                 </Border>
 
                 <!-- Files and directories -->
-                <StackPanel Grid.Column="1" Grid.Row="0">
+                <!--<StackPanel Grid.Column="1" Grid.Row="0">-->
 
-                    <Border Classes="VisibleBorders">
-                    <DataGrid
-                          Items="{ Binding DirectoryContent }"
-                          HeadersVisibility="All"
-                          GridLinesVisibility="All"
-                          >
+                <Border Classes="VisibleBorders" Grid.Column="1" Grid.Row="0">
+                        <DataGrid
+                                  Items="{ Binding DirectoryContent }"
+                                  HeadersVisibility="All"
+                                  GridLinesVisibility="All"
+                                  >
 
-                        <DataGrid.Columns>
+                            <DataGrid.Columns>
                                 <DataGridTextColumn Binding="{ Binding Name }" />
                             </DataGrid.Columns>
-                    </DataGrid>
-        </Border>
+                        </DataGrid>
+                    </Border>
 
-        </StackPanel>
+                <!--</StackPanel>-->
 
             </Grid>
         </Border>
