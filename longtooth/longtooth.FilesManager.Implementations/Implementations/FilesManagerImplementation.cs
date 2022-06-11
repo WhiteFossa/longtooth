@@ -1,4 +1,5 @@
 ﻿using Acr.UserDialogs;
+using longtooth.Abstractions.Interfaces.Permissions;
 using longtooth.Common.Abstractions.DTOs;
 using longtooth.FilesManager.Abstractions.Interfaces;
 using Plugin.Permissions;
@@ -13,17 +14,22 @@ namespace longtooth.FilesManager.Implementations.Implementations
 {
     public class FilesManagerImplementation : IFilesManager
     {
+        private readonly IPermissionsManager _permissionsManager;
+
+
         /// <summary>
         /// Shared directories
         /// </summary>
         private List<MountpointDto> _mountpoints;
 
-        public FilesManagerImplementation()
+        public FilesManagerImplementation(IPermissionsManager permissionsManager)
         {
+            _permissionsManager = permissionsManager;
+
             // Mocked mountpoints
             _mountpoints = new List<MountpointDto>();
-            _mountpoints.Add(new MountpointDto("Downloads", @"/storage/emulated/0/Download"));
-            _mountpoints.Add(new MountpointDto("DCIM", @"/storage/emulated/0/DCIM"));
+            _mountpoints.Add(new MountpointDto("Downloads", @"/storage/emulated/0/Download/"));
+            _mountpoints.Add(new MountpointDto("DCIM", @"/storage/emulated/0/DCIM/"));
         }
 
         public async Task<List<MountpointDto>> GetMountpointsAsync()
@@ -53,20 +59,9 @@ namespace longtooth.FilesManager.Implementations.Implementations
             }
 
             // Working with permissions
-            var status = await CrossPermissions.Current.CheckPermissionStatusAsync<StoragePermission>();
-            if (status != PermissionStatus.Granted)
+            var doWeHavePermission = await _permissionsManager.RequestPermission<StoragePermission>(Permission.Storage, "Access to storage is required!");
+            if (!doWeHavePermission)
             {
-                if (await CrossPermissions.Current.ShouldShowRequestPermissionRationaleAsync(Permission.Storage))
-                {
-                    await UserDialogs.Instance.AlertAsync("Access to storage is required!", "Error", "OK");
-                }
-
-                status = await CrossPermissions.Current.RequestPermissionAsync<StoragePermission>();
-            }
-
-            if (status != PermissionStatus.Granted)
-            {
-                await UserDialogs.Instance.AlertAsync("Access to storage is required, but you denied it!", "Error", "OK");
                 return new DirectoryContentDto(false, new List<DirectoryContentItemDto>());
             }
 
@@ -78,6 +73,11 @@ namespace longtooth.FilesManager.Implementations.Implementations
                     .Select(d => new DirectoryContentItemDto(true, d))
                      .Union(files.Select(f => new DirectoryContentItemDto(false, f)))
                      .ToList();
+
+            // Removing base directory
+            result = result
+                .Select(dci => new DirectoryContentItemDto(dci.IsDirectory, dci.Name.Replace(serverSidePath, string.Empty))) // TODO: Not so fast, but reliable
+                .ToList();
 
             return new DirectoryContentDto(true, result);
         }

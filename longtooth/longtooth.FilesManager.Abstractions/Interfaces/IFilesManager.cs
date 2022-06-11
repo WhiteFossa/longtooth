@@ -15,7 +15,7 @@ namespace longtooth.FilesManager.Abstractions.Interfaces
         Task<List<MountpointDto>> GetMountpointsAsync();
 
         /// <summary>
-        /// Returns directory content
+        /// Returns directory content. Directory name MUST end with slash
         /// </summary>
         Task<DirectoryContentDto> GetDirectoryContentAsync(string serverSidePath);
     }

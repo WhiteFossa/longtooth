@@ -18,6 +18,8 @@ using longtooth.Protocol.Implementations.Implementations;
 using longtooth.FilesManager.Abstractions.Interfaces;
 using longtooth.FilesManager.Implementations.Implementations;
 using Plugin.Permissions;
+using longtooth.Abstractions.Interfaces.Permissions;
+using longtooth.Droid.Implementations.Permissions;
 
 namespace longtooth.Droid
 {
@@ -37,6 +39,7 @@ namespace longtooth.Droid
             App.Container.Register<IServerSideMessagesProcessor, ServerSideMessagesProcessor>().AsSingleton();
             App.Container.Register<IResponseToClientHeaderGenerator, ResponseToClientHeaderGenerator>().AsSingleton();
             App.Container.Register<IFilesManager, FilesManagerImplementation>().AsSingleton();
+            App.Container.Register<IPermissionsManager, PermissionsManager>().AsSingleton();
 
             #endregion
 

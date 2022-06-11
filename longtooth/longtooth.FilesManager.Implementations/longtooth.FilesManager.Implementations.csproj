@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\longtooth.FilesManager.Abstractions\longtooth.FilesManager.Abstractions.csproj" />
+    <ProjectReference Include="..\longtooth\longtooth\longtooth.csproj" />
   </ItemGroup>
 
 </Project>
