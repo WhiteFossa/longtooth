@@ -36,9 +36,14 @@
         <Setter Property="Margin" Value="5, 0, 5, 0" />
     </Style>
 
-    <!-- Visible borders (for cells) -->
-    <Style Selector="Border.VisibleCellsBorders">
+    <!-- Visible borders (for data grids) -->
+    <Style Selector="DataGrid.VisibleBorders">
         <Setter Property="BorderBrush" Value="Black" />
         <Setter Property="BorderThickness" Value="1" />
+
+        <Setter Property="CornerRadius" Value="5" />
+
+        <Setter Property="Padding" Value="5" />
+        <Setter Property="Margin" Value="1" />
     </Style>
 </Styles> 
