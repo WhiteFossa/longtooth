@@ -70,6 +70,7 @@
                           Items="{ Binding Mountpoints }"
                           HeadersVisibility="All"
                           GridLinesVisibility="All"
+                          VerticalScrollBarVisibility="Visible"
                           CurrentCellChanged="OnMountpointCellChangedAsync"
                           >
 
@@ -88,6 +89,7 @@
                                   Items="{ Binding DirectoryContent }"
                                   HeadersVisibility="All"
                                   GridLinesVisibility="All"
+                                  VerticalScrollBarVisibility="Visible"
                                   >
 
                             <DataGrid.Columns>
