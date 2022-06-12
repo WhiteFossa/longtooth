@@ -29,8 +29,8 @@ namespace longtooth.FilesManager.Implementations.Implementations
 
             // Mocked mountpoints
             _mountpoints = new List<MountpointDto>();
-            _mountpoints.Add(new MountpointDto("Downloads", FilesHelper.NormalizePath(@"/storage/emulated/0/Download/")));
-            _mountpoints.Add(new MountpointDto("DCIM", FilesHelper.NormalizePath(@"/storage/emulated/0/DCIM/")));
+            _mountpoints.Add(new MountpointDto("Downloads", FilesHelper.NormalizePath(@"/storage/emulated/0/Download")));
+            _mountpoints.Add(new MountpointDto("DCIM", FilesHelper.NormalizePath(@"/storage/emulated/0/DCIM")));
         }
 
         public async Task<List<MountpointDto>> GetMountpointsAsync()
@@ -79,7 +79,7 @@ namespace longtooth.FilesManager.Implementations.Implementations
 
             // Removing base directory
             result = result
-                .Select(dci => new DirectoryContentItemDto(dci.IsDirectory, dci.Name.Replace(normalizedPath, string.Empty))) // TODO: Not so fast, but reliable
+                .Select(dci => new DirectoryContentItemDto(dci.IsDirectory, dci.Name.Substring(normalizedPath.Length + 1))) // +1 for trailing / of normalized path
                 .ToList();
 
             return new DirectoryContentDto(true, result);

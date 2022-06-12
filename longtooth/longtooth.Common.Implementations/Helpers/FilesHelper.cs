@@ -13,7 +13,8 @@ namespace longtooth.Common.Implementations.Helpers
         /// </summary>
         public static string NormalizePath(string path)
         {
-            return Path.GetFullPath(new Uri(path).LocalPath);
+            // TODO: Implement me
+            return path;
         }
     }
 }

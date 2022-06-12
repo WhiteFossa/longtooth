@@ -6,6 +6,7 @@ using longtooth.Common.Abstractions.Enums;
 using longtooth.Common.Abstractions.Interfaces.Logger;
 using longtooth.Common.Abstractions.Interfaces.MessagesProcessor;
 using longtooth.Common.Abstractions.Models;
+using longtooth.Common.Implementations.Helpers;
 using longtooth.FilesManager.Abstractions.Interfaces;
 using longtooth.Protocol.Abstractions.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,6 +14,7 @@ using ReactiveUI;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Net;
 using System.Reactive;
 using System.Threading.Tasks;
@@ -30,6 +32,7 @@ namespace longtooth.Desktop.ViewModels
         private int _consoleCaretIndex;
         private ObservableCollection<MountpointDto> _mountpoints = new ObservableCollection<MountpointDto>();
         private ObservableCollection<DirectoryContentItemDto> _directoryContent = new ObservableCollection<DirectoryContentItemDto>();
+        private string _currentDirectory;
 
         /// <summary>
         /// Server IP
@@ -83,6 +86,15 @@ namespace longtooth.Desktop.ViewModels
         {
             get => _directoryContent;
             set => this.RaiseAndSetIfChanged(ref _directoryContent, value);
+        }
+
+        /// <summary>
+        /// Current directory
+        /// </summary>
+        public string CurrentDirectory
+        {
+            get => _currentDirectory;
+            set => this.RaiseAndSetIfChanged(ref _currentDirectory, value);
         }
 
         #endregion
@@ -150,7 +162,12 @@ namespace longtooth.Desktop.ViewModels
 
             #endregion
 
+            #region Initialization
+
             _logger.SetLoggingFunction(AddLineToConsole);
+            CurrentDirectory = @"N/A";
+
+            #endregion
 
             #region Commands binding
 
@@ -277,9 +294,28 @@ namespace longtooth.Desktop.ViewModels
         /// <summary>
         /// Mountpoint changed - need to display content for given mountpoint
         /// </summary>
-        public async Task OnMountpointChanged(string serverSidePath)
+        public async Task OnMountpointChangedAsync(string serverSidePath)
         {
-            var getDirectoryContentCommand = _commandGenerator.GenerateGetDirectoryContentCommand(serverSidePath);
+            CurrentDirectory = serverSidePath;
+
+            var getDirectoryContentCommand = _commandGenerator.GenerateGetDirectoryContentCommand(CurrentDirectory);
+
+            await PrepareAndSendCommand(getDirectoryContentCommand);
+        }
+
+        /// <summary>
+        /// Called when user clicks on file or directory
+        /// </summary>
+        public async Task OnDirectoryContentCellChangedAsync(DirectoryContentItemDto directoryItem)
+        {
+            if (!directoryItem.IsDirectory)
+            {
+                return;
+            }
+
+            CurrentDirectory = FilesHelper.NormalizePath(Path.Combine(CurrentDirectory + @"/", directoryItem.Name));
+
+            var getDirectoryContentCommand = _commandGenerator.GenerateGetDirectoryContentCommand(CurrentDirectory);
 
             await PrepareAndSendCommand(getDirectoryContentCommand);
         }

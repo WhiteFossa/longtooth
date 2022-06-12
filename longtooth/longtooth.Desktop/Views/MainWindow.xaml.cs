@@ -31,7 +31,21 @@ namespace longtooth.Desktop.Views
 
             var viewModel = (sender as Control).DataContext as MainWindowViewModel;
 
-            await viewModel.OnMountpointChanged(serverSidePath);
+            await viewModel.OnMountpointChangedAsync(serverSidePath);
+        }
+
+        private async void OnDirectoryContentCellChangedAsync(object sender, EventArgs e)
+        {
+            var selectedItem = ((sender as DataGrid).SelectedItem as DirectoryContentItemDto);
+
+            if (selectedItem == null)
+            {
+                return;
+            }
+
+            var viewModel = (sender as Control).DataContext as MainWindowViewModel;
+
+            await viewModel.OnDirectoryContentCellChangedAsync(selectedItem);
         }
     }
 }

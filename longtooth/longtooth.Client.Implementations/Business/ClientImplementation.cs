@@ -66,8 +66,6 @@ namespace longtooth.Client.Implementations.Business
 
         public async Task DisconnectAsync()
         {
-            _ = _socket ?? throw new InvalidOperationException("Can't disconnect because socket not connected!");
-
             _readerThread.Interrupt();
 
             _socket = null;
