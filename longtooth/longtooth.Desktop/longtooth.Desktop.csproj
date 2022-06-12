@@ -42,7 +42,6 @@
     <ProjectReference Include="..\longtooth.Client.Implementations\longtooth.Client.Implementations.csproj" />
     <ProjectReference Include="..\longtooth.Common.Abstractions\longtooth.Common.Abstractions.csproj" />
     <ProjectReference Include="..\longtooth.Common.Implementations\longtooth.Common.Implementations.csproj" />
-    <ProjectReference Include="..\longtooth.FilesManager.Implementations\longtooth.FilesManager.Implementations.csproj" />
     <ProjectReference Include="..\longtooth.Protocol.Abstractions\longtooth.Protocol.Abstractions.csproj" />
     <ProjectReference Include="..\longtooth.Protocol.Implementations\longtooth.Protocol.Implementations.csproj" />
   </ItemGroup>

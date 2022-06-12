@@ -7,8 +7,6 @@ using longtooth.Common.Abstractions.Interfaces.MessagesProtocol;
 using longtooth.Common.Implementations.Logger;
 using longtooth.Common.Implementations.MessagesProcessor;
 using longtooth.Common.Implementations.MessagesProtocol;
-using longtooth.FilesManager.Abstractions.Interfaces;
-using longtooth.FilesManager.Implementations.Implementations;
 using longtooth.Protocol.Abstractions.Interfaces;
 using longtooth.Protocol.Implementations.Implementations;
 using Microsoft.Extensions.DependencyInjection;
@@ -54,9 +52,6 @@ namespace longtooth.Desktop
             services.AddTransient<IMessagesProcessor, MessagesProcessor>();
             services.AddSingleton<ICommandToServerHeaderGenerator, CommandToServerHeaderGenerator>();
             services.AddSingleton<IClientSideMessagesProcessor, ClientSideMessagesProcessor>();
-            services.AddSingleton<IResponseToClientHeaderGenerator, ResponseToClientHeaderGenerator>();
-            services.AddSingleton<IFilesManager, FilesManagerImplementation>();
-
             return services;
         }
     }

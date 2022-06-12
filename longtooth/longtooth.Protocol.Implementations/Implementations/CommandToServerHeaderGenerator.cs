@@ -1,6 +1,4 @@
-﻿using longtooth.Common.Abstractions.Interfaces.MessagesProcessor;
-using longtooth.FilesManager.Abstractions.Interfaces;
-using longtooth.Protocol.Abstractions.Commands;
+﻿using longtooth.Protocol.Abstractions.Commands;
 using longtooth.Protocol.Abstractions.DataStructures;
 using longtooth.Protocol.Abstractions.Interfaces;
 using System.Text;
@@ -10,19 +8,6 @@ namespace longtooth.Protocol.Implementations.Implementations
 {
     public class CommandToServerHeaderGenerator : ICommandToServerHeaderGenerator
     {
-        private readonly IMessagesProcessor _messagesProcessor;
-        private readonly IResponseToClientHeaderGenerator _responseToClientHeaderGenerator;
-        private readonly IFilesManager _filesManager;
-
-        public CommandToServerHeaderGenerator(IMessagesProcessor messagesProcessor,
-            IResponseToClientHeaderGenerator responseToClientHeaderGenerator,
-            IFilesManager filesManager)
-        {
-            _messagesProcessor = messagesProcessor;
-            _responseToClientHeaderGenerator = responseToClientHeaderGenerator;
-            _filesManager = filesManager;
-        }
-
         private byte[] EncodeCommand(object command)
         {
             var header = JsonSerializer.Serialize(command);
@@ -35,21 +20,21 @@ namespace longtooth.Protocol.Implementations.Implementations
 
         public byte[] GeneratePingCommand()
         {
-            var pingCommand = new PingCommand(_messagesProcessor, _responseToClientHeaderGenerator);
+            var pingCommand = new PingCommand(null, null);
 
             return EncodeCommand(pingCommand);
         }
 
         public byte[] GenerateExitCommand()
         {
-            var exitCommand = new ExitCommand(_messagesProcessor, _responseToClientHeaderGenerator);
+            var exitCommand = new ExitCommand(null, null);
 
             return EncodeCommand(exitCommand);
         }
 
         public byte[] GenerateGetMountpointsCommand()
         {
-            var getMountpointsCommand = new GetMountpointsCommand(_messagesProcessor, _responseToClientHeaderGenerator, _filesManager);
+            var getMountpointsCommand = new GetMountpointsCommand(null, null, null);
 
             return EncodeCommand(getMountpointsCommand);
         }
@@ -57,9 +42,9 @@ namespace longtooth.Protocol.Implementations.Implementations
         public byte[] GenerateGetDirectoryContentCommand(string serverSidePath)
         {
             var getDirectoryContentCommand = new GetDirectoryContentCommand(serverSidePath,
-                _messagesProcessor,
-                _responseToClientHeaderGenerator,
-                _filesManager);
+                null,
+                null,
+                null);
 
             return EncodeCommand(getDirectoryContentCommand);
         }
