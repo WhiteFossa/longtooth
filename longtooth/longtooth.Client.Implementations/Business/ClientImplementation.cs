@@ -60,6 +60,7 @@ namespace longtooth.Client.Implementations.Business
 
             // Starting reader thread
             _readerThread = new Thread(new ThreadStart(ReaderThreadRun));
+            _readerThread.IsBackground = true;
             _readerThread.Start();
         }
 
@@ -119,9 +120,10 @@ namespace longtooth.Client.Implementations.Business
                         return;
                     }
 
-                    if (_socket == null)
+                    if (_socket == null || !_socket.Connected || bytesRead == 0)
                     {
                         // Thread was killed during the disconnection
+                        DoDisconnect();
                         return;
                     }
 
@@ -144,6 +146,8 @@ namespace longtooth.Client.Implementations.Business
         {
             _socket.Shutdown(SocketShutdown.Both);
             _socket.Close();
+
+            _socket = null;
         }
     }
 }

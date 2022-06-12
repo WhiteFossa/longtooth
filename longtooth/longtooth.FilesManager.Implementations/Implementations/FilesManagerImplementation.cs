@@ -1,6 +1,7 @@
 ﻿using Acr.UserDialogs;
 using longtooth.Abstractions.Interfaces.Permissions;
 using longtooth.Common.Abstractions.DTOs;
+using longtooth.Common.Implementations.Helpers;
 using longtooth.FilesManager.Abstractions.Interfaces;
 using Plugin.Permissions;
 using Plugin.Permissions.Abstractions;
@@ -28,8 +29,8 @@ namespace longtooth.FilesManager.Implementations.Implementations
 
             // Mocked mountpoints
             _mountpoints = new List<MountpointDto>();
-            _mountpoints.Add(new MountpointDto("Downloads", @"/storage/emulated/0/Download/"));
-            _mountpoints.Add(new MountpointDto("DCIM", @"/storage/emulated/0/DCIM/"));
+            _mountpoints.Add(new MountpointDto("Downloads", FilesHelper.NormalizePath(@"/storage/emulated/0/Download/")));
+            _mountpoints.Add(new MountpointDto("DCIM", FilesHelper.NormalizePath(@"/storage/emulated/0/DCIM/")));
         }
 
         public async Task<List<MountpointDto>> GetMountpointsAsync()
@@ -41,11 +42,13 @@ namespace longtooth.FilesManager.Implementations.Implementations
         {
             _ = serverSidePath ?? throw new ArgumentNullException(nameof(serverSidePath));
 
+            var normalizedPath = FilesHelper.NormalizePath(serverSidePath);
+
             // Is directory belongs to one of mountpoints?
             var isChildDirectory = false;
             foreach(var mountpoint in _mountpoints)
             {
-                if (IsDirectoryInsideAnotherOrTheSame(mountpoint.ServerSidePath, serverSidePath))
+                if (IsDirectoryInsideAnotherOrTheSame(mountpoint.ServerSidePath, normalizedPath))
                 {
                     isChildDirectory = true;
                     break;
@@ -66,8 +69,8 @@ namespace longtooth.FilesManager.Implementations.Implementations
             }
 
             // Now we must have permission
-            var directories = Directory.GetDirectories(serverSidePath);
-            var files = Directory.GetFiles(serverSidePath);
+            var directories = Directory.GetDirectories(normalizedPath);
+            var files = Directory.GetFiles(normalizedPath);
 
             var result = directories
                     .Select(d => new DirectoryContentItemDto(true, d))
@@ -76,7 +79,7 @@ namespace longtooth.FilesManager.Implementations.Implementations
 
             // Removing base directory
             result = result
-                .Select(dci => new DirectoryContentItemDto(dci.IsDirectory, dci.Name.Replace(serverSidePath, string.Empty))) // TODO: Not so fast, but reliable
+                .Select(dci => new DirectoryContentItemDto(dci.IsDirectory, dci.Name.Replace(normalizedPath, string.Empty))) // TODO: Not so fast, but reliable
                 .ToList();
 
             return new DirectoryContentDto(true, result);
