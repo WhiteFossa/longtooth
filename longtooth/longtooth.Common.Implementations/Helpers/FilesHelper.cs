@@ -62,5 +62,23 @@ namespace longtooth.Common.Implementations.Helpers
             // TODO: Implement me
             return path;
         }
+
+        /// <summary>
+        /// Append filename to directory name to get full path
+        /// </summary>
+        public static string AppendFilename(string directory, string filename)
+        {
+            if (directory.Equals(string.Empty))
+            {
+                throw new ArgumentException(nameof(directory));
+            }
+
+            if (directory[directory.Length - 1] != '/')
+            {
+                directory = directory + @"/";
+            }
+
+            return directory + filename;
+        }
     }
 }

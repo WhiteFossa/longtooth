@@ -88,7 +88,7 @@
 
                 <!-- Files and directories -->
                 <Border Classes="VisibleBorders" Grid.Column="1" Grid.Row="0">
-                    <Grid ColumnDefinitions="*" RowDefinitions="Auto, *">
+                    <Grid ColumnDefinitions="*" RowDefinitions="Auto, Auto, *">
                         <!-- Current directory -->
                         <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="0">
                             <TextBlock Text="Current directory: " Classes="VCenterRightMargin" />
@@ -96,6 +96,13 @@
                             <TextBlock Text="{ Binding CurrentDirectory }" Classes="VCenterRightMargin"/>
                         </StackPanel>
 
+                        <!-- Current file -->
+                        <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="1">
+                            <TextBlock Text="Current file: " Classes="VCenterRightMargin" />
+
+                            <TextBlock Text="{ Binding CurrentFile }" Classes="VCenterRightMargin"/>
+                        </StackPanel>
+                        
                         <!-- Files -->
                         <DataGrid
                             Items="{ Binding DirectoryContent }"
@@ -103,7 +110,7 @@
                             GridLinesVisibility="All"
                             VerticalScrollBarVisibility="Visible"
                             Grid.Column="0"
-                            Grid.Row="1"
+                            Grid.Row="2"
                             Classes="VisibleBorders"
                             IsReadOnly="true"
                             CellPointerPressed="OnDirectoryContentCellPressedAsync"

@@ -31,6 +31,7 @@ namespace longtooth.Desktop.ViewModels
         private ObservableCollection<MountpointDto> _mountpoints = new ObservableCollection<MountpointDto>();
         private ObservableCollection<DirectoryContentItemDto> _directoryContent = new ObservableCollection<DirectoryContentItemDto>();
         private string _currentDirectory;
+        private string _currentFile;
 
         /// <summary>
         /// Server IP
@@ -93,6 +94,15 @@ namespace longtooth.Desktop.ViewModels
         {
             get => _currentDirectory;
             set => this.RaiseAndSetIfChanged(ref _currentDirectory, value);
+        }
+
+        /// <summary>
+        /// Current file
+        /// </summary>
+        public string CurrentFile
+        {
+            get => _currentFile;
+            set => this.RaiseAndSetIfChanged(ref _currentFile, value);
         }
 
         #endregion
@@ -161,6 +171,7 @@ namespace longtooth.Desktop.ViewModels
 
             _logger.SetLoggingFunction(AddLineToConsole);
             CurrentDirectory = @"N/A";
+            CurrentFile = @"N/A";
 
             #endregion
 
@@ -305,9 +316,12 @@ namespace longtooth.Desktop.ViewModels
         {
             if (!directoryItem.IsDirectory)
             {
+                // File
+                CurrentFile = FilesHelper.AppendFilename(CurrentDirectory, directoryItem.Name);
                 return;
             }
 
+            // Directory
             if (directoryItem.IsDirectory && directoryItem.Name.Equals(".."))
             {
                 CurrentDirectory = FilesHelper.MoveUp(CurrentDirectory);
