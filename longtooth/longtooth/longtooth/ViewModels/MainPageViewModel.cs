@@ -62,12 +62,14 @@ namespace longtooth.ViewModels
         /// </summary>
         public async Task OnServerStartAsync()
         {
-            // Requesting root access
-            var rootRequestResult = _permissionsManager.RequestRootAccess();
-            if (!rootRequestResult.IsRootAccess)
-            {
-                await UserDialogs.Instance.AlertAsync("Root access is required!", "Error", "OK");
-            }
+            // TODO: Add "Use root mode?" setting
+
+            //// Requesting root access
+            //var rootRequestResult = _permissionsManager.RequestRootAccess();
+            //if (!rootRequestResult.IsRootAccess)
+            //{
+            //    await UserDialogs.Instance.AlertAsync("Root access is required!", "Error", "OK");
+            //}
 
             // And storage access
             var doWeHavePermission = await _permissionsManager.RequestPermissionAsync<StorageWrite>();

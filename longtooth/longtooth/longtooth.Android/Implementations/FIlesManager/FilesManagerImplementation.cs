@@ -19,10 +19,11 @@ namespace longtooth.Droid.Implementations.FilesManager
         public FilesManagerImplementation()
         {
             // Mocked mountpoints
+            var externalStorageDir = Android.OS.Environment.ExternalStorageDirectory;
+
             _mountpoints = new List<MountpointDto>();
-            _mountpoints.Add(new MountpointDto("Downloads", FilesHelper.NormalizePath(@"/storage/emulated/0/Download")));
-            _mountpoints.Add(new MountpointDto("DCIM", FilesHelper.NormalizePath(@"/storage/emulated/0/DCIM")));
-            //_mountpoints.Add(new MountpointDto("Root", FilesHelper.NormalizePath(@"/")));
+            _mountpoints.Add(new MountpointDto("Downloads", FilesHelper.NormalizePath(@$"{ externalStorageDir }/Download")));
+            _mountpoints.Add(new MountpointDto("DCIM", FilesHelper.NormalizePath(@$"{ externalStorageDir }0/DCIM")));
         }
 
         public async Task<List<MountpointDto>> GetMountpointsAsync()
@@ -53,18 +54,8 @@ namespace longtooth.Droid.Implementations.FilesManager
                 return new DirectoryContentDto(false, new List<DirectoryContentItemDto>());
             }
 
-            string[] directories = null;
-            string[] files = null;
-
-            try
-            {
-                directories = Directory.GetDirectories(normalizedPath);
-                files = Directory.GetFiles(normalizedPath);
-            }
-            catch (Exception ex)
-            {
-                int a = 10;
-            }
+            var directories = Directory.GetDirectories(normalizedPath);
+            var files = Directory.GetFiles(normalizedPath);
 
             var result = directories
                     .Select(d => new DirectoryContentItemDto(true, d))
