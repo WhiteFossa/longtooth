@@ -1,16 +1,16 @@
-﻿using longtooth.Abstractions.Interfaces.Models;
+﻿using Acr.UserDialogs;
+using longtooth.Abstractions.Interfaces.Models;
+using longtooth.Abstractions.Interfaces.Permissions;
 using longtooth.Common.Abstractions.Interfaces.MessagesProcessor;
-using longtooth.Common.Implementations.MessagesProcessor;
 using longtooth.Models;
 using longtooth.Protocol.Abstractions.Interfaces;
 using longtooth.Server.Abstractions.DTOs;
 using longtooth.Server.Abstractions.Interfaces;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Xamarin.Forms;
+using static Xamarin.Essentials.Permissions;
 
 namespace longtooth.ViewModels
 {
@@ -38,6 +38,7 @@ namespace longtooth.ViewModels
         private IServer _server;
         private IMessagesProcessor _messagesProcessor;
         private IServerSideMessagesProcessor _serverSideMessagesProcessor;
+        private IPermissionsManager _permissionsManager;
 
         /// <summary>
         /// Constructor
@@ -45,9 +46,11 @@ namespace longtooth.ViewModels
         public MainPageViewModel()
         {
             MainModel = App.Container.Resolve<IMainModel>() as MainModel;
+
             _server = App.Container.Resolve<IServer>();
             _messagesProcessor = App.Container.Resolve<IMessagesProcessor>();
             _serverSideMessagesProcessor = App.Container.Resolve<IServerSideMessagesProcessor>();
+            _permissionsManager = App.Container.Resolve<IPermissionsManager>();
 
             // Binding commands to handlers
             StartServerCommand = new Command(async () => await OnServerStartAsync());
@@ -59,6 +62,20 @@ namespace longtooth.ViewModels
         /// </summary>
         public async Task OnServerStartAsync()
         {
+            // Requesting root access
+            var rootRequestResult = _permissionsManager.RequestRootAccess();
+            if (!rootRequestResult.IsRootAccess)
+            {
+                await UserDialogs.Instance.AlertAsync("Root access is required!", "Error", "OK");
+            }
+
+            // And storage access
+            var doWeHavePermission = await _permissionsManager.RequestPermissionAsync<StorageWrite>();
+            if (!doWeHavePermission)
+            {
+                await UserDialogs.Instance.AlertAsync("Storage permission is required!", "Error", "OK");
+            }
+
             await _server.StartAsync(OnNewDataReadFromClientAsync);
         }
 

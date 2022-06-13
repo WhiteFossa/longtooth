@@ -1,25 +1,22 @@
-﻿using System;
-
-using Android.App;
+﻿using Android.App;
 using Android.Content.PM;
-using Android.Runtime;
 using Android.OS;
-using Nancy.TinyIoc;
+using Android.Runtime;
 using longtooth.Abstractions.Interfaces.Models;
-using longtooth.Models;
-using longtooth.Server.Abstractions.Interfaces;
-using longtooth.Server.Implementations.Business;
+using longtooth.Abstractions.Interfaces.Permissions;
+using longtooth.Common.Abstractions.Interfaces.FilesManager;
 using longtooth.Common.Abstractions.Interfaces.MessagesProcessor;
-using longtooth.Common.Implementations.MessagesProcessor;
 using longtooth.Common.Abstractions.Interfaces.MessagesProtocol;
+using longtooth.Common.Implementations.MessagesProcessor;
 using longtooth.Common.Implementations.MessagesProtocol;
+using longtooth.Droid.Implementations.FilesManager;
+using longtooth.Droid.Implementations.PermissionsManager;
+using longtooth.Models;
 using longtooth.Protocol.Abstractions.Interfaces;
 using longtooth.Protocol.Implementations.Implementations;
-using longtooth.FilesManager.Abstractions.Interfaces;
-using longtooth.FilesManager.Implementations.Implementations;
-using Plugin.Permissions;
-using longtooth.Abstractions.Interfaces.Permissions;
-using longtooth.Droid.Implementations.Permissions;
+using longtooth.Server.Abstractions.Interfaces;
+using longtooth.Server.Implementations.Business;
+using Nancy.TinyIoc;
 
 namespace longtooth.Droid
 {
@@ -53,8 +50,6 @@ namespace longtooth.Droid
         public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Android.Content.PM.Permission[] grantResults)
         {
             Xamarin.Essentials.Platform.OnRequestPermissionsResult(requestCode, permissions, grantResults);
-
-            PermissionsImplementation.Current.OnRequestPermissionsResult(requestCode, permissions, grantResults);
             base.OnRequestPermissionsResult(requestCode, permissions, grantResults);
         }
     }

@@ -7,14 +7,12 @@ using longtooth.Common.Abstractions.Interfaces.Logger;
 using longtooth.Common.Abstractions.Interfaces.MessagesProcessor;
 using longtooth.Common.Abstractions.Models;
 using longtooth.Common.Implementations.Helpers;
-using longtooth.FilesManager.Abstractions.Interfaces;
 using longtooth.Protocol.Abstractions.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using ReactiveUI;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.IO;
 using System.Net;
 using System.Reactive;
 using System.Threading.Tasks;
@@ -138,7 +136,6 @@ namespace longtooth.Desktop.ViewModels
         private readonly IMessagesProcessor _messagesProcessor;
         private readonly ICommandToServerHeaderGenerator _commandGenerator;
         private readonly IClientSideMessagesProcessor _clientSideMessagesProcessor;
-        private readonly IFilesManager _filesManager;
 
 
         public MainWindowViewModel(MainModel model) : base()
@@ -157,8 +154,6 @@ namespace longtooth.Desktop.ViewModels
 
             _commandGenerator = Program.Di.GetService<ICommandToServerHeaderGenerator>();
             _clientSideMessagesProcessor = Program.Di.GetService<IClientSideMessagesProcessor>();
-
-            _filesManager = Program.Di.GetService<IFilesManager>();
 
             #endregion
 

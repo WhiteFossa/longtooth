@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace longtooth.FilesManager.Abstractions.Interfaces
+namespace longtooth.Common.Abstractions.Interfaces.FilesManager
 {
     /// <summary>
     /// Interface for work with server filesystem

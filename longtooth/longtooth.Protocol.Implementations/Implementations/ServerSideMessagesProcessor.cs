@@ -1,6 +1,6 @@
 ﻿using longtooth.Common.Abstractions.Enums;
+using longtooth.Common.Abstractions.Interfaces.FilesManager;
 using longtooth.Common.Abstractions.Interfaces.MessagesProcessor;
-using longtooth.FilesManager.Abstractions.Interfaces;
 using longtooth.Protocol.Abstractions.Commands;
 using longtooth.Protocol.Abstractions.DataStructures;
 using longtooth.Protocol.Abstractions.Interfaces;
