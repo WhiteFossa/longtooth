@@ -74,7 +74,8 @@
                             VerticalScrollBarVisibility="Visible"
                             Grid.Column="0"
                             Grid.Row="0"
-                            CurrentCellChanged="OnMountpointCellChangedAsync"
+                            IsReadOnly="true"
+                            CellPointerPressed="OnMountpointCellPressedAsync"
                             >
 
                             <DataGrid.Columns>
@@ -104,7 +105,8 @@
                             Grid.Column="0"
                             Grid.Row="1"
                             Classes="VisibleBorders"
-                            CurrentCellChanged="OnDirectoryContentCellChangedAsync"
+                            IsReadOnly="true"
+                            CellPointerPressed="OnDirectoryContentCellPressedAsync"
                             >
 
                             <DataGrid.Columns>

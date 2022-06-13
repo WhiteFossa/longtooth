@@ -82,6 +82,24 @@ namespace longtooth.FilesManager.Implementations.Implementations
                 .Select(dci => new DirectoryContentItemDto(dci.IsDirectory, dci.Name.Substring(normalizedPath.Length + 1))) // +1 for trailing / of normalized path
                 .ToList();
 
+            // Adding "move up" if not root directory
+            var isMountpoint = false;
+            foreach(var mountpoint in _mountpoints)
+            {
+                if (serverSidePath.Equals(mountpoint.ServerSidePath))
+                {
+                    isMountpoint = true;
+                    break;
+                }
+            }
+
+            if (!isMountpoint)
+            {
+                result = new List<DirectoryContentItemDto>() { new DirectoryContentItemDto(true, "..") }
+                    .Union(result)
+                    .ToList();
+            }
+
             return new DirectoryContentDto(true, result);
         }
 

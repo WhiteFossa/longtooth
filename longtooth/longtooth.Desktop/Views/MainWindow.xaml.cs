@@ -18,34 +18,34 @@ namespace longtooth.Desktop.Views
             AvaloniaXamlLoader.Load(this);
         }
 
-        private async void OnMountpointCellChangedAsync(object sender, EventArgs e)
+        private async void OnMountpointCellPressedAsync(object sender, DataGridCellPointerPressedEventArgs e)
         {
-            var selectedItem = ((sender as DataGrid).SelectedItem as MountpointDto);
+            var pressedItem = e.Cell.DataContext as MountpointDto;
 
-            if (selectedItem == null)
+            if (pressedItem == null)
             {
                 return;
             }
 
-            var serverSidePath = selectedItem.ServerSidePath;
+            var serverSidePath = pressedItem.ServerSidePath;
 
             var viewModel = (sender as Control).DataContext as MainWindowViewModel;
 
             await viewModel.OnMountpointChangedAsync(serverSidePath);
         }
 
-        private async void OnDirectoryContentCellChangedAsync(object sender, EventArgs e)
+        private async void OnDirectoryContentCellPressedAsync(object sender, DataGridCellPointerPressedEventArgs e)
         {
-            var selectedItem = ((sender as DataGrid).SelectedItem as DirectoryContentItemDto);
+            var pressedItem = e.Cell.DataContext as DirectoryContentItemDto;
 
-            if (selectedItem == null)
+            if (pressedItem == null)
             {
                 return;
             }
 
             var viewModel = (sender as Control).DataContext as MainWindowViewModel;
 
-            await viewModel.OnDirectoryContentCellChangedAsync(selectedItem);
+            await viewModel.OnDirectoryContentCellChangedAsync(pressedItem);
         }
     }
 }

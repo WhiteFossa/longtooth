@@ -313,7 +313,14 @@ namespace longtooth.Desktop.ViewModels
                 return;
             }
 
-            CurrentDirectory = FilesHelper.NormalizePath(Path.Combine(CurrentDirectory + @"/", directoryItem.Name));
+            if (directoryItem.IsDirectory && directoryItem.Name.Equals(".."))
+            {
+                CurrentDirectory = FilesHelper.MoveUp(CurrentDirectory);
+            }
+            else
+            {
+                CurrentDirectory = FilesHelper.MoveDown(CurrentDirectory, directoryItem.Name);
+            }
 
             var getDirectoryContentCommand = _commandGenerator.GenerateGetDirectoryContentCommand(CurrentDirectory);
 
