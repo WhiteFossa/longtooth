@@ -117,9 +117,29 @@ namespace longtooth.Droid.Implementations.FilesManager
 
         public async Task<DownloadedFileWithContentDto> DownloadFileAsync(string path, ulong start, uint length)
         {
-            var fileContent = new byte[1024];
+            if (!File.Exists(path))
+            {
+                return new DownloadedFileWithContentDto(false, start, length, new List<byte>());
+            }
 
-            return new DownloadedFileWithContentDto(true, start, length, fileContent.ToList());
+            var buffer = new byte[length];
+
+            using (var stream = new FileStream(path, FileMode.Open))
+            {
+                var newPosition = stream.Seek((long)start, SeekOrigin.Begin);
+                if (newPosition != (long)start)
+                {
+                    return new DownloadedFileWithContentDto(false, start, length, new List<byte>());
+                }
+
+                var readAmount = stream.Read(buffer, 0, (int)length);
+                if (readAmount != (int)length)
+                {
+                    return new DownloadedFileWithContentDto(false, start, length, new List<byte>());
+                }
+            }
+
+            return new DownloadedFileWithContentDto(true, start, length, buffer.ToList());
         }
     }
 }

@@ -15,6 +15,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Net;
 using System.Reactive;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace longtooth.Desktop.ViewModels
@@ -267,6 +268,7 @@ namespace longtooth.Desktop.ViewModels
                     }
 
                     // TODO: Save content here
+                    var textContent = Encoding.UTF8.GetString(fileResponse.File.Content.ToArray());
 
                     break;
 
