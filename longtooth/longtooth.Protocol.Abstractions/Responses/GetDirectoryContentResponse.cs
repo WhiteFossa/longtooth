@@ -3,6 +3,7 @@ using longtooth.Common.Abstractions.DTOs.Responses;
 using longtooth.Common.Abstractions.Enums;
 using longtooth.Protocol.Abstractions.DataStructures;
 using System;
+using System.Collections.Generic;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
@@ -22,7 +23,7 @@ namespace longtooth.Protocol.Abstractions.Responses
             Content = content ?? throw new ArgumentNullException(nameof(content));
         }
 
-        public static GetDirectoryContentResponse Parse(string header)
+        public static GetDirectoryContentResponse Parse(string header, List<byte> payload)
         {
             _ = header ?? throw new ArgumentNullException(nameof(header));
 

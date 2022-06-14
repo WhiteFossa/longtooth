@@ -32,19 +32,19 @@ namespace longtooth.Protocol.Implementations.Implementations
             switch (header.Command)
             {
                 case CommandType.Ping:
-                    return PingResponse.Parse(stringHeader);
+                    return PingResponse.Parse(stringHeader, payload);
 
                 case CommandType.Exit:
-                    return ExitResponse.Parse(stringHeader);
+                    return ExitResponse.Parse(stringHeader, payload);
 
                 case CommandType.GetMountpoints:
-                    return GetMountpointsResponse.Parse(stringHeader);
+                    return GetMountpointsResponse.Parse(stringHeader, payload);
 
                 case CommandType.GetDirectoryContent:
-                    return GetDirectoryContentResponse.Parse(stringHeader);
+                    return GetDirectoryContentResponse.Parse(stringHeader, payload);
 
                 case CommandType.DownloadFile:
-                    return DownloadFileResponse.Parse(stringHeader);
+                    return DownloadFileResponse.Parse(stringHeader, payload);
 
                 default:
                     throw new InvalidOperationException($"Response to unknown command. Type: {header.Command}");

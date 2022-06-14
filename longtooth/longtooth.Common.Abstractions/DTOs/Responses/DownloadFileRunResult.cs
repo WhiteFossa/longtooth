@@ -8,9 +8,9 @@ namespace longtooth.Common.Abstractions.DTOs.Responses
         /// <summary>
         /// File metadata
         /// </summary>
-        public DownloadedFileDto File { get; private set; }
+        public DownloadedFileWithContentDto File { get; private set; }
 
-        public DownloadFileRunResult(DownloadedFileDto file) : base(CommandType.DownloadFile)
+        public DownloadFileRunResult(DownloadedFileWithContentDto file) : base(CommandType.DownloadFile)
         {
             File = file ?? throw new ArgumentNullException(nameof(file));
         }

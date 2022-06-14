@@ -266,7 +266,7 @@ namespace longtooth.Desktop.ViewModels
                         return;
                     }
 
-                    int a = 10;
+                    // TODO: Save content here
 
                     break;
 

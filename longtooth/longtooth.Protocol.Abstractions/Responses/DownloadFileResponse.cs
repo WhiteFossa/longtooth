@@ -32,22 +32,21 @@ namespace longtooth.Protocol.Abstractions.Responses
             {
                 throw new ArgumentNullException(nameof(file));
             }
-
-            if (FileContent == null)
-            {
-                throw new ArgumentNullException(nameof(fileContent));
-            }
         }
 
-        public static DownloadFileResponse Parse(string header)
+        public static DownloadFileResponse Parse(string header, List<byte> payload)
         {
             _ = header ?? throw new ArgumentNullException(nameof(header));
+            _ = payload ?? throw new ArgumentNullException(nameof(payload));
 
-            return JsonSerializer.Deserialize<DownloadFileResponse>(header);
+            var fileInfo = JsonSerializer.Deserialize<DownloadFileResponse>(header);
+            return new DownloadFileResponse(fileInfo.File, payload);
         }
         public async override Task<ResponseRunResult> RunAsync()
         {
-            return new DownloadFileRunResult(File);
+            var fileWithContent = new DownloadedFileWithContentDto(File.IsSuccessful, File.StartPosition, File.Length, FileContent);
+
+            return new DownloadFileRunResult(fileWithContent);
         }
 
     }
