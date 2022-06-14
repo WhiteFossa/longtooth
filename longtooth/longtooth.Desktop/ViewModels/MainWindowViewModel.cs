@@ -14,6 +14,7 @@ using ReactiveUI;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Net;
 using System.Reactive;
 using System.Text;
@@ -154,6 +155,11 @@ namespace longtooth.Desktop.ViewModels
         private readonly ICommandToServerHeaderGenerator _commandGenerator;
         private readonly IClientSideMessagesProcessor _clientSideMessagesProcessor;
 
+        private const int DownloadChunkSize = 1000000;
+
+        private int _alreadyDownloaded;
+
+        private List<byte> _downloadedContent;
 
         public MainWindowViewModel(MainModel model) : base()
         {
@@ -177,10 +183,14 @@ namespace longtooth.Desktop.ViewModels
             #region Initialization
 
             _logger.SetLoggingFunction(AddLineToConsole);
+
+            ServerPort = "5934";
+
             CurrentDirectory = @"N/A";
             CurrentFile = new FileDto()
             {
                 Name = @"N/A",
+                FullPath = "",
                 Size = 0
             };
 
@@ -272,8 +282,26 @@ namespace longtooth.Desktop.ViewModels
                         return;
                     }
 
-                    // TODO: Save content here
-                    var textContent = Encoding.UTF8.GetString(fileResponse.File.Content.ToArray());
+                    _alreadyDownloaded += (int)fileResponse.File.Length;
+                    _downloadedContent.AddRange(fileResponse.File.Content);
+
+                    if (_alreadyDownloaded == CurrentFile.Size)
+                    {
+                        // Done
+                        File.WriteAllBytes(CurrentFile.Name, _downloadedContent.ToArray());
+                    }
+                    else
+                    {
+                        // Next chunk
+                        var chunkSize = CurrentFile.Size - _alreadyDownloaded;
+                        if (chunkSize > DownloadChunkSize)
+                        {
+                            chunkSize = DownloadChunkSize;
+                        }
+
+                        await PrepareAndSendCommand(_commandGenerator.GenerateDownloadCommand(CurrentFile.FullPath,
+                            (ulong)_alreadyDownloaded, (uint)chunkSize));
+                    }
 
                     break;
 
@@ -344,7 +372,8 @@ namespace longtooth.Desktop.ViewModels
                 // File
                 CurrentFile = new FileDto()
                 {
-                    Name = FilesHelper.AppendFilename(CurrentDirectory, directoryItem.Name),
+                    Name = directoryItem.Name,
+                    FullPath = FilesHelper.AppendFilename(CurrentDirectory, directoryItem.Name),
                     Size = directoryItem.Size
                 };
                 return;
@@ -370,12 +399,26 @@ namespace longtooth.Desktop.ViewModels
         /// </summary>
         private async void DownloadFileAsync()
         {
-            if (CurrentFile.Equals(@"N/A"))
+            if (CurrentFile.Name.Equals(@"N/A"))
             {
                 return;
             }
 
-            var downloadCommand = _commandGenerator.GenerateDownloadCommand(CurrentFile.Name, 0, (uint)CurrentFile.Size);
+            _alreadyDownloaded = 0;
+            _downloadedContent = new List<byte>();
+
+            byte[] downloadCommand;
+
+            if (CurrentFile.Size > DownloadChunkSize)
+            {
+                // Multichunk download
+                downloadCommand = _commandGenerator.GenerateDownloadCommand(CurrentFile.FullPath, 0, DownloadChunkSize);
+            }
+            else
+            {
+                // Single chunk download
+                downloadCommand = _commandGenerator.GenerateDownloadCommand(CurrentFile.FullPath, 0, (uint)CurrentFile.Size);
+            }
 
             await PrepareAndSendCommand(downloadCommand);
         }

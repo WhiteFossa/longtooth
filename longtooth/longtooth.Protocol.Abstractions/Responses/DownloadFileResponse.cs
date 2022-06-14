@@ -21,6 +21,7 @@ namespace longtooth.Protocol.Abstractions.Responses
         /// <summary>
         /// Partial file content
         /// </summary>
+        [JsonIgnore]
         public List<byte> FileContent { get; private set; }
 
         public DownloadFileResponse(DownloadedFileDto file, List<byte> fileContent) : base(CommandType.DownloadFile)

@@ -61,6 +61,7 @@ namespace longtooth.Protocol.Implementations.Implementations
             var metadata = new DownloadedFileDto(file.IsSuccessful, file.StartPosition, file.Length);
 
             var downloadFileResponse = new DownloadFileResponse(metadata, file.Content);
+
             return EncodeResponse(downloadFileResponse, downloadFileResponse.FileContent.ToArray());
         }
     }
