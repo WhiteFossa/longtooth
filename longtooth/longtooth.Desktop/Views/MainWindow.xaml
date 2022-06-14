@@ -120,7 +120,8 @@
                             >
 
                             <DataGrid.Columns>
-                                <DataGridTextColumn Binding="{ Binding Name }" />
+                                <DataGridTextColumn Header="Name" Binding="{ Binding Name }" />
+                                <DataGridTextColumn Header="Size" Binding="{ Binding Size }" />
                             </DataGrid.Columns>
                         </DataGrid>
                     </Grid>

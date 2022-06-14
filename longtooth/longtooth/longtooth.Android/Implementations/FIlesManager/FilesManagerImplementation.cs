@@ -55,16 +55,19 @@ namespace longtooth.Droid.Implementations.FilesManager
             }
 
             var directories = Directory.GetDirectories(normalizedPath);
-            var files = Directory.GetFiles(normalizedPath);
+            var files = (new DirectoryInfo(normalizedPath)).GetFiles();
 
             var result = directories
-                    .Select(d => new DirectoryContentItemDto(true, d))
-                     .Union(files.Select(f => new DirectoryContentItemDto(false, f)))
+                    .Select(d => new DirectoryContentItemDto(true, d, 0)) // Directories have no size
+                     .Union(files.Select(f => new DirectoryContentItemDto(false, f.Name, f.Length)))
                      .ToList();
 
             // Removing base directory
             result = result
-                .Select(dci => new DirectoryContentItemDto(dci.IsDirectory, dci.Name.Substring(normalizedPath.Length + 1))) // +1 for trailing / of normalized path
+                .Select(dci => new DirectoryContentItemDto(
+                    dci.IsDirectory,
+                    dci.IsDirectory ? dci.Name.Substring(normalizedPath.Length + 1) : dci.Name, // +1 for trailing / of normalized path
+                    dci.Size))
                 .ToList();
 
             // Adding "move up" if not root directory
@@ -80,7 +83,7 @@ namespace longtooth.Droid.Implementations.FilesManager
 
             if (!isMountpoint)
             {
-                result = new List<DirectoryContentItemDto>() { new DirectoryContentItemDto(true, "..") }
+                result = new List<DirectoryContentItemDto>() { new DirectoryContentItemDto(true, "..", 0) }
                     .Union(result)
                     .ToList();
             }
