@@ -24,5 +24,10 @@
         /// Get server directory content
         /// </summary>
         GetDirectoryContent = 3,
+
+        /// <summary>
+        /// Download part of file
+        /// </summary>
+        DownloadFile = 4,
     }
 }

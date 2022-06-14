@@ -18,5 +18,10 @@ namespace longtooth.Common.Abstractions.Interfaces.FilesManager
         /// Returns directory content. Directory name MUST end with slash
         /// </summary>
         Task<DirectoryContentDto> GetDirectoryContentAsync(string serverSidePath);
+
+        /// <summary>
+        /// Downloads part of file
+        /// </summary>
+        Task<DownloadedFileWithContentDto> DownloadFileAsync(string path, ulong start, uint length);
     }
 }

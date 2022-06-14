@@ -27,7 +27,7 @@ namespace longtooth.Protocol.Abstractions.Commands
         [JsonConstructor]
         public GetDirectoryContentCommand(string serverSidePath) : base(CommandType.GetDirectoryContent)
         {
-            ServerSidePath = serverSidePath ?? throw new ArgumentNullException(nameof(serverSidePath));
+            ServerSidePath = serverSidePath;
         }
 
         public GetDirectoryContentCommand(string serverSidePath,

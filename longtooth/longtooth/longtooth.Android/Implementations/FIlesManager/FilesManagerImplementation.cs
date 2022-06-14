@@ -23,7 +23,7 @@ namespace longtooth.Droid.Implementations.FilesManager
 
             _mountpoints = new List<MountpointDto>();
             _mountpoints.Add(new MountpointDto("Downloads", FilesHelper.NormalizePath(@$"{ externalStorageDir }/Download")));
-            _mountpoints.Add(new MountpointDto("DCIM", FilesHelper.NormalizePath(@$"{ externalStorageDir }0/DCIM")));
+            _mountpoints.Add(new MountpointDto("DCIM", FilesHelper.NormalizePath(@$"{ externalStorageDir }/DCIM")));
         }
 
         public async Task<List<MountpointDto>> GetMountpointsAsync()
@@ -113,6 +113,13 @@ namespace longtooth.Droid.Implementations.FilesManager
             }
 
             return isParent;
+        }
+
+        public async Task<DownloadedFileWithContentDto> DownloadFileAsync(string path, ulong start, uint length)
+        {
+            var fileContent = new byte[1024];
+
+            return new DownloadedFileWithContentDto(true, start, length, fileContent.ToList());
         }
     }
 }

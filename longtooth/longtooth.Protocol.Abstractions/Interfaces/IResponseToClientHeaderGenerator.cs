@@ -28,5 +28,10 @@ namespace longtooth.Protocol.Abstractions.Interfaces
         /// Generates directory content response
         /// </summary>
         byte[] GenerateGetDirectoryContentResponse(DirectoryContentDto directoryContent);
+
+        /// <summary>
+        /// Generates response for downloaded file
+        /// </summary>
+        byte[] GenerateDownloadFileResponse(DownloadedFileWithContentDto file);
     }
 }

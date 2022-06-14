@@ -134,6 +134,11 @@ namespace longtooth.Desktop.ViewModels
         /// </summary>
         public ReactiveCommand<Unit, Unit> GetMountpointsAsyncCommand { get; }
 
+        /// <summary>
+        /// Download current file
+        /// </summary>
+        public ReactiveCommand<Unit, Unit> DownloadFileAsyncCommand { get; }
+
         #endregion
 
         /// <summary>
@@ -182,6 +187,7 @@ namespace longtooth.Desktop.ViewModels
             PingAsyncCommand = ReactiveCommand.Create(PingAsync);
             GracefulDisconnectAsyncCommand = ReactiveCommand.Create(GracefulDisconnectAsync);
             GetMountpointsAsyncCommand = ReactiveCommand.Create(GetMountpointsAsync);
+            DownloadFileAsyncCommand = ReactiveCommand.Create(DownloadFileAsync);
 
             #endregion
         }
@@ -250,6 +256,18 @@ namespace longtooth.Desktop.ViewModels
                     }
 
                     DirectoryContent = new ObservableCollection<DirectoryContentItemDto>(getDirectoryContentResponse.DirectoryContent.Items);
+                    break;
+
+                case CommandType.DownloadFile:
+                    var fileResponse = runResult as DownloadFileRunResult;
+                    if (!fileResponse.File.IsSuccessful)
+                    {
+                        await _logger.LogErrorAsync("Failed download file!");
+                        return;
+                    }
+
+                    int a = 10;
+
                     break;
 
                 default:
@@ -334,6 +352,21 @@ namespace longtooth.Desktop.ViewModels
             var getDirectoryContentCommand = _commandGenerator.GenerateGetDirectoryContentCommand(CurrentDirectory);
 
             await PrepareAndSendCommand(getDirectoryContentCommand);
+        }
+
+        /// <summary>
+        /// Download file
+        /// </summary>
+        private async void DownloadFileAsync()
+        {
+            if (CurrentFile.Equals(@"N/A"))
+            {
+                return;
+            }
+
+            var downloadCommand = _commandGenerator.GenerateDownloadCommand(CurrentFile, 0, 1024);
+
+            await PrepareAndSendCommand(downloadCommand);
         }
     }
 }

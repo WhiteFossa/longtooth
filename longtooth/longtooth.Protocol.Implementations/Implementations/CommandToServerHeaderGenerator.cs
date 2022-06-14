@@ -48,5 +48,17 @@ namespace longtooth.Protocol.Implementations.Implementations
 
             return EncodeCommand(getDirectoryContentCommand);
         }
+
+        public byte[] GenerateDownloadCommand(string path, ulong startPosition, uint length)
+        {
+            var downloadFileCommand = new DownloadCommand(path,
+                startPosition,
+                length,
+                null,
+                null,
+                null);
+
+            return EncodeCommand(downloadFileCommand);
+        }
     }
 }

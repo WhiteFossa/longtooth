@@ -27,5 +27,10 @@ namespace longtooth.Protocol.Abstractions.Interfaces
         /// Get server directory content
         /// </summary>
         byte[] GenerateGetDirectoryContentCommand(string serverSidePath);
+
+        /// <summary>
+        /// Generate "download a file" command
+        /// </summary>
+        byte[] GenerateDownloadCommand(string path, ulong startPosition, uint length);
     }
 }

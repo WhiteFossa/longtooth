@@ -32,7 +32,7 @@ namespace longtooth.Protocol.Implementations.Implementations
         {
             var headerSize = BitConverter.ToInt32(message.GetRange(0, sizeof(Int32)).ToArray(), 0);
 
-            if ((headerSize + 2 * sizeof(Int32)) < message.Count)
+            if ((headerSize + 2 * sizeof(Int32)) > message.Count)
             {
                 throw new ArgumentException("Message is too short!", nameof(message));
             }
@@ -63,6 +63,17 @@ namespace longtooth.Protocol.Implementations.Implementations
 
                 case CommandType.GetDirectoryContent:
                     result = await new GetDirectoryContentCommand(string.Empty,
+                        _messagesProcessor,
+                        _responseToClientHeaderGenerator,
+                        _filesManager)
+                        .ParseAsync(stringHeader);
+
+                    break;
+
+                case CommandType.DownloadFile:
+                    result = await new DownloadCommand(string.Empty,
+                        0,
+                        0,
                         _messagesProcessor,
                         _responseToClientHeaderGenerator,
                         _filesManager)

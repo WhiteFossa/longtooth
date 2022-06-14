@@ -46,7 +46,7 @@
             <StackPanel>
                 <TextBlock Text="Experiments" />
 
-                <Grid ColumnDefinitions="Auto, Auto, Auto" RowDefinitions="Auto" >
+                <Grid ColumnDefinitions="Auto, Auto, Auto, Auto" RowDefinitions="Auto" >
 
                     <!-- Ping -->
                     <Button Grid.Column="0" Grid.Row="0" Content="Ping" Command="{ Binding PingAsync }" />
@@ -56,6 +56,9 @@
 
                     <!-- Get mountpoints -->
                     <Button Grid.Column="2" Grid.Row="0" Content="Get mountpoints" Command="{ Binding GetMountpointsAsync }" />
+
+                    <!-- Download file -->
+                    <Button Grid.Column="3" Grid.Row="0" Content="Download file" Command="{ Binding DownloadFileAsync }" />
                 </Grid>
             </StackPanel>
         </Border>
