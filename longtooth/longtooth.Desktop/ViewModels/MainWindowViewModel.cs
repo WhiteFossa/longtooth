@@ -7,6 +7,7 @@ using longtooth.Common.Abstractions.Interfaces.Logger;
 using longtooth.Common.Abstractions.Interfaces.MessagesProcessor;
 using longtooth.Common.Abstractions.Models;
 using longtooth.Common.Implementations.Helpers;
+using longtooth.Desktop.DTOs;
 using longtooth.Protocol.Abstractions.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using ReactiveUI;
@@ -32,7 +33,7 @@ namespace longtooth.Desktop.ViewModels
         private ObservableCollection<MountpointDto> _mountpoints = new ObservableCollection<MountpointDto>();
         private ObservableCollection<DirectoryContentItemDto> _directoryContent = new ObservableCollection<DirectoryContentItemDto>();
         private string _currentDirectory;
-        private string _currentFile;
+        private FileDto _currentFile;
 
         /// <summary>
         /// Server IP
@@ -100,7 +101,7 @@ namespace longtooth.Desktop.ViewModels
         /// <summary>
         /// Current file
         /// </summary>
-        public string CurrentFile
+        public FileDto CurrentFile
         {
             get => _currentFile;
             set => this.RaiseAndSetIfChanged(ref _currentFile, value);
@@ -177,7 +178,11 @@ namespace longtooth.Desktop.ViewModels
 
             _logger.SetLoggingFunction(AddLineToConsole);
             CurrentDirectory = @"N/A";
-            CurrentFile = @"N/A";
+            CurrentFile = new FileDto()
+            {
+                Name = @"N/A",
+                Size = 0
+            };
 
             #endregion
 
@@ -337,7 +342,11 @@ namespace longtooth.Desktop.ViewModels
             if (!directoryItem.IsDirectory)
             {
                 // File
-                CurrentFile = FilesHelper.AppendFilename(CurrentDirectory, directoryItem.Name);
+                CurrentFile = new FileDto()
+                {
+                    Name = FilesHelper.AppendFilename(CurrentDirectory, directoryItem.Name),
+                    Size = directoryItem.Size
+                };
                 return;
             }
 
@@ -366,7 +375,7 @@ namespace longtooth.Desktop.ViewModels
                 return;
             }
 
-            var downloadCommand = _commandGenerator.GenerateDownloadCommand(CurrentFile, 0, 1024);
+            var downloadCommand = _commandGenerator.GenerateDownloadCommand(CurrentFile.Name, 0, (uint)CurrentFile.Size);
 
             await PrepareAndSendCommand(downloadCommand);
         }

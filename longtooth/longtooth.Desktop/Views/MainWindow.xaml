@@ -103,7 +103,7 @@
                         <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="1">
                             <TextBlock Text="Current file: " Classes="VCenterRightMargin" />
 
-                            <TextBlock Text="{ Binding CurrentFile }" Classes="VCenterRightMargin"/>
+                            <TextBlock Text="{ Binding CurrentFile.Name }" Classes="VCenterRightMargin"/>
                         </StackPanel>
                         
                         <!-- Files -->

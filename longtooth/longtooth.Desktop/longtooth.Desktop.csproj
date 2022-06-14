@@ -46,7 +46,6 @@
     <ProjectReference Include="..\longtooth.Protocol.Implementations\longtooth.Protocol.Implementations.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="DTOs\" />
     <Folder Include="Models\" />
   </ItemGroup>
 </Project>
