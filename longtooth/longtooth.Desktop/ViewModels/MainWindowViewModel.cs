@@ -35,6 +35,7 @@ namespace longtooth.Desktop.ViewModels
         private ObservableCollection<DirectoryContentItemDto> _directoryContent = new ObservableCollection<DirectoryContentItemDto>();
         private string _currentDirectory;
         private FileDto _currentFile;
+        private double _progressValue;
 
         /// <summary>
         /// Server IP
@@ -106,6 +107,15 @@ namespace longtooth.Desktop.ViewModels
         {
             get => _currentFile;
             set => this.RaiseAndSetIfChanged(ref _currentFile, value);
+        }
+
+        /// <summary>
+        /// Current progressbar value [0-1]
+        /// </summary>
+        public double ProgressValue
+        {
+            get => _progressValue;
+            set => this.RaiseAndSetIfChanged(ref _progressValue, value);
         }
 
         #endregion
@@ -183,6 +193,8 @@ namespace longtooth.Desktop.ViewModels
             #region Initialization
 
             _logger.SetLoggingFunction(AddLineToConsole);
+
+            ProgressValue = 0;
 
             ServerPort = "5934";
 
@@ -283,11 +295,15 @@ namespace longtooth.Desktop.ViewModels
                     }
 
                     _alreadyDownloaded += (int)fileResponse.File.Length;
+
+                    ProgressValue = _alreadyDownloaded / (double)CurrentFile.Size;
+
                     _downloadedContent.AddRange(fileResponse.File.Content);
 
                     if (_alreadyDownloaded == CurrentFile.Size)
                     {
                         // Done
+                        ProgressValue = 0;
                         File.WriteAllBytes(CurrentFile.Name, _downloadedContent.ToArray());
                     }
                     else
@@ -403,6 +419,8 @@ namespace longtooth.Desktop.ViewModels
             {
                 return;
             }
+
+            ProgressValue = 0;
 
             _alreadyDownloaded = 0;
             _downloadedContent = new List<byte>();

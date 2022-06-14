@@ -2,7 +2,6 @@
 using Avalonia.Markup.Xaml;
 using longtooth.Common.Abstractions.DTOs;
 using longtooth.Desktop.ViewModels;
-using System;
 
 namespace longtooth.Desktop.Views
 {
