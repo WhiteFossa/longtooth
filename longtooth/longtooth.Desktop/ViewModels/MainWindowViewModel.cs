@@ -1,4 +1,6 @@
-﻿using longtooth.Client.Abstractions.DTOs;
+﻿using Avalonia.Controls;
+using HarfBuzzSharp;
+using longtooth.Client.Abstractions.DTOs;
 using longtooth.Client.Abstractions.Interfaces;
 using longtooth.Common.Abstractions.DTOs;
 using longtooth.Common.Abstractions.DTOs.Responses;
@@ -8,6 +10,7 @@ using longtooth.Common.Abstractions.Interfaces.MessagesProcessor;
 using longtooth.Common.Abstractions.Models;
 using longtooth.Common.Implementations.Helpers;
 using longtooth.Desktop.DTOs;
+using longtooth.Protocol.Abstractions.Commands;
 using longtooth.Protocol.Abstractions.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using ReactiveUI;
@@ -15,6 +18,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Reactive;
 using System.Text;
@@ -152,6 +156,11 @@ namespace longtooth.Desktop.ViewModels
         /// </summary>
         public ReactiveCommand<Unit, Unit> DownloadFileAsyncCommand { get; }
 
+        /// <summary>
+        /// Upload a file
+        /// </summary>
+        public ReactiveCommand<Unit, Unit> UploadFileAsyncCommand { get; }
+
         #endregion
 
         /// <summary>
@@ -216,6 +225,7 @@ namespace longtooth.Desktop.ViewModels
             GracefulDisconnectAsyncCommand = ReactiveCommand.Create(GracefulDisconnectAsync);
             GetMountpointsAsyncCommand = ReactiveCommand.Create(GetMountpointsAsync);
             DownloadFileAsyncCommand = ReactiveCommand.Create(DownloadFileAsync);
+            UploadFileAsyncCommand = ReactiveCommand.Create(UploadFileAsync);
 
             #endregion
         }
@@ -318,6 +328,20 @@ namespace longtooth.Desktop.ViewModels
                         await PrepareAndSendCommand(_commandGenerator.GenerateDownloadCommand(CurrentFile.FullPath,
                             (ulong)_alreadyDownloaded, (uint)chunkSize));
                     }
+
+                    break;
+
+                case CommandType.CreateFile:
+                    var createFileResponse = runResult as CreateFileRunResult;
+                    if (!createFileResponse.CreateFileResult.IsSuccessful)
+                    {
+                        await _logger.LogErrorAsync("Failed to create file!");
+                        return;
+                    }
+
+                    await _logger.LogInfoAsync("File created, going to upload...");
+
+                    // Uploading file
 
                     break;
 
@@ -439,6 +463,34 @@ namespace longtooth.Desktop.ViewModels
             }
 
             await PrepareAndSendCommand(downloadCommand);
+        }
+
+        /// <summary>
+        /// Upload file
+        /// </summary>
+        private async void UploadFileAsync()
+        {
+            var dialog = new OpenFileDialog();
+            dialog.Filters.Add(new FileDialogFilter() { Name = "Any file", Extensions = { "*" } });
+            dialog.AllowMultiple = false;
+
+            var dialogResult = await dialog.ShowAsync(Program.GetMainWindow());
+
+            if (dialogResult == null)
+            {
+                return;
+            }
+
+            var pathToFile = dialogResult.FirstOrDefault();
+            var filename = Path.GetFileName(pathToFile);
+
+            var remotePath = CurrentDirectory + $@"/{ filename }";
+
+            var content = File.ReadAllBytes(pathToFile);
+
+            // TODO: Implement chunks
+            var createCommand = _commandGenerator.CreateFileCommand(remotePath);
+            await PrepareAndSendCommand(createCommand);
         }
     }
 }

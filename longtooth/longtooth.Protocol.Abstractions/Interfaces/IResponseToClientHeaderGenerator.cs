@@ -33,5 +33,10 @@ namespace longtooth.Protocol.Abstractions.Interfaces
         /// Generates response for downloaded file
         /// </summary>
         byte[] GenerateDownloadFileResponse(DownloadedFileWithContentDto file);
+
+        /// <summary>
+        /// Generate response for file creation
+        /// </summary>
+        byte[] GenerateCreateFileResponse(CreateFileResultDto fileCreationResult);
     }
 }

@@ -23,5 +23,10 @@ namespace longtooth.Common.Abstractions.Interfaces.FilesManager
         /// Downloads part of file
         /// </summary>
         Task<DownloadedFileWithContentDto> DownloadFileAsync(string path, ulong start, uint length);
+
+        /// <summary>
+        /// Create new empty file
+        /// </summary>
+        Task<CreateFileResultDto> CreateNewFileAsync(string newFilePath);
     }
 }

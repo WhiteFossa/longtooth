@@ -46,7 +46,7 @@
             <StackPanel>
                 <TextBlock Text="Experiments" />
 
-                <Grid ColumnDefinitions="Auto, Auto, Auto, Auto" RowDefinitions="Auto" >
+                <Grid ColumnDefinitions="Auto, Auto, Auto, Auto, Auto" RowDefinitions="Auto" >
 
                     <!-- Ping -->
                     <Button Grid.Column="0" Grid.Row="0" Content="Ping" Command="{ Binding PingAsync }" />
@@ -59,6 +59,9 @@
 
                     <!-- Download file -->
                     <Button Grid.Column="3" Grid.Row="0" Content="Download file" Command="{ Binding DownloadFileAsync }" />
+
+                    <!-- Upload new file -->
+                    <Button Grid.Column="4" Grid.Row="0" Content="Upload file" Command="{ Binding UploadFileAsync }" />
                 </Grid>
             </StackPanel>
         </Border>

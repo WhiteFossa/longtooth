@@ -1,4 +1,6 @@
 ﻿using Avalonia;
+using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Controls;
 using longtooth.Client.Abstractions.Interfaces;
 using longtooth.Client.Implementations.Business;
 using longtooth.Common.Abstractions.Interfaces.Logger;
@@ -53,6 +55,16 @@ namespace longtooth.Desktop
             services.AddSingleton<ICommandToServerHeaderGenerator, CommandToServerHeaderGenerator>();
             services.AddSingleton<IClientSideMessagesProcessor, ClientSideMessagesProcessor>();
             return services;
+        }
+
+        // Getting main window
+        public static Window GetMainWindow()
+        {
+            if (Application.Current.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktopLifetime)
+            {
+                return desktopLifetime.MainWindow;
+            }
+            return null;
         }
     }
 }

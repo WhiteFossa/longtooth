@@ -1,7 +1,4 @@
-﻿using longtooth.Common.Abstractions.DTOs;
-using System.Collections.Generic;
-
-namespace longtooth.Protocol.Abstractions.Interfaces
+﻿namespace longtooth.Protocol.Abstractions.Interfaces
 {
     /// <summary>
     /// Interface to generate commands to server
@@ -32,5 +29,10 @@ namespace longtooth.Protocol.Abstractions.Interfaces
         /// Generate "download a file" command
         /// </summary>
         byte[] GenerateDownloadCommand(string path, ulong startPosition, uint length);
+
+        /// <summary>
+        /// Generate "create a file" command
+        /// </summary>
+        byte[] CreateFileCommand(string path);
     }
 }

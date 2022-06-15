@@ -64,5 +64,12 @@ namespace longtooth.Protocol.Implementations.Implementations
 
             return EncodeResponse(downloadFileResponse, downloadFileResponse.FileContent.ToArray());
         }
+
+        public byte[] GenerateCreateFileResponse(CreateFileResultDto fileCreationResult)
+        {
+            var createFileResponse = new CreateFileResponse(fileCreationResult);
+
+            return EncodeResponse(createFileResponse, null);
+        }
     }
 }

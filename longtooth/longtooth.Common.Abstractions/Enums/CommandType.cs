@@ -29,5 +29,10 @@
         /// Download part of file
         /// </summary>
         DownloadFile = 4,
+
+        /// <summary>
+        /// Create new file
+        /// </summary>
+        CreateFile = 5,
     }
 }

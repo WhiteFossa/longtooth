@@ -144,5 +144,11 @@ namespace longtooth.Droid.Implementations.FilesManager
 
             return new DownloadedFileWithContentDto(true, start, length, buffer.ToList());
         }
+
+        public async Task<CreateFileResultDto> CreateNewFileAsync(string newFilePath)
+        {
+            // TODO: Implement me
+            return new CreateFileResultDto(true);
+        }
     }
 }

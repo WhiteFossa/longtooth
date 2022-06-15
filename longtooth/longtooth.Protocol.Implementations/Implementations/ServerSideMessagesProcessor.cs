@@ -81,6 +81,15 @@ namespace longtooth.Protocol.Implementations.Implementations
 
                     break;
 
+                case CommandType.CreateFile:
+                    result = await new CreateFileCommand(string.Empty,
+                        _messagesProcessor,
+                        _responseToClientHeaderGenerator,
+                        _filesManager)
+                        .ParseAsync(stringHeader);
+
+                    break;
+
                 default:
                     throw new InvalidOperationException($"Unknown command type: { header.Command }");
             }

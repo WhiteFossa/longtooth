@@ -60,5 +60,15 @@ namespace longtooth.Protocol.Implementations.Implementations
 
             return EncodeCommand(downloadFileCommand);
         }
+
+        public byte[] CreateFileCommand(string path)
+        {
+            var createFileCommand = new CreateFileCommand(path,
+                null,
+                null,
+                null);
+
+            return EncodeCommand(createFileCommand);
+        }
     }
 }
