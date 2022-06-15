@@ -1,5 +1,4 @@
 ﻿using Avalonia.Controls;
-using HarfBuzzSharp;
 using longtooth.Client.Abstractions.DTOs;
 using longtooth.Client.Abstractions.Interfaces;
 using longtooth.Common.Abstractions.DTOs;
@@ -10,7 +9,6 @@ using longtooth.Common.Abstractions.Interfaces.MessagesProcessor;
 using longtooth.Common.Abstractions.Models;
 using longtooth.Common.Implementations.Helpers;
 using longtooth.Desktop.DTOs;
-using longtooth.Protocol.Abstractions.Commands;
 using longtooth.Protocol.Abstractions.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using ReactiveUI;
@@ -21,7 +19,6 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Reactive;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace longtooth.Desktop.ViewModels
@@ -175,10 +172,13 @@ namespace longtooth.Desktop.ViewModels
         private readonly IClientSideMessagesProcessor _clientSideMessagesProcessor;
 
         private const int DownloadChunkSize = 1000000;
-
         private int _alreadyDownloaded;
-
         private List<byte> _downloadedContent;
+
+        private const int UploadChunkSize = 1000000;
+        private string _pathToUpload;
+        private int _alreadyUploaded;
+        private List<byte> _contentToUpload;
 
         public MainWindowViewModel(MainModel model) : base()
         {
@@ -342,6 +342,49 @@ namespace longtooth.Desktop.ViewModels
                     await _logger.LogInfoAsync("File created, going to upload...");
 
                     // Uploading file
+                    _alreadyUploaded = 0;
+                    ProgressValue = 0;
+                    if (_contentToUpload.Count > UploadChunkSize)
+                    {
+                        // Multichunk
+                        var uploadBuffer = _contentToUpload.GetRange(0, UploadChunkSize);
+                        await PrepareAndSendCommand(_commandGenerator.UpdateFileCommand(_pathToUpload, 0, uploadBuffer.ToArray()));
+                    }
+                    else
+                    {
+                        // Single chunk
+                        await PrepareAndSendCommand(_commandGenerator.UpdateFileCommand(_pathToUpload, 0, _contentToUpload.ToArray()));
+                    }
+
+                    break;
+
+                case CommandType.UpdateFile:
+                    var updateFileResponse = runResult as UpdateFileRunResult;
+                    if (!updateFileResponse.UpdateFileResult.IsSuccessful)
+                    {
+                        await _logger.LogErrorAsync("Failed to update file!");
+                        return;
+                    }
+
+                    _alreadyUploaded += (int)updateFileResponse.UpdateFileResult.BytesWritten;
+                    ProgressValue = _alreadyUploaded / (double)_contentToUpload.Count;
+
+                    if (_alreadyUploaded == _contentToUpload.Count)
+                    {
+                        // Done
+                        ProgressValue = 0;
+                    }
+                    else
+                    {
+                        var uploadBytesCount = _contentToUpload.Count - _alreadyUploaded;
+                        if (uploadBytesCount > UploadChunkSize)
+                        {
+                            uploadBytesCount = UploadChunkSize;
+                        }
+
+                        var uploadBuffer = _contentToUpload.GetRange(_alreadyUploaded, uploadBytesCount);
+                        await PrepareAndSendCommand(_commandGenerator.UpdateFileCommand(_pathToUpload, (ulong)_alreadyUploaded, uploadBuffer.ToArray()));
+                    }
 
                     break;
 
@@ -488,7 +531,10 @@ namespace longtooth.Desktop.ViewModels
 
             var content = File.ReadAllBytes(pathToFile);
 
-            // TODO: Implement chunks
+            _alreadyUploaded = 0;
+            _pathToUpload = remotePath;
+            _contentToUpload = content.ToList<byte>();
+
             var createCommand = _commandGenerator.CreateFileCommand(remotePath);
             await PrepareAndSendCommand(createCommand);
         }

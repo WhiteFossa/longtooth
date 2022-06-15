@@ -42,22 +42,25 @@ namespace longtooth.Protocol.Implementations.Implementations
 
             var header = JsonSerializer.Deserialize<CommandHeader>(stringHeader); // Initially to generic header
 
+            var payloadSize = BitConverter.ToInt32(message.GetRange(4 + headerSize, 4).ToArray());
+            var payload = message.GetRange(8 + headerSize, message.Count - 8 - headerSize);
+
             ResponseDto result;
             switch (header.Command)
             {
                 case CommandType.Ping:
-                    result = new PingCommand(_messagesProcessor, _responseToClientHeaderGenerator).Parse(stringHeader);
+                    result = new PingCommand(_messagesProcessor, _responseToClientHeaderGenerator).Parse(stringHeader, payload);
 
                     break;
 
                 case CommandType.Exit:
-                    result = new ExitCommand(_messagesProcessor, _responseToClientHeaderGenerator).Parse(stringHeader);
+                    result = new ExitCommand(_messagesProcessor, _responseToClientHeaderGenerator).Parse(stringHeader, payload);
 
                     break;
 
                 case CommandType.GetMountpoints:
                     result = await new GetMountpointsCommand(_messagesProcessor, _responseToClientHeaderGenerator, _filesManager)
-                        .ParseAsync(stringHeader);
+                        .ParseAsync(stringHeader, payload);
 
                     break;
 
@@ -66,7 +69,7 @@ namespace longtooth.Protocol.Implementations.Implementations
                         _messagesProcessor,
                         _responseToClientHeaderGenerator,
                         _filesManager)
-                        .ParseAsync(stringHeader);
+                        .ParseAsync(stringHeader, payload);
 
                     break;
 
@@ -77,7 +80,7 @@ namespace longtooth.Protocol.Implementations.Implementations
                         _messagesProcessor,
                         _responseToClientHeaderGenerator,
                         _filesManager)
-                        .ParseAsync(stringHeader);
+                        .ParseAsync(stringHeader, payload);
 
                     break;
 
@@ -86,7 +89,18 @@ namespace longtooth.Protocol.Implementations.Implementations
                         _messagesProcessor,
                         _responseToClientHeaderGenerator,
                         _filesManager)
-                        .ParseAsync(stringHeader);
+                        .ParseAsync(stringHeader, payload);
+
+                    break;
+
+                case CommandType.UpdateFile:
+                    result = await new UpdateFileCommand(String.Empty,
+                        0,
+                        null,
+                        _messagesProcessor,
+                        _responseToClientHeaderGenerator,
+                        _filesManager)
+                        .ParseAsync(stringHeader, payload);
 
                     break;
 

@@ -152,7 +152,10 @@ namespace longtooth.Droid.Implementations.FilesManager
                 return new CreateFileResultDto(false);
             }
 
-            File.Create(newFilePath);
+            using (var stream = File.Create(newFilePath))
+            {
+
+            }
 
             return new CreateFileResultDto(true);
         }
@@ -171,6 +174,40 @@ namespace longtooth.Droid.Implementations.FilesManager
             }
 
             return isChildDirectory;
+        }
+
+        public async Task<UpdateFileResultDto> UpdateFileAsync(string path, ulong start, List<byte> data)
+        {
+            _ = path ?? throw new ArgumentNullException(nameof(path));
+
+            var targetDirectory = Path.GetDirectoryName(path);
+
+            if (!IsDirectoryBelongsToMountpoint(targetDirectory))
+            {
+                // Non-exported directory
+                return new UpdateFileResultDto(false, 0);
+            }
+
+            if (!File.Exists(path))
+            {
+                // File not exist
+                return new UpdateFileResultDto(false, 0);
+            }
+
+            using (var stream = new FileStream(path, FileMode.Open))
+            {
+                var newPosition = stream.Seek((long)start, SeekOrigin.Begin);
+
+                if (newPosition != (long)start)
+                {
+                    // Position is out of file
+                    return new UpdateFileResultDto(false, 0);
+                }
+
+                stream.Write(data.ToArray(), 0, data.Count);
+            }
+
+            return new UpdateFileResultDto(true, (uint)data.Count());
         }
     }
 }

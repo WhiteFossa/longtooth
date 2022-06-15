@@ -71,5 +71,12 @@ namespace longtooth.Protocol.Implementations.Implementations
 
             return EncodeResponse(createFileResponse, null);
         }
+
+        public byte[] GenerateUpdateFileResponse(UpdateFileResultDto updateFileResult)
+        {
+            var updateFileResponse = new UpdateFileResponse(updateFileResult);
+
+            return EncodeResponse(updateFileResponse, null);
+        }
     }
 }

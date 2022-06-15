@@ -34,5 +34,10 @@
         /// Generate "create a file" command
         /// </summary>
         byte[] CreateFileCommand(string path);
+
+        /// <summary>
+        /// Generate "update a file" command
+        /// </summary>
+        byte[] UpdateFileCommand(string path, ulong startPosition, byte[] dataToWrite);
     }
 }

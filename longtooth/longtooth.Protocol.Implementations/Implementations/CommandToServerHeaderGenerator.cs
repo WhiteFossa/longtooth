@@ -1,6 +1,8 @@
 ﻿using longtooth.Protocol.Abstractions.Commands;
 using longtooth.Protocol.Abstractions.DataStructures;
 using longtooth.Protocol.Abstractions.Interfaces;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Text.Json;
 
@@ -8,12 +10,12 @@ namespace longtooth.Protocol.Implementations.Implementations
 {
     public class CommandToServerHeaderGenerator : ICommandToServerHeaderGenerator
     {
-        private byte[] EncodeCommand(object command)
+        private byte[] EncodeCommand(object command, byte[] data)
         {
             var header = JsonSerializer.Serialize(command);
             var serializedHeader = Encoding.UTF8.GetBytes(header);
 
-            var message = new Message(serializedHeader, null);
+            var message = new Message(serializedHeader, data);
 
             return message.ToDataPacket();
         }
@@ -22,21 +24,21 @@ namespace longtooth.Protocol.Implementations.Implementations
         {
             var pingCommand = new PingCommand(null, null);
 
-            return EncodeCommand(pingCommand);
+            return EncodeCommand(pingCommand, null);
         }
 
         public byte[] GenerateExitCommand()
         {
             var exitCommand = new ExitCommand(null, null);
 
-            return EncodeCommand(exitCommand);
+            return EncodeCommand(exitCommand, null);
         }
 
         public byte[] GenerateGetMountpointsCommand()
         {
             var getMountpointsCommand = new GetMountpointsCommand(null, null, null);
 
-            return EncodeCommand(getMountpointsCommand);
+            return EncodeCommand(getMountpointsCommand, null);
         }
 
         public byte[] GenerateGetDirectoryContentCommand(string serverSidePath)
@@ -46,7 +48,7 @@ namespace longtooth.Protocol.Implementations.Implementations
                 null,
                 null);
 
-            return EncodeCommand(getDirectoryContentCommand);
+            return EncodeCommand(getDirectoryContentCommand, null);
         }
 
         public byte[] GenerateDownloadCommand(string path, ulong startPosition, uint length)
@@ -58,7 +60,7 @@ namespace longtooth.Protocol.Implementations.Implementations
                 null,
                 null);
 
-            return EncodeCommand(downloadFileCommand);
+            return EncodeCommand(downloadFileCommand, null);
         }
 
         public byte[] CreateFileCommand(string path)
@@ -68,7 +70,19 @@ namespace longtooth.Protocol.Implementations.Implementations
                 null,
                 null);
 
-            return EncodeCommand(createFileCommand);
+            return EncodeCommand(createFileCommand, null);
+        }
+
+        public byte[] UpdateFileCommand(string path, ulong startPosition, byte[] dataToWrite)
+        {
+            var updateFileCommand = new UpdateFileCommand(path,
+                startPosition,
+                dataToWrite.ToList(),
+                null,
+                null,
+                null);
+
+            return EncodeCommand(updateFileCommand, updateFileCommand.Content.ToArray());
         }
     }
 }

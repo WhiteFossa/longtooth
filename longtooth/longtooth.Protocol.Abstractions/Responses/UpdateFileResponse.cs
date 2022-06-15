@@ -10,29 +10,29 @@ using System.Threading.Tasks;
 
 namespace longtooth.Protocol.Abstractions.Responses
 {
-    public class CreateFileResponse : ResponseHeader
+    public class UpdateFileResponse : ResponseHeader
     {
         /// <summary>
         /// Result
         /// </summary>
-        [JsonPropertyName("CreateFileResult")]
-        public CreateFileResultDto CreateFileResult { get; set; }
+        [JsonPropertyName("UpdateFileResult")]
+        public UpdateFileResultDto UpdateFileResult { get; set; }
 
-        public CreateFileResponse(CreateFileResultDto createFileResult) : base(CommandType.CreateFile)
+        public UpdateFileResponse(UpdateFileResultDto updateFileResult) : base(CommandType.UpdateFile)
         {
-            CreateFileResult = createFileResult;
+            UpdateFileResult = updateFileResult;
         }
 
-        public static CreateFileResponse Parse(string header, List<byte> payload)
+        public static UpdateFileResponse Parse(string header, List<byte> payload)
         {
             _ = header ?? throw new ArgumentNullException(nameof(header));
 
-            return JsonSerializer.Deserialize<CreateFileResponse>(header);
+            return JsonSerializer.Deserialize<UpdateFileResponse>(header);
         }
 
         public async override Task<ResponseRunResult> RunAsync()
         {
-            return new CreateFileRunResult(CreateFileResult);
+            return new UpdateFileRunResult(UpdateFileResult);
         }
     }
 }

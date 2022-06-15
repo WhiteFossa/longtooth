@@ -49,6 +49,9 @@ namespace longtooth.Protocol.Implementations.Implementations
                 case CommandType.CreateFile:
                     return CreateFileResponse.Parse(stringHeader, payload);
 
+                case CommandType.UpdateFile:
+                    return UpdateFileResponse.Parse(stringHeader, payload);
+
                 default:
                     throw new InvalidOperationException($"Response to unknown command. Type: {header.Command}");
             }

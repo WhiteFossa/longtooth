@@ -43,7 +43,7 @@ namespace longtooth.Protocol.Abstractions.Commands
             _filesManager = filesManager;
         }
 
-        public async Task<ResponseDto> ParseAsync(string header)
+        public async Task<ResponseDto> ParseAsync(string header, List<byte> payload)
         {
             // Do work here
             var parsedHeader = JsonSerializer.Deserialize<CreateFileCommand>(header);

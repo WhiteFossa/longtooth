@@ -34,5 +34,10 @@
         /// Create new file
         /// </summary>
         CreateFile = 5,
+
+        /// <summary>
+        /// Update file content
+        /// </summary>
+        UpdateFile = 6,
     }
 }

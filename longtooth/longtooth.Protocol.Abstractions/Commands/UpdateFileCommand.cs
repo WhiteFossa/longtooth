@@ -1,4 +1,5 @@
-﻿using longtooth.Common.Abstractions.Enums;
+﻿using longtooth.Common.Abstractions.DTOs;
+using longtooth.Common.Abstractions.Enums;
 using longtooth.Common.Abstractions.Interfaces.FilesManager;
 using longtooth.Common.Abstractions.Interfaces.MessagesProcessor;
 using longtooth.Protocol.Abstractions.DataStructures;
@@ -13,51 +14,48 @@ using System.Threading.Tasks;
 
 namespace longtooth.Protocol.Abstractions.Commands
 {
-    /// <summary>
-    /// Command to download part of file
-    /// </summary>
-    public class DownloadCommand : CommandHeader
+    public class UpdateFileCommand : CommandHeader
     {
         /// <summary>
-        /// File to download
+        /// File to update
         /// </summary>
         [JsonPropertyName("FilePath")]
         public string FilePath { get; private set; }
 
         /// <summary>
-        /// Position in file to start reading
+        /// Position in file to start where update will start
         /// </summary>
         [JsonPropertyName("StartPosition")]
         public ulong StartPosition { get; private set; }
 
         /// <summary>
-        /// Read this amount of bytes
+        /// Update content
         /// </summary>
-        [JsonPropertyName("ReadLength")]
-        public uint ReadLength { get; private set; }
+        [JsonIgnore]
+        public List<byte> Content { get; private set; }
 
         private readonly IMessagesProcessor _messagesProcessor;
         private readonly IResponseToClientHeaderGenerator _responseToClientHeaderGenerator;
         private readonly IFilesManager _filesManager;
 
         [JsonConstructor]
-        public DownloadCommand(string filePath, ulong startPosition, uint readLength) : base(CommandType.DownloadFile)
+        public UpdateFileCommand(string filePath, ulong startPosition) : base(CommandType.UpdateFile)
         {
             FilePath = filePath ?? throw new ArgumentNullException(nameof(filePath));
             StartPosition = startPosition;
-            ReadLength = readLength;
+            Content = null;
         }
 
-        public DownloadCommand(string filePath,
+        public UpdateFileCommand(string filePath,
             ulong startPosition,
-            uint readLength,
+            List<byte> content,
             IMessagesProcessor messagesProcessor,
             IResponseToClientHeaderGenerator responseToClientHeaderGenerator,
-            IFilesManager filesManager) : base(CommandType.DownloadFile)
+            IFilesManager filesManager) : base(CommandType.UpdateFile)
         {
-            FilePath = filePath ?? throw new ArgumentNullException(nameof(filePath)); ;
+            FilePath = filePath;
             StartPosition = startPosition;
-            ReadLength = readLength;
+            Content = content;
 
             _messagesProcessor = messagesProcessor;
             _responseToClientHeaderGenerator = responseToClientHeaderGenerator;
@@ -67,16 +65,15 @@ namespace longtooth.Protocol.Abstractions.Commands
         public async Task<ResponseDto> ParseAsync(string header, List<byte> payload)
         {
             // Do work here
-            var parsedHeader = JsonSerializer.Deserialize<DownloadCommand>(header);
+            var parsedHeader = JsonSerializer.Deserialize<UpdateFileCommand>(header);
 
-            var fileData = await _filesManager.DownloadFileAsync(parsedHeader.FilePath, parsedHeader.StartPosition, parsedHeader.ReadLength);
+            var updateResult = await _filesManager.UpdateFileAsync(parsedHeader.FilePath, parsedHeader.StartPosition, payload);
 
-            var response = _responseToClientHeaderGenerator.GenerateDownloadFileResponse(fileData);
+            var response = _responseToClientHeaderGenerator.GenerateUpdateFileResponse(updateResult);
 
             var responseMessage = _messagesProcessor.PrepareMessageToSend(new List<byte>(response));
 
             return new ResponseDto(true, false, responseMessage);
         }
-
     }
 }

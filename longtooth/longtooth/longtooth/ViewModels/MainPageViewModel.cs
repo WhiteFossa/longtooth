@@ -85,7 +85,7 @@ namespace longtooth.ViewModels
             }
             catch(Exception ex)
             {
-                int a = 10;
+                // TODO: Handle me
             }
         }
 

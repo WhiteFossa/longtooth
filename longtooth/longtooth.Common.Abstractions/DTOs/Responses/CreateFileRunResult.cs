@@ -6,7 +6,7 @@ namespace longtooth.Common.Abstractions.DTOs.Responses
     public class CreateFileRunResult : ResponseRunResult
     {
         /// <summary>
-        /// Is successful?
+        /// Result
         /// </summary>
         [JsonPropertyName("CreateFileResult")]
         public CreateFileResultDto CreateFileResult { get; set; }
