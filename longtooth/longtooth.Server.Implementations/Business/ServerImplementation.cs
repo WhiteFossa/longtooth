@@ -22,19 +22,29 @@ namespace longtooth.Server.Implementations.Business
         /// </summary>
         private const int ListenQueueSize = 10;
 
-        // Thread signal
-        private ManualResetEvent _allDone = new ManualResetEvent(false);
-
         private OnNewDataReadDelegate _readCallback;
         private Socket _socket;
         private IPEndPoint _endpoint;
         private Thread _serverThread;
 
+        /// <summary>
+        /// True if we need to stop server
+        /// </summary>
         private bool _needToStopServer;
+
+        /// <summary>
+        /// True, if server is running
+        /// </summary>
+        private bool _isRunning;
 
         public async Task StartAsync(OnNewDataReadDelegate readCallback)
         {
             _readCallback = readCallback ?? throw new ArgumentNullException(nameof(readCallback));
+
+            if (_isRunning)
+            {
+                throw new InvalidOperationException("Server already running!");
+            }
 
             var listenIp = IPAddress.Any;
             _endpoint = new IPEndPoint(listenIp, ListenPort);
@@ -56,12 +66,9 @@ namespace longtooth.Server.Implementations.Business
             {
                 _socket.Bind(_endpoint);
                 _socket.Listen(ListenQueueSize);
-
-                _allDone.Reset();
-
                 _socket.BeginAccept(new AsyncCallback(AcceptCallback), _socket);
 
-                _allDone.WaitOne();
+                _isRunning = true;
             }
             catch (Exception ex)
             {
@@ -74,11 +81,17 @@ namespace longtooth.Server.Implementations.Business
         private void AcceptCallback(IAsyncResult result)
         {
             var socket = result.AsyncState as Socket;
+
+            if (_needToStopServer)
+            {
+                // Server was stopped while we waited for connection
+                KillServer();
+                return;
+            }
+
             var connectionSocket = socket.EndAccept(result);
             connectionSocket.ReceiveBufferSize = Constants.MaxPacketSize;
             connectionSocket.SendBufferSize = Constants.MaxPacketSize;
-
-            _allDone.Set();
 
             // Waiting for data from client
             var connectionState = new ConnectionState(connectionSocket);
@@ -97,54 +110,64 @@ namespace longtooth.Server.Implementations.Business
 
         public async void ReadCallbackAsync(IAsyncResult result)
         {
-            var connectionState = result.AsyncState as ConnectionState;
-            int bytesRead = connectionState.ClientSocket.EndReceive(result);
-
-            if (bytesRead > 0)
+            try
             {
-                var responseToClient = await _readCallback(new List<byte>(connectionState.ReadBuffer).GetRange(0, bytesRead));
+                var connectionState = result.AsyncState as ConnectionState;
+                int bytesRead = connectionState.ClientSocket.EndReceive(result);
 
-                // Sending answer if needed
-                if (responseToClient.NeedToSendResponse)
+                if (bytesRead > 0)
                 {
-                    connectionState.WriteAmount = responseToClient.Response.Count;
-                    connectionState.WriteBufferOffset = 0;
+                    var responseToClient = await _readCallback(new List<byte>(connectionState.ReadBuffer).GetRange(0, bytesRead));
 
-                    Array.Copy(responseToClient.Response.ToArray(), connectionState.WriteBuffer, connectionState.WriteAmount);
+                    // Sending answer if needed
+                    if (responseToClient.NeedToSendResponse)
+                    {
+                        connectionState.WriteAmount = responseToClient.Response.Count;
+                        connectionState.WriteBufferOffset = 0;
 
-                    connectionState.ClientSocket.BeginSend(
-                        connectionState.WriteBuffer,
+                        Array.Copy(responseToClient.Response.ToArray(), connectionState.WriteBuffer, connectionState.WriteAmount);
+
+                        connectionState.ClientSocket.BeginSend(
+                            connectionState.WriteBuffer,
+                            0,
+                            connectionState.WriteAmount,
+                            0,
+                            new AsyncCallback(SendCallback),
+                            connectionState);
+                    }
+
+                    connectionState.IsShutdownRequired = responseToClient.NeedToClose;
+
+                    if (responseToClient.NeedToClose)
+                    {
+                        connectionState.ClientSocket.Shutdown(SocketShutdown.Both);
+                        connectionState.ClientSocket.Close();
+                        return;
+                    }
+
+                    if (_needToStopServer)
+                    {
+                        KillServer();
+                        return;
+                    }
+
+                    // Continuing to listen
+                    connectionState.ClientSocket.BeginReceive(
+                        connectionState.ReadBuffer,
                         0,
-                        connectionState.WriteAmount,
+                        connectionState.ReadBuffer.Length,
                         0,
-                        new AsyncCallback(SendCallback),
+                        new AsyncCallback(ReadCallbackAsync),
                         connectionState);
                 }
-
-                connectionState.IsShutdownRequired = responseToClient.NeedToClose;
-
-                if (responseToClient.NeedToClose)
-                {
-                    connectionState.ClientSocket.Shutdown(SocketShutdown.Both);
-                    connectionState.ClientSocket.Close();
-                    return;
-                }
-
-                if (_needToStopServer)
-                {
-                    _socket.Close();
-                    _needToStopServer = false;
-                    return;
-                }
-
-                // Continuing to listen
-                connectionState.ClientSocket.BeginReceive(
-                    connectionState.ReadBuffer,
-                    0,
-                    connectionState.ReadBuffer.Length,
-                    0,
-                    new AsyncCallback(ReadCallbackAsync),
-                    connectionState);
+            }
+            catch(SocketException socketException)
+            {
+                // Client abruptly closed connection, we can do nothing with it
+            }
+            catch (ObjectDisposedException disposedException)
+            {
+                // Swallowing it, we can do nothing
             }
         }
 
@@ -153,36 +176,50 @@ namespace longtooth.Server.Implementations.Business
         /// </summary>
         private void SendCallback(IAsyncResult result)
         {
-            var connectionState = result.AsyncState as ConnectionState;
-
-            var sentAmount = connectionState.ClientSocket.EndSend(result);
-
-            connectionState.WriteBufferOffset += sentAmount;
-
-            if (connectionState.WriteBufferOffset < connectionState.WriteAmount)
+            try
             {
-                // Continuing transmission, we was unable to send data via one call
-                connectionState.ClientSocket.BeginSend(
-                        connectionState.WriteBuffer,
-                        connectionState.WriteBufferOffset,
-                        connectionState.WriteAmount,
-                        0,
-                        new AsyncCallback(SendCallback),
-                        connectionState);
-            }
-            else
-            {
-                // Current transmission completed
-                if (connectionState.IsShutdownRequired)
+                var connectionState = result.AsyncState as ConnectionState;
+
+                var sentAmount = connectionState.ClientSocket.EndSend(result);
+
+                connectionState.WriteBufferOffset += sentAmount;
+
+                if (connectionState.WriteBufferOffset < connectionState.WriteAmount)
                 {
-                    ShutdownClientConnection(connectionState.ClientSocket);
+                    // Continuing transmission, we was unable to send data via one call
+                    connectionState.ClientSocket.BeginSend(
+                            connectionState.WriteBuffer,
+                            connectionState.WriteBufferOffset,
+                            connectionState.WriteAmount,
+                            0,
+                            new AsyncCallback(SendCallback),
+                            connectionState);
                 }
+                else
+                {
+                    // Current transmission completed
+                    if (connectionState.IsShutdownRequired)
+                    {
+                        ShutdownClientConnection(connectionState.ClientSocket);
+                    }
+                }
+            }
+            catch (SocketException socketException)
+            {
+                // Client abruptly closed connection, we can do nothing with it
+            }
+            catch (ObjectDisposedException disposedException)
+            {
+                // Swallowing it, we can do nothing
             }
         }
 
         public void Stop()
         {
-            _ = _serverThread ?? throw new InvalidOperationException("Server isn't running");
+            if (!_isRunning)
+            {
+                throw new InvalidOperationException("Server isn't running");
+            }
 
             _needToStopServer = true;
         }
@@ -191,6 +228,20 @@ namespace longtooth.Server.Implementations.Business
         {
             clientSocket.Shutdown(SocketShutdown.Both);
             clientSocket.Close();
+        }
+
+        private void KillServer()
+        {
+            _ = _socket ?? throw new InvalidOperationException("Server isn't running, main socket is null!");
+
+            if (!_isRunning)
+            {
+                throw new InvalidOperationException("Server isn't running, _isRunning flag is not set!");
+            }
+
+            _socket.Close();
+            _isRunning = false;
+            _needToStopServer = false;
         }
     }
 }

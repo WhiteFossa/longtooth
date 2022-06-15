@@ -6,6 +6,7 @@ using longtooth.Models;
 using longtooth.Protocol.Abstractions.Interfaces;
 using longtooth.Server.Abstractions.DTOs;
 using longtooth.Server.Abstractions.Interfaces;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -78,7 +79,14 @@ namespace longtooth.ViewModels
                 await UserDialogs.Instance.AlertAsync("Storage permission is required!", "Error", "OK");
             }
 
-            await _server.StartAsync(OnNewDataReadFromClientAsync);
+            try
+            {
+                await _server.StartAsync(OnNewDataReadFromClientAsync);
+            }
+            catch(Exception ex)
+            {
+                int a = 10;
+            }
         }
 
         /// <summary>
