@@ -37,18 +37,7 @@ namespace longtooth.Droid.Implementations.FilesManager
 
             var normalizedPath = FilesHelper.NormalizePath(serverSidePath);
 
-            // Is directory belongs to one of mountpoints?
-            var isChildDirectory = false;
-            foreach (var mountpoint in _mountpoints)
-            {
-                if (IsDirectoryInsideAnotherOrTheSame(mountpoint.ServerSidePath, normalizedPath))
-                {
-                    isChildDirectory = true;
-                    break;
-                }
-            }
-
-            if (!isChildDirectory)
+            if (!IsDirectoryBelongsToMountpoint(normalizedPath))
             {
                 // Non-exported directory
                 return new DirectoryContentDto(false, new List<DirectoryContentItemDto>());
@@ -147,8 +136,41 @@ namespace longtooth.Droid.Implementations.FilesManager
 
         public async Task<CreateFileResultDto> CreateNewFileAsync(string newFilePath)
         {
-            // TODO: Implement me
+            _ = newFilePath ?? throw new ArgumentNullException(nameof(newFilePath));
+
+            var targetDirectory = Path.GetDirectoryName(newFilePath);
+
+            if (!IsDirectoryBelongsToMountpoint(targetDirectory))
+            {
+                // Non-exported directory
+                return new CreateFileResultDto(false);
+            }
+
+            if (File.Exists(newFilePath))
+            {
+                // File already exist
+                return new CreateFileResultDto(false);
+            }
+
+            File.Create(newFilePath);
+
             return new CreateFileResultDto(true);
+        }
+
+        private bool IsDirectoryBelongsToMountpoint(string path)
+        {
+            // Is directory belongs to one of mountpoints?
+            var isChildDirectory = false;
+            foreach (var mountpoint in _mountpoints)
+            {
+                if (IsDirectoryInsideAnotherOrTheSame(mountpoint.ServerSidePath, path))
+                {
+                    isChildDirectory = true;
+                    break;
+                }
+            }
+
+            return isChildDirectory;
         }
     }
 }
