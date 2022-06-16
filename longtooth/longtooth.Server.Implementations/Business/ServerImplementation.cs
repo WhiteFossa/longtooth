@@ -243,5 +243,11 @@ namespace longtooth.Server.Implementations.Business
             _isRunning = false;
             _needToStopServer = false;
         }
+
+        public IEnumerable<IPAddress> GetLocalIps()
+        {
+            var hostname = Dns.GetHostName();
+            return Dns.GetHostAddresses(hostname);
+        }
     }
 }

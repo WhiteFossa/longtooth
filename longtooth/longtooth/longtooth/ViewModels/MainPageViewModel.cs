@@ -1,4 +1,5 @@
 ﻿using Acr.UserDialogs;
+using longtooth.Abstractions.DTOs;
 using longtooth.Abstractions.Interfaces.Models;
 using longtooth.Abstractions.Interfaces.Permissions;
 using longtooth.Common.Abstractions.Interfaces.MessagesProcessor;
@@ -8,6 +9,8 @@ using longtooth.Server.Abstractions.DTOs;
 using longtooth.Server.Abstractions.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Xamarin.Forms;
@@ -36,6 +39,24 @@ namespace longtooth.ViewModels
         /// </summary>
         public MainModel MainModel;
 
+        /// <summary>
+        /// Local server IPs
+        /// </summary>
+        private ObservableCollection<ServerIpDto> _serverIps = new ObservableCollection<ServerIpDto>();
+
+        public ObservableCollection<ServerIpDto> ServerIps
+        {
+            get
+            {
+                return _serverIps;
+            }
+            set
+            {
+                _serverIps = value;
+                OnPropertyChanged();
+            }
+        }
+
         private IServer _server;
         private IMessagesProcessor _messagesProcessor;
         private IServerSideMessagesProcessor _serverSideMessagesProcessor;
@@ -56,6 +77,17 @@ namespace longtooth.ViewModels
             // Binding commands to handlers
             StartServerCommand = new Command(async () => await OnServerStartAsync());
             StopServerCommand = new Command(async() => await OnServerStopAsync());
+
+            // Local IPs
+            var localIps = _server
+                .GetLocalIps()
+                .Select(ip => new ServerIpDto(ip.ToString()))
+                .ToList();
+
+            foreach(var localIp in localIps)
+            {
+                ServerIps.Add(localIp);
+            }
         }
 
         /// <summary>

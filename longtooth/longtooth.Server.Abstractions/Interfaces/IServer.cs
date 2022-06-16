@@ -1,5 +1,6 @@
 ﻿using longtooth.Server.Abstractions.DTOs;
 using System.Collections.Generic;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace longtooth.Server.Abstractions.Interfaces
@@ -23,6 +24,12 @@ namespace longtooth.Server.Abstractions.Interfaces
         /// Stops server
         /// </summary>
         void Stop();
+
+        /// <summary>
+        /// Returns list of local IPs
+        /// </summary>
+        /// <returns></returns>
+        IEnumerable<IPAddress> GetLocalIps();
 
     }
 }

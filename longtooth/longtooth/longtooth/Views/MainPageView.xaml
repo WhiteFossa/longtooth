@@ -15,20 +15,38 @@
                 <!-- Server control -->
                 <Frame
                     Style="{StaticResource FramesStyle}">
-
                     <StackLayout>
-                        <Label
-                        Text="Server control"
-                        HorizontalOptions="Center" />
+                        <StackLayout>
+                            <!-- Server IPs-->
+                            <Label
+                                Text="Phone IPs"
+                                HorizontalOptions="Center" />
 
-                        <Button
-                            Text="Start server"
-                            Command="{Binding StartServerCommand}" />
+                            <StackLayout BindableLayout.ItemsSource="{Binding ServerIps}">
+                                <BindableLayout.ItemTemplate>
+                                    <DataTemplate>
+                                        <Label Text="{Binding Ip}"/>
+                                    </DataTemplate>
+                                </BindableLayout.ItemTemplate>
+                            </StackLayout>
 
-                        <Button
-                            Text="Stop server"
-                            Command="{Binding StopServerCommand}" />
+                        </StackLayout>
 
+                        <StackLayout>
+                            <!-- Start / stop -->
+                            <Label
+                                Text="Server control"
+                                HorizontalOptions="Center" />
+
+                            <Button
+                                Text="Start server"
+                                Command="{Binding StartServerCommand}" />
+
+                            <Button
+                                Text="Stop server"
+                                Command="{Binding StopServerCommand}" />
+
+                        </StackLayout>
                     </StackLayout>
                 </Frame>
                 <!-- End of service settings -->
