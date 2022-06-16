@@ -44,5 +44,10 @@
         /// Delete file
         /// </summary>
         DeleteFile = 7,
+
+        /// <summary>
+        /// Delete directory
+        /// </summary>
+        DeleteDirectory = 8,
     }
 }

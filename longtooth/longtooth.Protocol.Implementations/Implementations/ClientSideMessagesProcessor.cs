@@ -55,6 +55,9 @@ namespace longtooth.Protocol.Implementations.Implementations
                 case CommandType.DeleteFile:
                     return DeleteFileResponse.Parse(stringHeader, payload);
 
+                case CommandType.DeleteDirectory:
+                    return DeleteDirectoryResponse.Parse(stringHeader, payload);
+
                 default:
                     throw new InvalidOperationException($"Response to unknown command. Type: {header.Command}");
             }

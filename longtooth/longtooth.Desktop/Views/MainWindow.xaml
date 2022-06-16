@@ -46,7 +46,7 @@
             <StackPanel>
                 <TextBlock Text="Experiments" />
 
-                <Grid ColumnDefinitions="Auto, Auto, Auto, Auto, Auto, Auto" RowDefinitions="Auto" >
+                <Grid ColumnDefinitions="Auto, Auto, Auto, Auto, Auto, Auto, Auto" RowDefinitions="Auto" >
 
                     <!-- Ping -->
                     <Button Grid.Column="0" Grid.Row="0" Content="Ping" Command="{ Binding PingAsync }" />
@@ -65,6 +65,9 @@
 
                     <!-- Delete current file -->
                     <Button Grid.Column="5" Grid.Row="0" Content="Delete file" Command="{ Binding DeleteFileAsync }" />
+
+                    <!-- Delete current directory -->
+                    <Button Grid.Column="6" Grid.Row="0" Content="Delete directory" Command="{ Binding DeleteDirectoryAsync }" />
                 </Grid>
             </StackPanel>
         </Border>

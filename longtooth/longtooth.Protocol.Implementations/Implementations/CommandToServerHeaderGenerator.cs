@@ -1,7 +1,6 @@
 ﻿using longtooth.Protocol.Abstractions.Commands;
 using longtooth.Protocol.Abstractions.DataStructures;
 using longtooth.Protocol.Abstractions.Interfaces;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
@@ -93,6 +92,16 @@ namespace longtooth.Protocol.Implementations.Implementations
                 null);
 
             return EncodeCommand(deleteFileCommand, null);
+        }
+
+        public byte[] DeleteDirectoryCommand(string path)
+        {
+            var deleteDirectoryCommand = new DeleteDirectoryCommand(path,
+                null,
+                null,
+                null);
+
+            return EncodeCommand(deleteDirectoryCommand, null);
         }
     }
 }

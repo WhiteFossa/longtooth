@@ -48,5 +48,10 @@ namespace longtooth.Protocol.Abstractions.Interfaces
         /// Generate response for file delete
         /// </summary>
         byte[] GenerateDeleteFileResponse(DeleteFileResultDto deleteFileResult);
+
+        /// <summary>
+        /// Generate response for directory deletion
+        /// </summary>
+        byte[] GenerateDeleteDirectoryResponse(DeleteDirectoryResultDto deleteDirectoryResult);
     }
 }

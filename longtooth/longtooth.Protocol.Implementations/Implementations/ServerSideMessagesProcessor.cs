@@ -112,6 +112,14 @@ namespace longtooth.Protocol.Implementations.Implementations
                         .ParseAsync(stringHeader, payload);
                     break;
 
+                case CommandType.DeleteDirectory:
+                    result = await new DeleteDirectoryCommand(string.Empty,
+                         _messagesProcessor,
+                        _responseToClientHeaderGenerator,
+                        _filesManager)
+                        .ParseAsync(stringHeader, payload);
+                    break;
+
                 default:
                     throw new InvalidOperationException($"Unknown command type: { header.Command }");
             }

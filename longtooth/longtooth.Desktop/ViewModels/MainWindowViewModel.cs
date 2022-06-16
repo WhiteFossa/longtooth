@@ -406,6 +406,18 @@ namespace longtooth.Desktop.ViewModels
 
                     break;
 
+                case CommandType.DeleteDirectory:
+                    var deleteDirectoryResponse = runResult as DeleteDirectoryRunResult;
+
+                    if (!deleteDirectoryResponse.DeleteDirectoryResult.IsSuccessful)
+                    {
+                        await _logger.LogErrorAsync("Failed to delete directory");
+                    }
+
+                    await _logger.LogInfoAsync("Directory successfully deleted");
+
+                    break;
+
                 default:
                     throw new InvalidOperationException("Incorrect command type in response!");
             }
@@ -565,6 +577,17 @@ namespace longtooth.Desktop.ViewModels
             }
 
             var deleteCommand = _commandGenerator.DeleteFileCommand(CurrentFile.FullPath);
+            await PrepareAndSendCommand(deleteCommand);
+        }
+
+        private async void DeleteDirectoryAsync()
+        {
+            if (CurrentDirectory == @"N/A")
+            {
+                return;
+            }
+
+            var deleteCommand = _commandGenerator.DeleteDirectoryCommand(CurrentDirectory);
             await PrepareAndSendCommand(deleteCommand);
         }
     }
