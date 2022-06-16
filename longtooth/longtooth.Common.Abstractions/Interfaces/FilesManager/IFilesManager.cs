@@ -33,5 +33,10 @@ namespace longtooth.Common.Abstractions.Interfaces.FilesManager
         /// Update file starting from given position
         /// </summary>
         Task<UpdateFileResultDto> UpdateFileAsync(string path, ulong start, List<byte> data);
+
+        /// <summary>
+        /// Delete file
+        /// </summary>
+        Task<DeleteFileResultDto> DeleteFileAsync(string path);
     }
 }

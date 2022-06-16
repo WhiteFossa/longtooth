@@ -158,6 +158,11 @@ namespace longtooth.Desktop.ViewModels
         /// </summary>
         public ReactiveCommand<Unit, Unit> UploadFileAsyncCommand { get; }
 
+        /// <summary>
+        /// Delete current file
+        /// </summary>
+        public ReactiveCommand<Unit, Unit> DeleteFileAsyncCommand { get; }
+
         #endregion
 
         /// <summary>
@@ -226,6 +231,7 @@ namespace longtooth.Desktop.ViewModels
             GetMountpointsAsyncCommand = ReactiveCommand.Create(GetMountpointsAsync);
             DownloadFileAsyncCommand = ReactiveCommand.Create(DownloadFileAsync);
             UploadFileAsyncCommand = ReactiveCommand.Create(UploadFileAsync);
+            DeleteFileAsyncCommand = ReactiveCommand.Create(DeleteFileAsync);
 
             #endregion
         }
@@ -388,6 +394,18 @@ namespace longtooth.Desktop.ViewModels
 
                     break;
 
+                case CommandType.DeleteFile:
+                    var deleteFileResponse = runResult as DeleteFileRunResult;
+
+                    if (!deleteFileResponse.DeleteFileResult.IsSuccessful)
+                    {
+                        await _logger.LogErrorAsync("Failed to delete file");
+                    }
+
+                    await _logger.LogInfoAsync("File successfully deleted");
+
+                    break;
+
                 default:
                     throw new InvalidOperationException("Incorrect command type in response!");
             }
@@ -537,6 +555,17 @@ namespace longtooth.Desktop.ViewModels
 
             var createCommand = _commandGenerator.CreateFileCommand(remotePath);
             await PrepareAndSendCommand(createCommand);
+        }
+
+        private async void DeleteFileAsync()
+        {
+            if (CurrentFile.Name == @"N/A")
+            {
+                return;
+            }
+
+            var deleteCommand = _commandGenerator.DeleteFileCommand(CurrentFile.FullPath);
+            await PrepareAndSendCommand(deleteCommand);
         }
     }
 }

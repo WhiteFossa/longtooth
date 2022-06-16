@@ -78,5 +78,12 @@ namespace longtooth.Protocol.Implementations.Implementations
 
             return EncodeResponse(updateFileResponse, null);
         }
+
+        public byte[] GenerateDeleteFileResponse(DeleteFileResultDto deleteFileResult)
+        {
+            var deleteFileResponse = new DeleteFileResponse(deleteFileResult);
+
+            return EncodeResponse(deleteFileResponse, null);
+        }
     }
 }

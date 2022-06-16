@@ -84,5 +84,15 @@ namespace longtooth.Protocol.Implementations.Implementations
 
             return EncodeCommand(updateFileCommand, updateFileCommand.Content.ToArray());
         }
+
+        public byte[] DeleteFileCommand(string path)
+        {
+            var deleteFileCommand = new DeleteFileCommand(path,
+                null,
+                null,
+                null);
+
+            return EncodeCommand(deleteFileCommand, null);
+        }
     }
 }

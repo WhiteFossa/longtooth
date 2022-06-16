@@ -39,5 +39,10 @@
         /// Update file content
         /// </summary>
         UpdateFile = 6,
+
+        /// <summary>
+        /// Delete file
+        /// </summary>
+        DeleteFile = 7,
     }
 }

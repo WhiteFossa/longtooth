@@ -39,5 +39,10 @@
         /// Generate "update a file" command
         /// </summary>
         byte[] UpdateFileCommand(string path, ulong startPosition, byte[] dataToWrite);
+
+        /// <summary>
+        /// Generate "delete file" command
+        /// </summary>
+        byte[] DeleteFileCommand(string path);
     }
 }
