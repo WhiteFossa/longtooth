@@ -49,5 +49,10 @@
         /// Delete directory
         /// </summary>
         DeleteDirectory = 8,
+
+        /// <summary>
+        /// Create directory
+        /// </summary>
+        CreateDirectory = 9,
     }
 }

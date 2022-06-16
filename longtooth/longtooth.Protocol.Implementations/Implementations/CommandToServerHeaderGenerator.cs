@@ -103,5 +103,15 @@ namespace longtooth.Protocol.Implementations.Implementations
 
             return EncodeCommand(deleteDirectoryCommand, null);
         }
+
+        public byte[] CreateDirectoryCommand(string path)
+        {
+            var createDirectoryCommand = new CreateDirectoryCommand(path,
+                null,
+                null,
+                null);
+
+            return EncodeCommand(createDirectoryCommand, null);
+        }
     }
 }

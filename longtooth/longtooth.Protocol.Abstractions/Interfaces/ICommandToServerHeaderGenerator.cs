@@ -49,5 +49,10 @@
         /// Generate "delete directory" command
         /// </summary>
         byte[] DeleteDirectoryCommand(string path);
+
+        /// <summary>
+        /// Generate "create directory" command
+        /// </summary>
+        byte[] CreateDirectoryCommand(string path);
     }
 }

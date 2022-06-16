@@ -88,9 +88,16 @@ namespace longtooth.Protocol.Implementations.Implementations
 
         public byte[] GenerateDeleteDirectoryResponse(DeleteDirectoryResultDto deleteDirectoryResult)
         {
-            var deleteFileResponse = new DeleteDirectoryResponse(deleteDirectoryResult);
+            var deleteDirectoryResponse = new DeleteDirectoryResponse(deleteDirectoryResult);
 
-            return EncodeResponse(deleteFileResponse, null);
+            return EncodeResponse(deleteDirectoryResponse, null);
+        }
+
+        public byte[] GenerateCreateDirectoryResponse(CreateDirectoryResultDto createDirectoryResult)
+        {
+            var createDirectoryResponse = new CreateDirectoryResponse(createDirectoryResult);
+
+            return EncodeResponse(createDirectoryResponse, null);
         }
     }
 }

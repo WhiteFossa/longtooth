@@ -43,5 +43,10 @@ namespace longtooth.Common.Abstractions.Interfaces.FilesManager
         /// Delete directory
         /// </summary>
         Task<DeleteDirectoryResultDto> DeleteDirectoryAsync(string path);
+
+        /// <summary>
+        /// Create directory
+        /// </summary>
+        Task<CreateDirectoryResultDto> CreateDirectoryAsync(string path);
     }
 }

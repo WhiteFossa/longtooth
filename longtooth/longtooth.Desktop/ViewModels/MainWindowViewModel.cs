@@ -37,6 +37,7 @@ namespace longtooth.Desktop.ViewModels
         private string _currentDirectory;
         private FileDto _currentFile;
         private double _progressValue;
+        private string _newDirectoryName;
 
         /// <summary>
         /// Server IP
@@ -119,6 +120,15 @@ namespace longtooth.Desktop.ViewModels
             set => this.RaiseAndSetIfChanged(ref _progressValue, value);
         }
 
+        /// <summary>
+        /// New directory name
+        /// </summary>
+        public string NewDirectoryName
+        {
+            get => _newDirectoryName;
+            set => this.RaiseAndSetIfChanged(ref _newDirectoryName, value);
+        }
+
         #endregion
 
         #region Commands
@@ -162,6 +172,11 @@ namespace longtooth.Desktop.ViewModels
         /// Delete current file
         /// </summary>
         public ReactiveCommand<Unit, Unit> DeleteFileAsyncCommand { get; }
+
+        /// <summary>
+        /// Create new directory
+        /// </summary>
+        public ReactiveCommand<Unit, Unit> CreateNewDirectoryCommand { get; }
 
         #endregion
 
@@ -232,6 +247,7 @@ namespace longtooth.Desktop.ViewModels
             DownloadFileAsyncCommand = ReactiveCommand.Create(DownloadFileAsync);
             UploadFileAsyncCommand = ReactiveCommand.Create(UploadFileAsync);
             DeleteFileAsyncCommand = ReactiveCommand.Create(DeleteFileAsync);
+            CreateNewDirectoryCommand = ReactiveCommand.Create(CreateDirectoryAsync);
 
             #endregion
         }
@@ -418,6 +434,18 @@ namespace longtooth.Desktop.ViewModels
 
                     break;
 
+                case CommandType.CreateDirectory:
+                    var createDirectoryResponse = runResult as CreateDirectoryRunResult;
+
+                    if (!createDirectoryResponse.CreateDirectoryResult.IsSuccessful)
+                    {
+                        await _logger.LogErrorAsync("Failed to create directory");
+                    }
+
+                    await _logger.LogInfoAsync("Directory successfully created");
+
+                    break;
+
                 default:
                     throw new InvalidOperationException("Incorrect command type in response!");
             }
@@ -589,6 +617,17 @@ namespace longtooth.Desktop.ViewModels
 
             var deleteCommand = _commandGenerator.DeleteDirectoryCommand(CurrentDirectory);
             await PrepareAndSendCommand(deleteCommand);
+        }
+
+        private async void CreateDirectoryAsync()
+        {
+            if (NewDirectoryName.Equals(string.Empty))
+            {
+                return;
+            }
+
+            var createDirectoryCommand = _commandGenerator.CreateDirectoryCommand(CurrentDirectory + @"/" + NewDirectoryName);
+            await PrepareAndSendCommand(createDirectoryCommand);
         }
     }
 }

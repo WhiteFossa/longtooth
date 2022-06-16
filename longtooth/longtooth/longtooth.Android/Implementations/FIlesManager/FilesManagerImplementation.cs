@@ -263,5 +263,28 @@ namespace longtooth.Droid.Implementations.FilesManager
 
             return new DeleteDirectoryResultDto(true);
         }
+
+        public async Task<CreateDirectoryResultDto> CreateDirectoryAsync(string path)
+        {
+            _ = path ?? throw new ArgumentNullException(nameof(path));
+
+            var targetDirectory = Path.GetDirectoryName(path);
+
+            if (!IsDirectoryBelongsToMountpoint(targetDirectory))
+            {
+                // Non-exported directory
+                return new CreateDirectoryResultDto(false);
+            }
+
+            if (Directory.Exists(path))
+            {
+                // Directory already exist
+                return new CreateDirectoryResultDto(false);
+            }
+
+            Directory.CreateDirectory(path);
+
+            return new CreateDirectoryResultDto(true);
+        }
     }
 }
