@@ -9,9 +9,9 @@ namespace longtooth.Common.Abstractions.DTOs.Responses
     /// </summary>
     public class GetMountpointsRunResult : ResponseRunResult
     {
-        public List<MountpointDto> Mountpoints { get; private set; }
+        public IReadOnlyCollection<MountpointDto> Mountpoints { get; private set; }
 
-        public GetMountpointsRunResult(List<MountpointDto> mountpoints) : base(CommandType.GetMountpoints)
+        public GetMountpointsRunResult(IReadOnlyCollection<MountpointDto> mountpoints) : base(CommandType.GetMountpoints)
         {
             Mountpoints = mountpoints ?? throw new ArgumentNullException(nameof(mountpoints));
         }

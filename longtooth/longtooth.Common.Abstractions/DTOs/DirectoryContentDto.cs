@@ -19,9 +19,9 @@ namespace longtooth.Common.Abstractions.DTOs
         /// Directory content
         /// </summary>
         [JsonPropertyName("Items")]
-        public List<DirectoryContentItemDto> Items { get; private set; }
+        public IReadOnlyCollection<DirectoryContentItemDto> Items { get; private set; }
 
-        public DirectoryContentDto(bool isSuccessful, List<DirectoryContentItemDto> items)
+        public DirectoryContentDto(bool isSuccessful, IReadOnlyCollection<DirectoryContentItemDto> items)
         {
             IsSuccessful = isSuccessful;
             Items = items ?? throw new ArgumentNullException(nameof(items));

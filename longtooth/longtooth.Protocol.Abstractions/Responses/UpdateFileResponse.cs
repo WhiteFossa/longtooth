@@ -23,7 +23,7 @@ namespace longtooth.Protocol.Abstractions.Responses
             UpdateFileResult = updateFileResult;
         }
 
-        public static UpdateFileResponse Parse(string header, List<byte> payload)
+        public static UpdateFileResponse Parse(string header, IReadOnlyCollection<byte> payload)
         {
             _ = header ?? throw new ArgumentNullException(nameof(header));
 

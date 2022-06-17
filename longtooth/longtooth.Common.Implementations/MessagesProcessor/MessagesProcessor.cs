@@ -26,12 +26,12 @@ namespace longtooth.Common.Implementations.MessagesProcessor
             _onNewMessage = handler ?? throw new ArgumentNullException(nameof(handler));
         }
 
-        public List<byte> PrepareMessageToSend(List<byte> messageToSend)
+        public IReadOnlyCollection<byte> PrepareMessageToSend(IReadOnlyCollection<byte> messageToSend)
         {
             return _messagesProtocol.GenerateMessage(messageToSend);
         }
 
-        public void OnNewMessageArrive(List<byte> newMessage)
+        public void OnNewMessageArrive(IReadOnlyCollection<byte> newMessage)
         {
             _ = _onNewMessage ?? throw new InvalidOperationException("Messages processor isn't set up.");
             _ = newMessage ?? throw new ArgumentNullException(nameof(newMessage));
@@ -41,7 +41,7 @@ namespace longtooth.Common.Implementations.MessagesProcessor
             while(true)
             {
                 var decodedMessage = _messagesProtocol.ExtractFirstMessage(_accumulator);
-                _accumulator = decodedMessage.NewBuffer;
+                _accumulator = new List<byte>(decodedMessage.NewBuffer);
 
                 if (decodedMessage.Message == null)
                 {
@@ -52,7 +52,7 @@ namespace longtooth.Common.Implementations.MessagesProcessor
             };
         }
 
-        public List<byte> OnNewMessageArriveServer(List<byte> newMessage)
+        public IReadOnlyCollection<byte> OnNewMessageArriveServer(IReadOnlyCollection<byte> newMessage)
         {
             _ = newMessage ?? throw new ArgumentNullException(nameof(newMessage));
 
@@ -61,7 +61,7 @@ namespace longtooth.Common.Implementations.MessagesProcessor
             while (true)
             {
                 var decodedMessage = _messagesProtocol.ExtractFirstMessage(_accumulator);
-                _accumulator = decodedMessage.NewBuffer;
+                _accumulator = new List<byte>(decodedMessage.NewBuffer);
 
                 if (decodedMessage.Message == null)
                 {

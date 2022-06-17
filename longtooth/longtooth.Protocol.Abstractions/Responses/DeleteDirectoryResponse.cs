@@ -24,7 +24,7 @@ namespace longtooth.Protocol.Abstractions.Responses
             DeleteDirectoryResult = deleteDirectoryResult;
         }
 
-        public static DeleteDirectoryResponse Parse(string header, List<byte> payload)
+        public static DeleteDirectoryResponse Parse(string header, IReadOnlyCollection<byte> payload)
         {
             _ = header ?? throw new ArgumentNullException(nameof(header));
 

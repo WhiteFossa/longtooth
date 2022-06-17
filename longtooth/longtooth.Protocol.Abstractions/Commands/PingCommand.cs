@@ -22,12 +22,12 @@ namespace longtooth.Protocol.Abstractions.Commands
             _responseToClientHeaderGenerator = responseToClientHeaderGenerator;
         }
 
-        public ResponseDto Parse(string header, List<byte> payload)
+        public ResponseDto Parse(string header, IReadOnlyCollection<byte> payload)
         {
             // Do work here
             var response = _responseToClientHeaderGenerator.GeneratePingResponse();
 
-            var responseMessage = _messagesProcessor.PrepareMessageToSend(new List<byte>(response));
+            var responseMessage = _messagesProcessor.PrepareMessageToSend(response);
 
             return new ResponseDto(true, false, responseMessage);
         }

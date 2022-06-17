@@ -16,14 +16,14 @@ namespace longtooth.Protocol.Abstractions.Responses
         /// List of mountpoints
         /// </summary>
         [JsonPropertyName("Mountpoints")]
-        public List<MountpointDto> Mountpoints { get; set; }
+        public IReadOnlyCollection<MountpointDto> Mountpoints { get; set; }
 
-        public GetMountpointsResponse(List<MountpointDto> mountpoints) : base(CommandType.GetMountpoints)
+        public GetMountpointsResponse(IReadOnlyCollection<MountpointDto> mountpoints) : base(CommandType.GetMountpoints)
         {
             Mountpoints = mountpoints ?? throw new ArgumentNullException(nameof(mountpoints));
         }
 
-        public static GetMountpointsResponse Parse(string header, List<byte> payload)
+        public static GetMountpointsResponse Parse(string header, IReadOnlyCollection<byte> payload)
         {
             _ = header ?? throw new ArgumentNullException(nameof(header));
 

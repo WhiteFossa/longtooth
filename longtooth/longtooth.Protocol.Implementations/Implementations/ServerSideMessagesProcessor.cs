@@ -28,22 +28,24 @@ namespace longtooth.Protocol.Implementations.Implementations
             _filesManager = filesManager;
         }
 
-        public async Task<ResponseDto> ParseMessageAsync(List<byte> message)
+        public async Task<ResponseDto> ParseMessageAsync(IReadOnlyCollection<byte> message)
         {
-            var headerSize = BitConverter.ToInt32(message.GetRange(0, sizeof(Int32)).ToArray(), 0);
+            var messageAsList = new List<byte>(message);
 
-            if ((headerSize + 2 * sizeof(Int32)) > message.Count)
+            var headerSize = BitConverter.ToInt32(messageAsList.GetRange(0, sizeof(Int32)).ToArray(), 0);
+
+            if ((headerSize + 2 * sizeof(Int32)) > messageAsList.Count)
             {
                 throw new ArgumentException("Message is too short!", nameof(message));
             }
 
-            var binaryHeader = message.GetRange(4, headerSize);
+            var binaryHeader = messageAsList.GetRange(4, headerSize);
             var stringHeader = Encoding.UTF8.GetString(binaryHeader.ToArray());
 
             var header = JsonSerializer.Deserialize<CommandHeader>(stringHeader); // Initially to generic header
 
-            var payloadSize = BitConverter.ToInt32(message.GetRange(4 + headerSize, 4).ToArray());
-            var payload = message.GetRange(8 + headerSize, message.Count - 8 - headerSize);
+            var payloadSize = BitConverter.ToInt32(messageAsList.GetRange(4 + headerSize, 4).ToArray());
+            var payload = messageAsList.GetRange(8 + headerSize, message.Count - 8 - headerSize);
 
             ResponseDto result;
             switch (header.Command)

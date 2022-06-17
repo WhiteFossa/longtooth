@@ -43,7 +43,7 @@ namespace longtooth.Protocol.Abstractions.Commands
             _filesManager = filesManager;
         }
 
-        public async Task<ResponseDto> ParseAsync(string header, List<byte> payload)
+        public async Task<ResponseDto> ParseAsync(string header, IReadOnlyCollection<byte> payload)
         {
             // Do work here
             var parsedHeader = JsonSerializer.Deserialize<CreateFileCommand>(header);
@@ -52,7 +52,7 @@ namespace longtooth.Protocol.Abstractions.Commands
 
             var response = _responseToClientHeaderGenerator.GenerateCreateFileResponse(createResult);
 
-            var responseMessage = _messagesProcessor.PrepareMessageToSend(new List<byte>(response));
+            var responseMessage = _messagesProcessor.PrepareMessageToSend(response);
 
             return new ResponseDto(true, false, responseMessage);
         }

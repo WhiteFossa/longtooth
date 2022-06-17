@@ -13,7 +13,7 @@ namespace longtooth.Protocol.Abstractions.Responses
     /// </summary>
     public class ExitResponse : ResponseHeader
     {
-        public static ExitResponse Parse(string header, List<byte> payload)
+        public static ExitResponse Parse(string header, IReadOnlyCollection<byte> payload)
         {
             _ = header ?? throw new ArgumentNullException(nameof(header));
 

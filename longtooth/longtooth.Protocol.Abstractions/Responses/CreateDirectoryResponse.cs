@@ -1,13 +1,12 @@
-﻿using longtooth.Common.Abstractions.DTOs.Responses;
-using longtooth.Common.Abstractions.DTOs;
+﻿using longtooth.Common.Abstractions.DTOs;
+using longtooth.Common.Abstractions.DTOs.Responses;
+using longtooth.Common.Abstractions.Enums;
 using longtooth.Protocol.Abstractions.DataStructures;
 using System;
 using System.Collections.Generic;
-using System.Text;
-using System.Text.Json.Serialization;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
-using longtooth.Common.Abstractions.Enums;
 
 namespace longtooth.Protocol.Abstractions.Responses
 {
@@ -24,7 +23,7 @@ namespace longtooth.Protocol.Abstractions.Responses
             CreateDirectoryResult = createDirectoryResult;
         }
 
-        public static CreateDirectoryResponse Parse(string header, List<byte> payload)
+        public static CreateDirectoryResponse Parse(string header, IReadOnlyCollection<byte> payload)
         {
             _ = header ?? throw new ArgumentNullException(nameof(header));
 

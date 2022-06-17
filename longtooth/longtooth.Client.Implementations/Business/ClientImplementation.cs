@@ -76,7 +76,7 @@ namespace longtooth.Client.Implementations.Business
             _isDisconnectRequired = true;
         }
 
-        public async Task SendAsync(List<byte> message)
+        public async Task SendAsync(IReadOnlyCollection<byte> message)
         {
             var buffer = message.ToArray();
 

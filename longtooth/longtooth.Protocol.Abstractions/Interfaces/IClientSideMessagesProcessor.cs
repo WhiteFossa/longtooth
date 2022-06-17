@@ -11,6 +11,6 @@ namespace longtooth.Protocol.Abstractions.Interfaces
         /// <summary>
         /// Call this when new message arrive and call Run() of result
         /// </summary>
-        ResponseHeader ParseMessage(List<byte> message);
+        ResponseHeader ParseMessage(IReadOnlyCollection<byte> message);
     }
 }

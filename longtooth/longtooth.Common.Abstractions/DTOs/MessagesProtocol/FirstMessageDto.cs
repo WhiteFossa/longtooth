@@ -3,21 +3,21 @@
 namespace longtooth.Common.Abstractions.DTOs.MessagesProtocol
 {
     /// <summary>
-    /// Information about the firs message, extracted from buffer
+    /// Information about the first message, extracted from buffer
     /// </summary>
     public class FirstMessageDto
     {
         /// <summary>
         /// Extracted message (can be null, if buffer contain no messages)
         /// </summary>
-        public List<byte> Message { get; private set; }
+        public IReadOnlyCollection<byte> Message { get; private set; }
 
         /// <summary>
         /// Buffer without message (i.e. message is cut from buffer)
         /// </summary>
-        public List<byte> NewBuffer { get; private set; }
+        public IReadOnlyCollection<byte> NewBuffer { get; private set; }
 
-        public FirstMessageDto(List<byte> message, List<byte> newBuffer)
+        public FirstMessageDto(IReadOnlyCollection<byte> message, IReadOnlyCollection<byte> newBuffer)
         {
             Message = message;
             NewBuffer = newBuffer;

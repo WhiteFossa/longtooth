@@ -271,7 +271,7 @@ namespace longtooth.Desktop.ViewModels
             await _client.DisconnectAsync();
         }
 
-        private async void OnServerResponse(List<byte> response)
+        private async void OnServerResponse(IReadOnlyCollection<byte> response)
         {
             _messagesProcessor.OnNewMessageArrive(response);
         }
@@ -286,7 +286,7 @@ namespace longtooth.Desktop.ViewModels
             ConsoleCaretIndex = ConsoleText.Length;
         }
 
-        private async void OnNewMessageAsync(List<byte> decodedMessage)
+        private async void OnNewMessageAsync(IReadOnlyCollection<byte> decodedMessage)
         {
             var response = _clientSideMessagesProcessor.ParseMessage(decodedMessage);
             var runResult = await response.RunAsync();
@@ -451,7 +451,7 @@ namespace longtooth.Desktop.ViewModels
             }
         }
 
-        private async Task PrepareAndSendCommand(byte[] commandMessage)
+        private async Task PrepareAndSendCommand(IReadOnlyCollection<byte> commandMessage)
         {
             var encodedMessage = _messagesProcessor.PrepareMessageToSend(new List<byte>(commandMessage));
             await _client.SendAsync(encodedMessage);
@@ -550,7 +550,7 @@ namespace longtooth.Desktop.ViewModels
             _alreadyDownloaded = 0;
             _downloadedContent = new List<byte>();
 
-            byte[] downloadCommand;
+            IReadOnlyCollection<byte> downloadCommand;
 
             if (CurrentFile.Size > DownloadChunkSize)
             {

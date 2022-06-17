@@ -16,7 +16,7 @@ namespace longtooth.Protocol.Abstractions.DataStructures
         /// <summary>
         /// Header itself
         /// </summary>
-        public byte[] Header { get; private set; }
+        public IReadOnlyCollection<byte> Header { get; private set; }
 
         /// <summary>
         /// Binary data size
@@ -26,12 +26,12 @@ namespace longtooth.Protocol.Abstractions.DataStructures
         /// <summary>
         /// Binary data
         /// </summary>
-        public byte[] BinaryData { get; private set; }
+        public IReadOnlyCollection<byte> BinaryData { get; private set; }
 
-        public Message(byte[] header, byte[] binaryData)
+        public Message(IReadOnlyCollection<byte> header, IReadOnlyCollection<byte> binaryData)
         {
             Header = header ?? throw new ArgumentNullException(nameof(header));
-            HeaderSize = Header.Length;
+            HeaderSize = Header.Count;
 
             if (binaryData == null)
             {
@@ -40,12 +40,12 @@ namespace longtooth.Protocol.Abstractions.DataStructures
             }
             else
             {
-                BinaryDataSize = binaryData.Length;
+                BinaryDataSize = binaryData.Count;
                 BinaryData = binaryData;
             }
         }
 
-        public byte[] ToDataPacket()
+        public IReadOnlyCollection<byte> ToDataPacket()
         {
             var result = new List<byte>();
 

@@ -81,8 +81,7 @@ namespace longtooth.ViewModels
             // Local IPs
             var localIps = _server
                 .GetLocalIps()
-                .Select(ip => new ServerIpDto(ip.ToString()))
-                .ToList();
+                .Select(ip => new ServerIpDto(ip.ToString()));
 
             foreach(var localIp in localIps)
             {
@@ -124,7 +123,7 @@ namespace longtooth.ViewModels
         /// <summary>
         /// Called when we are receiving new data from client
         /// </summary>
-        private async Task<ResponseDto> OnNewDataReadFromClientAsync(List<byte> data)
+        private async Task<ResponseDto> OnNewDataReadFromClientAsync(IReadOnlyCollection<byte> data)
         {
             var decodedMessage = _messagesProcessor.OnNewMessageArriveServer(data);
 

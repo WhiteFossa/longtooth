@@ -1,6 +1,7 @@
 ﻿using longtooth.Protocol.Abstractions.Commands;
 using longtooth.Protocol.Abstractions.DataStructures;
 using longtooth.Protocol.Abstractions.Interfaces;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
@@ -9,7 +10,7 @@ namespace longtooth.Protocol.Implementations.Implementations
 {
     public class CommandToServerHeaderGenerator : ICommandToServerHeaderGenerator
     {
-        private byte[] EncodeCommand(object command, byte[] data)
+        private IReadOnlyCollection<byte> EncodeCommand(object command, byte[] data)
         {
             var header = JsonSerializer.Serialize(command);
             var serializedHeader = Encoding.UTF8.GetBytes(header);
@@ -19,28 +20,28 @@ namespace longtooth.Protocol.Implementations.Implementations
             return message.ToDataPacket();
         }
 
-        public byte[] GeneratePingCommand()
+        public IReadOnlyCollection<byte> GeneratePingCommand()
         {
             var pingCommand = new PingCommand(null, null);
 
             return EncodeCommand(pingCommand, null);
         }
 
-        public byte[] GenerateExitCommand()
+        public IReadOnlyCollection<byte> GenerateExitCommand()
         {
             var exitCommand = new ExitCommand(null, null);
 
             return EncodeCommand(exitCommand, null);
         }
 
-        public byte[] GenerateGetMountpointsCommand()
+        public IReadOnlyCollection<byte> GenerateGetMountpointsCommand()
         {
             var getMountpointsCommand = new GetMountpointsCommand(null, null, null);
 
             return EncodeCommand(getMountpointsCommand, null);
         }
 
-        public byte[] GenerateGetDirectoryContentCommand(string serverSidePath)
+        public IReadOnlyCollection<byte> GenerateGetDirectoryContentCommand(string serverSidePath)
         {
             var getDirectoryContentCommand = new GetDirectoryContentCommand(serverSidePath,
                 null,
@@ -50,7 +51,7 @@ namespace longtooth.Protocol.Implementations.Implementations
             return EncodeCommand(getDirectoryContentCommand, null);
         }
 
-        public byte[] GenerateDownloadCommand(string path, ulong startPosition, uint length)
+        public IReadOnlyCollection<byte> GenerateDownloadCommand(string path, ulong startPosition, uint length)
         {
             var downloadFileCommand = new DownloadCommand(path,
                 startPosition,
@@ -62,7 +63,7 @@ namespace longtooth.Protocol.Implementations.Implementations
             return EncodeCommand(downloadFileCommand, null);
         }
 
-        public byte[] CreateFileCommand(string path)
+        public IReadOnlyCollection<byte> CreateFileCommand(string path)
         {
             var createFileCommand = new CreateFileCommand(path,
                 null,
@@ -72,7 +73,7 @@ namespace longtooth.Protocol.Implementations.Implementations
             return EncodeCommand(createFileCommand, null);
         }
 
-        public byte[] UpdateFileCommand(string path, ulong startPosition, byte[] dataToWrite)
+        public IReadOnlyCollection<byte> UpdateFileCommand(string path, ulong startPosition, byte[] dataToWrite)
         {
             var updateFileCommand = new UpdateFileCommand(path,
                 startPosition,
@@ -84,7 +85,7 @@ namespace longtooth.Protocol.Implementations.Implementations
             return EncodeCommand(updateFileCommand, updateFileCommand.Content.ToArray());
         }
 
-        public byte[] DeleteFileCommand(string path)
+        public IReadOnlyCollection<byte> DeleteFileCommand(string path)
         {
             var deleteFileCommand = new DeleteFileCommand(path,
                 null,
@@ -94,7 +95,7 @@ namespace longtooth.Protocol.Implementations.Implementations
             return EncodeCommand(deleteFileCommand, null);
         }
 
-        public byte[] DeleteDirectoryCommand(string path)
+        public IReadOnlyCollection<byte> DeleteDirectoryCommand(string path)
         {
             var deleteDirectoryCommand = new DeleteDirectoryCommand(path,
                 null,
@@ -104,7 +105,7 @@ namespace longtooth.Protocol.Implementations.Implementations
             return EncodeCommand(deleteDirectoryCommand, null);
         }
 
-        public byte[] CreateDirectoryCommand(string path)
+        public IReadOnlyCollection<byte> CreateDirectoryCommand(string path)
         {
             var createDirectoryCommand = new CreateDirectoryCommand(path,
                 null,

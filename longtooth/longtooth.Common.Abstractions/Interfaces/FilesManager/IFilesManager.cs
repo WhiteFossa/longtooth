@@ -12,7 +12,7 @@ namespace longtooth.Common.Abstractions.Interfaces.FilesManager
         /// <summary>
         /// Returns mountpoints, shared on server
         /// </summary>
-        Task<List<MountpointDto>> GetMountpointsAsync();
+        Task<IReadOnlyCollection<MountpointDto>> GetMountpointsAsync();
 
         /// <summary>
         /// Returns directory content. Directory name MUST end with slash
@@ -32,7 +32,7 @@ namespace longtooth.Common.Abstractions.Interfaces.FilesManager
         /// <summary>
         /// Update file starting from given position
         /// </summary>
-        Task<UpdateFileResultDto> UpdateFileAsync(string path, ulong start, List<byte> data);
+        Task<UpdateFileResultDto> UpdateFileAsync(string path, ulong start, IReadOnlyCollection<byte> data);
 
         /// <summary>
         /// Delete file

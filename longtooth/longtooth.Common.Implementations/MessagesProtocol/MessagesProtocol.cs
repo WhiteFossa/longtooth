@@ -22,12 +22,12 @@ namespace longtooth.Common.Implementations.MessagesProtocol
         /// <summary>
         /// Byte representation of MessageBeginSignature
         /// </summary>
-        private readonly List<byte> MessageBeginSignatureArray;
+        private readonly IReadOnlyCollection<byte> MessageBeginSignatureArray;
 
         /// <summary>
         /// Byte representation of MessageEndSignature
         /// </summary>
-        private readonly List<byte> MessageEndSignatureArray;
+        private readonly IReadOnlyCollection<byte> MessageEndSignatureArray;
 
         public MessagesProtocol()
         {
@@ -35,7 +35,7 @@ namespace longtooth.Common.Implementations.MessagesProtocol
             MessageEndSignatureArray = new List<byte>(MessageEndSignature.ToByteArray());
         }
 
-        public List<byte> GenerateMessage(List<byte> message)
+        public IReadOnlyCollection<byte> GenerateMessage(IReadOnlyCollection<byte> message)
         {
             _ = message ?? throw new ArgumentNullException(nameof(message));
 
@@ -53,7 +53,7 @@ namespace longtooth.Common.Implementations.MessagesProtocol
             return result;
         }
 
-        public FirstMessageDto ExtractFirstMessage(List<byte> buffer)
+        public FirstMessageDto ExtractFirstMessage(IReadOnlyCollection<byte> buffer)
         {
             _ = buffer ?? throw new ArgumentNullException(nameof(buffer));
 
@@ -75,12 +75,13 @@ namespace longtooth.Common.Implementations.MessagesProtocol
             var startIndex = messageStartIndex + MessageBeginSignatureArray.Count;
             var length = messageEndIndex - messageStartIndex - MessageBeginSignatureArray.Count;
 
-            var result = buffer.GetRange(startIndex, length);
+            var bufferAsList = new List<byte>(buffer);
+            var result = bufferAsList.GetRange(startIndex, length);
 
             // Removing message from buffer
             var remainingLength = messageEndIndex + MessageEndSignatureArray.Count;
-            var newBuffer = buffer.GetRange(0, messageStartIndex);
-            newBuffer.AddRange(buffer.GetRange(remainingLength, buffer.Count - remainingLength));
+            var newBuffer = bufferAsList.GetRange(0, messageStartIndex);
+            newBuffer.AddRange(bufferAsList.GetRange(remainingLength, buffer.Count - remainingLength));
 
             return new FirstMessageDto(result, newBuffer);
         }

@@ -12,6 +12,6 @@ namespace longtooth.Protocol.Abstractions.Interfaces
         /// <summary>
         /// Call this when new message arrive
         /// </summary>
-        Task<ResponseDto> ParseMessageAsync(List<byte> message);
+        Task<ResponseDto> ParseMessageAsync(IReadOnlyCollection<byte> message);
     }
 }

@@ -11,11 +11,11 @@ namespace longtooth.Common.Abstractions.Interfaces.MessagesProtocol
         /// <summary>
         /// Encode message. Encoded message is ready to be pushed to socket
         /// </summary>
-        List<byte> GenerateMessage(List<byte> message);
+        IReadOnlyCollection<byte> GenerateMessage(IReadOnlyCollection<byte> message);
 
         /// <summary>
         /// Searches buffer for the first message
         /// </summary>
-        FirstMessageDto ExtractFirstMessage(List<byte> buffer);
+        FirstMessageDto ExtractFirstMessage(IReadOnlyCollection<byte> buffer);
     }
 }

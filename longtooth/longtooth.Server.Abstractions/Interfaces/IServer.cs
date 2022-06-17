@@ -8,7 +8,7 @@ namespace longtooth.Server.Abstractions.Interfaces
     /// <summary>
     /// Delegate, called when new data comes from client
     /// </summary>
-    public delegate Task<ResponseDto> OnNewDataReadDelegate(List<byte> data);
+    public delegate Task<ResponseDto> OnNewDataReadDelegate(IReadOnlyCollection<byte> data);
 
     /// <summary>
     /// Longtooth server
@@ -28,8 +28,7 @@ namespace longtooth.Server.Abstractions.Interfaces
         /// <summary>
         /// Returns list of local IPs
         /// </summary>
-        /// <returns></returns>
-        IEnumerable<IPAddress> GetLocalIps();
+        IReadOnlyCollection<IPAddress> GetLocalIps();
 
     }
 }

@@ -9,7 +9,7 @@ namespace longtooth.Client.Abstractions.Interfaces
         /// <summary>
         /// Delegate, called when server responses to a message
         /// </summary>
-        public delegate void OnResponseDelegate(List<byte> response);
+        public delegate void OnResponseDelegate(IReadOnlyCollection<byte> response);
 
         /// <summary>
         /// Call this before any other operations
@@ -24,7 +24,7 @@ namespace longtooth.Client.Abstractions.Interfaces
         /// <summary>
         /// Sends message to a server
         /// </summary>
-        Task SendAsync(List<byte> message);
+        Task SendAsync(IReadOnlyCollection<byte> message);
 
         /// <summary>
         /// Disconnect from server (hard, forced)

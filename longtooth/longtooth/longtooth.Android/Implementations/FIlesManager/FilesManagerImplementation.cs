@@ -3,6 +3,7 @@ using longtooth.Common.Abstractions.Interfaces.FilesManager;
 using longtooth.Common.Implementations.Helpers;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -26,9 +27,9 @@ namespace longtooth.Droid.Implementations.FilesManager
             _mountpoints.Add(new MountpointDto("DCIM", FilesHelper.NormalizePath(@$"{ externalStorageDir }/DCIM")));
         }
 
-        public async Task<List<MountpointDto>> GetMountpointsAsync()
+        public async Task<IReadOnlyCollection<MountpointDto>> GetMountpointsAsync()
         {
-            return _mountpoints;
+            return _mountpoints.AsReadOnly();
         }
 
         public async Task<DirectoryContentDto> GetDirectoryContentAsync(string serverSidePath)
@@ -176,7 +177,7 @@ namespace longtooth.Droid.Implementations.FilesManager
             return isChildDirectory;
         }
 
-        public async Task<UpdateFileResultDto> UpdateFileAsync(string path, ulong start, List<byte> data)
+        public async Task<UpdateFileResultDto> UpdateFileAsync(string path, ulong start, IReadOnlyCollection<byte> data)
         {
             _ = path ?? throw new ArgumentNullException(nameof(path));
 

@@ -21,9 +21,9 @@ namespace longtooth.Server.Abstractions.DTOs
         /// <summary>
         /// Response to a client
         /// </summary>
-        public List<byte> Response { get; private set; }
+        public IReadOnlyCollection<byte> Response { get; private set; }
 
-        public ResponseDto(bool needToSendResponse, bool needToClose, List<byte> response)
+        public ResponseDto(bool needToSendResponse, bool needToClose, IReadOnlyCollection<byte> response)
         {
             NeedToSendResponse = needToSendResponse;
             NeedToClose = needToClose;

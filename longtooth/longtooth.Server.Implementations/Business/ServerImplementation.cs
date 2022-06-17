@@ -125,7 +125,7 @@ namespace longtooth.Server.Implementations.Business
                         connectionState.WriteAmount = responseToClient.Response.Count;
                         connectionState.WriteBufferOffset = 0;
 
-                        Array.Copy(responseToClient.Response.ToArray(), connectionState.WriteBuffer, connectionState.WriteAmount);
+                        Array.Copy(new List<byte>(responseToClient.Response).ToArray(), connectionState.WriteBuffer, connectionState.WriteAmount);
 
                         connectionState.ClientSocket.BeginSend(
                             connectionState.WriteBuffer,
@@ -244,7 +244,7 @@ namespace longtooth.Server.Implementations.Business
             _needToStopServer = false;
         }
 
-        public IEnumerable<IPAddress> GetLocalIps()
+        public IReadOnlyCollection<IPAddress> GetLocalIps()
         {
             var hostname = Dns.GetHostName();
             return Dns.GetHostAddresses(hostname);

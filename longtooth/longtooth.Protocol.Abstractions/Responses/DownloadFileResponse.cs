@@ -22,9 +22,9 @@ namespace longtooth.Protocol.Abstractions.Responses
         /// Partial file content
         /// </summary>
         [JsonIgnore]
-        public List<byte> FileContent { get; private set; }
+        public IReadOnlyCollection<byte> FileContent { get; private set; }
 
-        public DownloadFileResponse(DownloadedFileDto file, List<byte> fileContent) : base(CommandType.DownloadFile)
+        public DownloadFileResponse(DownloadedFileDto file, IReadOnlyCollection<byte> fileContent) : base(CommandType.DownloadFile)
         {
             File = file;
             FileContent = fileContent;
@@ -35,7 +35,7 @@ namespace longtooth.Protocol.Abstractions.Responses
             }
         }
 
-        public static DownloadFileResponse Parse(string header, List<byte> payload)
+        public static DownloadFileResponse Parse(string header, IReadOnlyCollection<byte> payload)
         {
             _ = header ?? throw new ArgumentNullException(nameof(header));
             _ = payload ?? throw new ArgumentNullException(nameof(payload));
