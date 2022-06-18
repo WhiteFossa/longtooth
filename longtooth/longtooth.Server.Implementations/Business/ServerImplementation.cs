@@ -161,11 +161,11 @@ namespace longtooth.Server.Implementations.Business
                         connectionState);
                 }
             }
-            catch(SocketException socketException)
+            catch(SocketException)
             {
                 // Client abruptly closed connection, we can do nothing with it
             }
-            catch (ObjectDisposedException disposedException)
+            catch (ObjectDisposedException)
             {
                 // Swallowing it, we can do nothing
             }
@@ -204,11 +204,11 @@ namespace longtooth.Server.Implementations.Business
                     }
                 }
             }
-            catch (SocketException socketException)
+            catch (SocketException)
             {
                 // Client abruptly closed connection, we can do nothing with it
             }
-            catch (ObjectDisposedException disposedException)
+            catch (ObjectDisposedException)
             {
                 // Swallowing it, we can do nothing
             }

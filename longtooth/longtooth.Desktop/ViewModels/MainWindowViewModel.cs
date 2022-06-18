@@ -32,8 +32,8 @@ namespace longtooth.Desktop.ViewModels
         private string _serverPort;
         private string _consoleText;
         private int _consoleCaretIndex;
-        private ObservableCollection<MountpointDto> _mountpoints = new ObservableCollection<MountpointDto>();
-        private ObservableCollection<DirectoryContentItemDto> _directoryContent = new ObservableCollection<DirectoryContentItemDto>();
+        private ObservableCollection<MountpointDto> _mountpoints = new();
+        private ObservableCollection<DirectoryContentItemDto> _directoryContent = new();
         private string _currentDirectory;
         private FileDto _currentFile;
         private double _progressValue;
@@ -176,7 +176,12 @@ namespace longtooth.Desktop.ViewModels
         /// <summary>
         /// Create new directory
         /// </summary>
-        public ReactiveCommand<Unit, Unit> CreateNewDirectoryCommand { get; }
+        public ReactiveCommand<Unit, Unit> CreateDirectoryAsyncCommand { get; }
+
+        /// <summary>
+        /// Delete current directory
+        /// </summary>
+        public ReactiveCommand<Unit, Unit> DeleteDirectoryAsyncCommand { get; }
 
         #endregion
 
@@ -247,7 +252,8 @@ namespace longtooth.Desktop.ViewModels
             DownloadFileAsyncCommand = ReactiveCommand.Create(DownloadFileAsync);
             UploadFileAsyncCommand = ReactiveCommand.Create(UploadFileAsync);
             DeleteFileAsyncCommand = ReactiveCommand.Create(DeleteFileAsync);
-            CreateNewDirectoryCommand = ReactiveCommand.Create(CreateDirectoryAsync);
+            CreateDirectoryAsyncCommand = ReactiveCommand.Create(CreateDirectoryAsync);
+            DeleteDirectoryAsyncCommand = ReactiveCommand.Create(DeleteDirectoryAsync);
 
             #endregion
         }

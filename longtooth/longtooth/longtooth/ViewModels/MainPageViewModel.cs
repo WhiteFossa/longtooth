@@ -57,10 +57,10 @@ namespace longtooth.ViewModels
             }
         }
 
-        private IServer _server;
-        private IMessagesProcessor _messagesProcessor;
-        private IServerSideMessagesProcessor _serverSideMessagesProcessor;
-        private IPermissionsManager _permissionsManager;
+        private readonly IServer _server;
+        private readonly IMessagesProcessor _messagesProcessor;
+        private readonly IServerSideMessagesProcessor _serverSideMessagesProcessor;
+        private readonly IPermissionsManager _permissionsManager;
 
         /// <summary>
         /// Constructor
@@ -114,7 +114,7 @@ namespace longtooth.ViewModels
             {
                 await _server.StartAsync(OnNewDataReadFromClientAsync);
             }
-            catch(Exception ex)
+            catch(Exception)
             {
                 // TODO: Handle me
             }
