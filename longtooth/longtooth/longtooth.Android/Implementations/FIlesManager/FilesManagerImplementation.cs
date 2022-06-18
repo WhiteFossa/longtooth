@@ -34,51 +34,58 @@ namespace longtooth.Droid.Implementations.FilesManager
 
         public async Task<DirectoryContentDto> GetDirectoryContentAsync(string serverSidePath)
         {
-            _ = serverSidePath ?? throw new ArgumentNullException(nameof(serverSidePath));
-
-            var normalizedPath = FilesHelper.NormalizePath(serverSidePath);
-
-            if (!IsDirectoryBelongsToMountpoint(normalizedPath))
+            try
             {
-                // Non-exported directory
+                _ = serverSidePath ?? throw new ArgumentNullException(nameof(serverSidePath));
+
+                var normalizedPath = FilesHelper.NormalizePath(serverSidePath);
+
+                if (!IsDirectoryBelongsToMountpoint(normalizedPath))
+                {
+                    // Non-exported directory
+                    return new DirectoryContentDto(false, new List<DirectoryContentItemDto>());
+                }
+
+                var directories = Directory.GetDirectories(normalizedPath);
+                var files = (new DirectoryInfo(normalizedPath)).GetFiles();
+
+                var result = directories
+                        .Select(d => new DirectoryContentItemDto(true, d, 0)) // Directories have no size
+                         .Union(files.Select(f => new DirectoryContentItemDto(false, f.Name, f.Length)))
+                         .ToList();
+
+                // Removing base directory
+                result = result
+                    .Select(dci => new DirectoryContentItemDto(
+                        dci.IsDirectory,
+                        dci.IsDirectory ? dci.Name.Substring(normalizedPath.Length + 1) : dci.Name, // +1 for trailing / of normalized path
+                        dci.Size))
+                    .ToList();
+
+                // Adding "move up" if not root directory
+                var isMountpoint = false;
+                foreach (var mountpoint in _mountpoints)
+                {
+                    if (serverSidePath.Equals(mountpoint.ServerSidePath))
+                    {
+                        isMountpoint = true;
+                        break;
+                    }
+                }
+
+                if (!isMountpoint)
+                {
+                    result = new List<DirectoryContentItemDto>() { new DirectoryContentItemDto(true, "..", 0) }
+                        .Union(result)
+                        .ToList();
+                }
+
+                return new DirectoryContentDto(true, result);
+            }
+            catch (Exception)
+            {
                 return new DirectoryContentDto(false, new List<DirectoryContentItemDto>());
             }
-
-            var directories = Directory.GetDirectories(normalizedPath);
-            var files = (new DirectoryInfo(normalizedPath)).GetFiles();
-
-            var result = directories
-                    .Select(d => new DirectoryContentItemDto(true, d, 0)) // Directories have no size
-                     .Union(files.Select(f => new DirectoryContentItemDto(false, f.Name, f.Length)))
-                     .ToList();
-
-            // Removing base directory
-            result = result
-                .Select(dci => new DirectoryContentItemDto(
-                    dci.IsDirectory,
-                    dci.IsDirectory ? dci.Name.Substring(normalizedPath.Length + 1) : dci.Name, // +1 for trailing / of normalized path
-                    dci.Size))
-                .ToList();
-
-            // Adding "move up" if not root directory
-            var isMountpoint = false;
-            foreach (var mountpoint in _mountpoints)
-            {
-                if (serverSidePath.Equals(mountpoint.ServerSidePath))
-                {
-                    isMountpoint = true;
-                    break;
-                }
-            }
-
-            if (!isMountpoint)
-            {
-                result = new List<DirectoryContentItemDto>() { new DirectoryContentItemDto(true, "..", 0) }
-                    .Union(result)
-                    .ToList();
-            }
-
-            return new DirectoryContentDto(true, result);
         }
 
         private bool IsDirectoryInsideAnotherOrTheSame(string upperDirectory, string lowerDirectory)
@@ -110,55 +117,71 @@ namespace longtooth.Droid.Implementations.FilesManager
 
         public async Task<DownloadedFileWithContentDto> DownloadFileAsync(string path, ulong start, uint length)
         {
-            if (!File.Exists(path))
+            try
             {
-                return new DownloadedFileWithContentDto(false, start, length, new List<byte>());
-            }
+                _ = path ?? throw new ArgumentNullException(nameof(path));
 
-            var buffer = new byte[length];
-
-            using (var stream = new FileStream(path, FileMode.Open))
-            {
-                var newPosition = stream.Seek((long)start, SeekOrigin.Begin);
-                if (newPosition != (long)start)
+                if (!File.Exists(path))
                 {
-                    return new DownloadedFileWithContentDto(false, start, length, new List<byte>());
+                    return new DownloadedFileWithContentDto(false, 0, 0, new List<byte>());
                 }
 
-                var readAmount = stream.Read(buffer, 0, (int)length);
-                if (readAmount != (int)length)
-                {
-                    return new DownloadedFileWithContentDto(false, start, length, new List<byte>());
-                }
-            }
+                var buffer = new byte[length];
 
-            return new DownloadedFileWithContentDto(true, start, length, buffer.ToList());
+                using (var stream = new FileStream(path, FileMode.Open))
+                {
+                    var newPosition = stream.Seek((long)start, SeekOrigin.Begin);
+                    if (newPosition != (long)start)
+                    {
+                        return new DownloadedFileWithContentDto(false, 0, 0, new List<byte>());
+                    }
+
+                    var readAmount = stream.Read(buffer, 0, (int)length);
+                    if (readAmount != (int)length)
+                    {
+                        return new DownloadedFileWithContentDto(false, 0, 0, new List<byte>());
+                    }
+                }
+
+                return new DownloadedFileWithContentDto(true, start, length, buffer.ToList());
+            }
+            catch (Exception)
+            {
+                return new DownloadedFileWithContentDto(false, 0, 0, new List<byte>());
+            }
         }
 
         public async Task<CreateFileResultDto> CreateNewFileAsync(string newFilePath)
         {
-            _ = newFilePath ?? throw new ArgumentNullException(nameof(newFilePath));
-
-            var targetDirectory = Path.GetDirectoryName(newFilePath);
-
-            if (!IsDirectoryBelongsToMountpoint(targetDirectory))
+            try
             {
-                // Non-exported directory
+                _ = newFilePath ?? throw new ArgumentNullException(nameof(newFilePath));
+
+                var targetDirectory = Path.GetDirectoryName(newFilePath);
+
+                if (!IsDirectoryBelongsToMountpoint(targetDirectory))
+                {
+                    // Non-exported directory
+                    return new CreateFileResultDto(false);
+                }
+
+                if (File.Exists(newFilePath))
+                {
+                    // File already exist
+                    return new CreateFileResultDto(false);
+                }
+
+                using (var stream = File.Create(newFilePath))
+                {
+
+                }
+
+                return new CreateFileResultDto(true);
+            }
+            catch (Exception)
+            {
                 return new CreateFileResultDto(false);
             }
-
-            if (File.Exists(newFilePath))
-            {
-                // File already exist
-                return new CreateFileResultDto(false);
-            }
-
-            using (var stream = File.Create(newFilePath))
-            {
-
-            }
-
-            return new CreateFileResultDto(true);
         }
 
         private bool IsDirectoryBelongsToMountpoint(string path)
@@ -179,113 +202,141 @@ namespace longtooth.Droid.Implementations.FilesManager
 
         public async Task<UpdateFileResultDto> UpdateFileAsync(string path, ulong start, IReadOnlyCollection<byte> data)
         {
-            _ = path ?? throw new ArgumentNullException(nameof(path));
-
-            var targetDirectory = Path.GetDirectoryName(path);
-
-            if (!IsDirectoryBelongsToMountpoint(targetDirectory))
+            try
             {
-                // Non-exported directory
-                return new UpdateFileResultDto(false, 0);
-            }
+                _ = path ?? throw new ArgumentNullException(nameof(path));
 
-            if (!File.Exists(path))
-            {
-                // File not exist
-                return new UpdateFileResultDto(false, 0);
-            }
+                var targetDirectory = Path.GetDirectoryName(path);
 
-            using (var stream = new FileStream(path, FileMode.Open))
-            {
-                var newPosition = stream.Seek((long)start, SeekOrigin.Begin);
-
-                if (newPosition != (long)start)
+                if (!IsDirectoryBelongsToMountpoint(targetDirectory))
                 {
-                    // Position is out of file
+                    // Non-exported directory
                     return new UpdateFileResultDto(false, 0);
                 }
 
-                stream.Write(data.ToArray(), 0, data.Count);
-            }
+                if (!File.Exists(path))
+                {
+                    // File not exist
+                    return new UpdateFileResultDto(false, 0);
+                }
 
-            return new UpdateFileResultDto(true, (uint)data.Count());
+                using (var stream = new FileStream(path, FileMode.Open))
+                {
+                    var newPosition = stream.Seek((long)start, SeekOrigin.Begin);
+
+                    if (newPosition != (long)start)
+                    {
+                        // Position is out of file
+                        return new UpdateFileResultDto(false, 0);
+                    }
+
+                    stream.Write(data.ToArray(), 0, data.Count);
+                }
+
+                return new UpdateFileResultDto(true, (uint)data.Count());
+            }
+            catch (Exception)
+            {
+                return new UpdateFileResultDto(false, 0);
+            }
         }
 
         public async Task<DeleteFileResultDto> DeleteFileAsync(string path)
         {
-            _ = path ?? throw new ArgumentNullException(nameof(path));
-
-            var targetDirectory = Path.GetDirectoryName(path);
-
-            if (!IsDirectoryBelongsToMountpoint(targetDirectory))
+            try
             {
-                // Non-exported directory
+                _ = path ?? throw new ArgumentNullException(nameof(path));
+
+                var targetDirectory = Path.GetDirectoryName(path);
+
+                if (!IsDirectoryBelongsToMountpoint(targetDirectory))
+                {
+                    // Non-exported directory
+                    return new DeleteFileResultDto(false);
+                }
+
+                if (!File.Exists(path))
+                {
+                    // File not exist
+                    return new DeleteFileResultDto(false);
+                }
+
+                File.Delete(path);
+
+                return new DeleteFileResultDto(true);
+            }
+            catch (Exception)
+            {
                 return new DeleteFileResultDto(false);
             }
-
-            if (!File.Exists(path))
-            {
-                // File not exist
-                return new DeleteFileResultDto(false);
-            }
-
-            File.Delete(path);
-
-            return new DeleteFileResultDto(true);
         }
 
         public async Task<DeleteDirectoryResultDto> DeleteDirectoryAsync(string path)
         {
-            _ = path ?? throw new ArgumentNullException(nameof(path));
-
-            var targetDirectory = Path.GetDirectoryName(path);
-
-            if (!IsDirectoryBelongsToMountpoint(targetDirectory))
+            try
             {
-                // Non-exported directory
+                _ = path ?? throw new ArgumentNullException(nameof(path));
+
+                var targetDirectory = Path.GetDirectoryName(path);
+
+                if (!IsDirectoryBelongsToMountpoint(targetDirectory))
+                {
+                    // Non-exported directory
+                    return new DeleteDirectoryResultDto(false);
+                }
+
+                if (_mountpoints
+                    .Where(mp => mp.ServerSidePath == path)
+                    .Any())
+                {
+                    // Mountpoints are not-removable
+                    return new DeleteDirectoryResultDto(false);
+                }
+
+                if (!Directory.Exists(path))
+                {
+                    // Directory doesn't exist
+                    return new DeleteDirectoryResultDto(false);
+                }
+
+                Directory.Delete(path);
+
+                return new DeleteDirectoryResultDto(true);
+            }
+            catch (Exception)
+            {
                 return new DeleteDirectoryResultDto(false);
             }
-
-            if (_mountpoints
-                .Where(mp => mp.ServerSidePath == path)
-                .Any())
-            {
-                // Mountpoints are not-removable
-                return new DeleteDirectoryResultDto(false);
-            }
-
-            if (!Directory.Exists(path))
-            {
-                // Directory doesn't exist
-                return new DeleteDirectoryResultDto(false);
-            }
-
-            Directory.Delete(path);
-
-            return new DeleteDirectoryResultDto(true);
         }
 
         public async Task<CreateDirectoryResultDto> CreateDirectoryAsync(string path)
         {
-            _ = path ?? throw new ArgumentNullException(nameof(path));
-
-            var targetDirectory = Path.GetDirectoryName(path);
-
-            if (!IsDirectoryBelongsToMountpoint(targetDirectory))
+            try
             {
-                // Non-exported directory
+                _ = path ?? throw new ArgumentNullException(nameof(path));
+
+                var targetDirectory = Path.GetDirectoryName(path);
+
+                if (!IsDirectoryBelongsToMountpoint(targetDirectory))
+                {
+                    // Non-exported directory
+                    return new CreateDirectoryResultDto(false);
+                }
+
+                if (Directory.Exists(path))
+                {
+                    // Directory already exist
+                    return new CreateDirectoryResultDto(false);
+                }
+
+                Directory.CreateDirectory(path);
+
+                return new CreateDirectoryResultDto(true);
+            }
+            catch (Exception)
+            {
                 return new CreateDirectoryResultDto(false);
             }
-
-            if (Directory.Exists(path))
-            {
-                // Directory already exist
-                return new CreateDirectoryResultDto(false);
-            }
-
-            Directory.CreateDirectory(path);
-
-            return new CreateDirectoryResultDto(true);
         }
     }
 }

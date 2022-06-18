@@ -395,6 +395,7 @@ namespace longtooth.Desktop.ViewModels
                     {
                         // Done
                         ProgressValue = 0;
+                        await _logger.LogInfoAsync("File updated!");
                     }
                     else
                     {
