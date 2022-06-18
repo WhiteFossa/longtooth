@@ -51,7 +51,7 @@ namespace longtooth.Protocol.Implementations.Implementations
             return EncodeCommand(getDirectoryContentCommand, null);
         }
 
-        public IReadOnlyCollection<byte> GenerateDownloadCommand(string path, ulong startPosition, uint length)
+        public IReadOnlyCollection<byte> GenerateDownloadCommand(string path, ulong startPosition, int length)
         {
             var downloadFileCommand = new DownloadCommand(path,
                 startPosition,

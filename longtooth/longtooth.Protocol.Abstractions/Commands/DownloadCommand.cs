@@ -34,14 +34,14 @@ namespace longtooth.Protocol.Abstractions.Commands
         /// Read this amount of bytes
         /// </summary>
         [JsonPropertyName("ReadLength")]
-        public uint ReadLength { get; private set; }
+        public int ReadLength { get; private set; }
 
         private readonly IMessagesProcessor _messagesProcessor;
         private readonly IResponseToClientHeaderGenerator _responseToClientHeaderGenerator;
         private readonly IFilesManager _filesManager;
 
         [JsonConstructor]
-        public DownloadCommand(string filePath, ulong startPosition, uint readLength) : base(CommandType.DownloadFile)
+        public DownloadCommand(string filePath, ulong startPosition, int readLength) : base(CommandType.DownloadFile)
         {
             FilePath = filePath ?? throw new ArgumentNullException(nameof(filePath));
             StartPosition = startPosition;
@@ -50,7 +50,7 @@ namespace longtooth.Protocol.Abstractions.Commands
 
         public DownloadCommand(string filePath,
             ulong startPosition,
-            uint readLength,
+            int readLength,
             IMessagesProcessor messagesProcessor,
             IResponseToClientHeaderGenerator responseToClientHeaderGenerator,
             IFilesManager filesManager) : base(CommandType.DownloadFile)

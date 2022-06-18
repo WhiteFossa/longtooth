@@ -23,12 +23,12 @@ namespace longtooth.Common.Abstractions.DTOs
         /// Content length
         /// </summary>
         [JsonPropertyName("Length")]
-        public uint Length { get; private set; }
+        public int Length { get; private set; }
 
 
         public DownloadedFileDto(bool isSuccessful,
             ulong startPosition,
-            uint length)
+            int length)
         {
             IsSuccessful = isSuccessful;
             StartPosition = startPosition;

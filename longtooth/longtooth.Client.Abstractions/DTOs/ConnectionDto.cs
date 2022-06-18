@@ -16,9 +16,9 @@ namespace longtooth.Client.Abstractions.DTOs
         /// <summary>
         /// Server port
         /// </summary>
-        public uint Port { get; private set; }
+        public int Port { get; private set; }
 
-        public ConnectionDto(IPAddress address, uint port)
+        public ConnectionDto(IPAddress address, int port)
         {
             Address = address ?? throw new ArgumentNullException(nameof(address));
             Port = port;

@@ -30,7 +30,7 @@ namespace longtooth.Protocol.Abstractions.Interfaces
         /// <summary>
         /// Generate "download a file" command
         /// </summary>
-        IReadOnlyCollection<byte> GenerateDownloadCommand(string path, ulong startPosition, uint length);
+        IReadOnlyCollection<byte> GenerateDownloadCommand(string path, ulong startPosition, int length);
 
         /// <summary>
         /// Generate "create a file" command

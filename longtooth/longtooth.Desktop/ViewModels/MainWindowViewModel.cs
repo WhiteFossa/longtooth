@@ -264,7 +264,7 @@ namespace longtooth.Desktop.ViewModels
         public async void ConnectAsync()
         {
             _mainModel.ServerIp = IPAddress.Parse(_serverIp);
-            _mainModel.ServerPort = uint.Parse(_serverPort);
+            _mainModel.ServerPort = int.Parse(_serverPort);
 
             await _client.ConnectAsync(new ConnectionDto(_mainModel.ServerIp, _mainModel.ServerPort));
         }
@@ -354,7 +354,7 @@ namespace longtooth.Desktop.ViewModels
                         }
 
                         await PrepareAndSendCommand(_commandGenerator.GenerateDownloadCommand(CurrentFile.FullPath,
-                            (ulong)_alreadyDownloaded, (uint)chunkSize));
+                            (ulong)_alreadyDownloaded, (int)chunkSize));
                     }
 
                     break;
@@ -567,7 +567,7 @@ namespace longtooth.Desktop.ViewModels
             else
             {
                 // Single chunk download
-                downloadCommand = _commandGenerator.GenerateDownloadCommand(CurrentFile.FullPath, 0, (uint)CurrentFile.Size);
+                downloadCommand = _commandGenerator.GenerateDownloadCommand(CurrentFile.FullPath, 0, (int)CurrentFile.Size);
             }
 
             await PrepareAndSendCommand(downloadCommand);

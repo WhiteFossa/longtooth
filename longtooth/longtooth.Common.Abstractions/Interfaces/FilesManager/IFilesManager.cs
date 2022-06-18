@@ -22,7 +22,7 @@ namespace longtooth.Common.Abstractions.Interfaces.FilesManager
         /// <summary>
         /// Downloads part of file
         /// </summary>
-        Task<DownloadedFileWithContentDto> DownloadFileAsync(string path, ulong start, uint length);
+        Task<DownloadedFileWithContentDto> DownloadFileAsync(string path, ulong start, int length);
 
         /// <summary>
         /// Create new empty file

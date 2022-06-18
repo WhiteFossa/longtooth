@@ -115,7 +115,7 @@ namespace longtooth.Droid.Implementations.FilesManager
             return isParent;
         }
 
-        public async Task<DownloadedFileWithContentDto> DownloadFileAsync(string path, ulong start, uint length)
+        public async Task<DownloadedFileWithContentDto> DownloadFileAsync(string path, ulong start, int length)
         {
             try
             {
@@ -233,7 +233,7 @@ namespace longtooth.Droid.Implementations.FilesManager
                     stream.Write(data.ToArray(), 0, data.Count);
                 }
 
-                return new UpdateFileResultDto(true, (uint)data.Count());
+                return new UpdateFileResultDto(true, data.Count());
             }
             catch (Exception)
             {

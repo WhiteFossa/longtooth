@@ -17,7 +17,7 @@ namespace longtooth.Common.Abstractions.Models
         /// <summary>
         /// Server port
         /// </summary>
-        public uint ServerPort { get; set; }
+        public int ServerPort { get; set; }
 
         /// <summary>
         /// Share phone's mountpoints

@@ -14,9 +14,9 @@ namespace longtooth.Common.Abstractions.DTOs
         /// How much bytes was written (for convenience)
         /// </summary>
         [JsonPropertyName("BytesWritten")]
-        public uint BytesWritten { get; private set; }
+        public int BytesWritten { get; private set; }
 
-        public UpdateFileResultDto(bool isSuccessful, uint bytesWritten)
+        public UpdateFileResultDto(bool isSuccessful, int bytesWritten)
         {
             IsSuccessful = isSuccessful;
             BytesWritten = bytesWritten;
