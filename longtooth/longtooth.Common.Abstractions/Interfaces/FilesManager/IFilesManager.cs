@@ -22,7 +22,7 @@ namespace longtooth.Common.Abstractions.Interfaces.FilesManager
         /// <summary>
         /// Downloads part of file
         /// </summary>
-        Task<DownloadedFileWithContentDto> DownloadFileAsync(string path, ulong start, int length);
+        Task<DownloadedFileWithContentDto> DownloadFileAsync(string path, long start, int length);
 
         /// <summary>
         /// Create new empty file
@@ -32,7 +32,7 @@ namespace longtooth.Common.Abstractions.Interfaces.FilesManager
         /// <summary>
         /// Update file starting from given position
         /// </summary>
-        Task<UpdateFileResultDto> UpdateFileAsync(string path, ulong start, IReadOnlyCollection<byte> data);
+        Task<UpdateFileResultDto> UpdateFileAsync(string path, long start, IReadOnlyCollection<byte> data);
 
         /// <summary>
         /// Delete file

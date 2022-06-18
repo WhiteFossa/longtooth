@@ -115,7 +115,7 @@ namespace longtooth.Droid.Implementations.FilesManager
             return isParent;
         }
 
-        public async Task<DownloadedFileWithContentDto> DownloadFileAsync(string path, ulong start, int length)
+        public async Task<DownloadedFileWithContentDto> DownloadFileAsync(string path, long start, int length)
         {
             try
             {
@@ -200,7 +200,7 @@ namespace longtooth.Droid.Implementations.FilesManager
             return isChildDirectory;
         }
 
-        public async Task<UpdateFileResultDto> UpdateFileAsync(string path, ulong start, IReadOnlyCollection<byte> data)
+        public async Task<UpdateFileResultDto> UpdateFileAsync(string path, long start, IReadOnlyCollection<byte> data)
         {
             try
             {

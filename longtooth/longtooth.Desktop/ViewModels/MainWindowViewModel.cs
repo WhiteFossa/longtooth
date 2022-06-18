@@ -197,12 +197,12 @@ namespace longtooth.Desktop.ViewModels
         private readonly IClientSideMessagesProcessor _clientSideMessagesProcessor;
 
         private const int DownloadChunkSize = 1000000;
-        private int _alreadyDownloaded;
+        private long _alreadyDownloaded;
         private List<byte> _downloadedContent;
 
         private const int UploadChunkSize = 1000000;
         private string _pathToUpload;
-        private int _alreadyUploaded;
+        private long _alreadyUploaded;
         private List<byte> _contentToUpload;
 
         public MainWindowViewModel(MainModel model) : base()
@@ -354,7 +354,7 @@ namespace longtooth.Desktop.ViewModels
                         }
 
                         await PrepareAndSendCommand(_commandGenerator.GenerateDownloadCommand(CurrentFile.FullPath,
-                            (ulong)_alreadyDownloaded, (int)chunkSize));
+                            _alreadyDownloaded, (int)chunkSize));
                     }
 
                     break;
@@ -411,8 +411,8 @@ namespace longtooth.Desktop.ViewModels
                             uploadBytesCount = UploadChunkSize;
                         }
 
-                        var uploadBuffer = _contentToUpload.GetRange(_alreadyUploaded, uploadBytesCount);
-                        await PrepareAndSendCommand(_commandGenerator.UpdateFileCommand(_pathToUpload, (ulong)_alreadyUploaded, uploadBuffer.ToArray()));
+                        var uploadBuffer = _contentToUpload.GetRange((int)_alreadyUploaded, (int)uploadBytesCount);
+                        await PrepareAndSendCommand(_commandGenerator.UpdateFileCommand(_pathToUpload, _alreadyUploaded, uploadBuffer.ToArray()));
                     }
 
                     break;

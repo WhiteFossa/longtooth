@@ -17,7 +17,7 @@ namespace longtooth.Common.Abstractions.DTOs
         /// Download start position
         /// </summary>
         [JsonPropertyName("StartPosition")]
-        public ulong StartPosition { get; private set; }
+        public long StartPosition { get; private set; }
 
         /// <summary>
         /// Content length
@@ -27,7 +27,7 @@ namespace longtooth.Common.Abstractions.DTOs
 
 
         public DownloadedFileDto(bool isSuccessful,
-            ulong startPosition,
+            long startPosition,
             int length)
         {
             IsSuccessful = isSuccessful;

@@ -51,7 +51,7 @@ namespace longtooth.Protocol.Implementations.Implementations
             return EncodeCommand(getDirectoryContentCommand, null);
         }
 
-        public IReadOnlyCollection<byte> GenerateDownloadCommand(string path, ulong startPosition, int length)
+        public IReadOnlyCollection<byte> GenerateDownloadCommand(string path, long startPosition, int length)
         {
             var downloadFileCommand = new DownloadCommand(path,
                 startPosition,
@@ -73,7 +73,7 @@ namespace longtooth.Protocol.Implementations.Implementations
             return EncodeCommand(createFileCommand, null);
         }
 
-        public IReadOnlyCollection<byte> UpdateFileCommand(string path, ulong startPosition, byte[] dataToWrite)
+        public IReadOnlyCollection<byte> UpdateFileCommand(string path, long startPosition, byte[] dataToWrite)
         {
             var updateFileCommand = new UpdateFileCommand(path,
                 startPosition,

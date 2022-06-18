@@ -26,7 +26,7 @@ namespace longtooth.Protocol.Abstractions.Commands
         /// Position in file to start where update will start
         /// </summary>
         [JsonPropertyName("StartPosition")]
-        public ulong StartPosition { get; private set; }
+        public long StartPosition { get; private set; }
 
         /// <summary>
         /// Update content
@@ -39,7 +39,7 @@ namespace longtooth.Protocol.Abstractions.Commands
         private readonly IFilesManager _filesManager;
 
         [JsonConstructor]
-        public UpdateFileCommand(string filePath, ulong startPosition) : base(CommandType.UpdateFile)
+        public UpdateFileCommand(string filePath, long startPosition) : base(CommandType.UpdateFile)
         {
             FilePath = filePath ?? throw new ArgumentNullException(nameof(filePath));
             StartPosition = startPosition;
@@ -47,7 +47,7 @@ namespace longtooth.Protocol.Abstractions.Commands
         }
 
         public UpdateFileCommand(string filePath,
-            ulong startPosition,
+            long startPosition,
             IReadOnlyCollection<byte> content,
             IMessagesProcessor messagesProcessor,
             IResponseToClientHeaderGenerator responseToClientHeaderGenerator,
