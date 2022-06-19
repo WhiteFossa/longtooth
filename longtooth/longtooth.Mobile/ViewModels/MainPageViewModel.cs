@@ -1,13 +1,10 @@
-﻿using Android.Content.Res;
-using longtooth.Abstractions.DTOs;
+﻿using longtooth.Abstractions.DTOs;
 using longtooth.Abstractions.Interfaces.AppManager;
 using longtooth.Abstractions.Interfaces.Models;
 using longtooth.Abstractions.Interfaces.Permissions;
 using longtooth.Common.Abstractions.DTOs;
 using longtooth.Common.Abstractions.Interfaces.FilesManager;
 using longtooth.Common.Abstractions.Interfaces.MessagesProcessor;
-using longtooth.Mobile.Abstractions.FilesPicke;
-using longtooth.Mobile.Abstractions.FilesPicker;
 using longtooth.Mobile.Abstractions.Interfaces.UserNotifier;
 using longtooth.Mobile.Views;
 using longtooth.Models;
@@ -25,7 +22,7 @@ using static Xamarin.Essentials.Permissions;
 
 namespace longtooth.ViewModels
 {
-    internal class MainPageViewModel : BindableObject
+    public class MainPageViewModel : BindableObject
     {
         #region Commands
 
@@ -98,6 +95,7 @@ namespace longtooth.ViewModels
         public MainPageViewModel()
         {
             MainModel = App.Container.Resolve<IMainModel>() as MainModel;
+            MainModel.MainPageViewModel = this;
 
             _server = App.Container.Resolve<IServer>();
             _messagesProcessor = App.Container.Resolve<IMessagesProcessor>();
@@ -190,27 +188,20 @@ namespace longtooth.ViewModels
             {
                 await Navigation.PushModalAsync(_addMountpointPageView);
             });
+        }
 
-            //var directorySelectionDialog = App.Container.Resolve<IFilesPicker>();
-            //directorySelectionDialog.Setup(FileSelectionMode.FolderChoose);
+        public async Task OnAddNewMountpointAsync(MountpointDto mountpoint)
+        {
+            _ = mountpoint ?? throw new ArgumentNullException(nameof(mountpoint));
 
-            //var path = await directorySelectionDialog.GetFileOrDirectoryAsync(Android.OS.Environment.ExternalStorageDirectory.AbsolutePath);
-
-            //if (path == null)
-            //{
-            //    return;
-            //}
-
-            //var newMountpoint = new MountpointDto(path, path); // For now path equal to name
-
-            //try
-            //{
-            //    _filesManager.AddMountpoint(newMountpoint);
-            //}
-            //catch (ArgumentException)
-            //{
-            //    await _userNotifier.ShowNotificationMessageAsync("Warning", "Mountpoint with this path or name already exist!");
-            //}
+            try
+            {
+                _filesManager.AddMountpoint(mountpoint);
+            }
+            catch (ArgumentException)
+            {
+                await _userNotifier.ShowNotificationMessageAsync("Warning", "Mountpoint with this path or name already exist!");
+            }
         }
     }
 }

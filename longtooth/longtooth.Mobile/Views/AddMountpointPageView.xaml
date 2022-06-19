@@ -39,7 +39,7 @@
 
                     <Button
                         Text="Select"
-                        Command="{Binding SelectPath}" />
+                        Command="{Binding SelectPathCommand}" />
                 </StackLayout>
 
                 <!-- Accept / cancel -->
@@ -48,11 +48,11 @@
                     
                     <Button
                         Text="Accept"
-                        Command="{Binding Accept}" />
+                        Command="{Binding AcceptCommand}" />
 
                     <Button
                         Text="Cancel"
-                        Command="{Binding Cancel}" />
+                        Command="{Binding CancelCommand}" />
                 </StackLayout>
 
             </StackLayout>
