@@ -30,7 +30,6 @@ namespace longtooth.Protocol.Implementations.Implementations
             var payloadSize = BitConverter.ToInt32(messageAsList.GetRange(4 + headerSize, 4).ToArray());
             var payload = messageAsList.GetRange(8 + headerSize, message.Count - 8 - headerSize);
 
-            ResponseHeader response = null;
             switch (header.Command)
             {
                 case CommandType.Ping:

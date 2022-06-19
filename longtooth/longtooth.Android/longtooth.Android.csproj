@@ -64,6 +64,7 @@
     <PackageReference Include="Xamarin.Forms" Version="5.0.0.2196" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Implementations\AppManager\AppManager.cs" />
     <Compile Include="Implementations\FIlesManager\FilesManagerImplementation.cs" />
     <Compile Include="Implementations\PermissionsManager\PermissionsManager.cs" />
     <Compile Include="MainActivity.cs" />
@@ -95,27 +96,27 @@
     <Folder Include="Resources\drawable\" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\longtooth.Common.Abstractions\longtooth.Common.Abstractions.csproj">
+    <ProjectReference Include="..\longtooth.Common.Abstractions\longtooth.Common.Abstractions.csproj">
       <Project>{A8446E21-B2D8-4798-BA71-5F55CB6AA464}</Project>
       <Name>longtooth.Common.Abstractions</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\longtooth.Common.Implementations\longtooth.Common.Implementations.csproj">
+    <ProjectReference Include="..\longtooth.Common.Implementations\longtooth.Common.Implementations.csproj">
       <Project>{6756AAB9-06B8-4B9F-905D-D74A05D4CEBD}</Project>
       <Name>longtooth.Common.Implementations</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\longtooth.Protocol.Abstractions\longtooth.Protocol.Abstractions.csproj">
+    <ProjectReference Include="..\longtooth.Protocol.Abstractions\longtooth.Protocol.Abstractions.csproj">
       <Project>{59DCFA75-CCC3-4E33-AACD-27C4C71A350A}</Project>
       <Name>longtooth.Protocol.Abstractions</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\longtooth.Protocol.Implementations\longtooth.Protocol.Implementations.csproj">
+    <ProjectReference Include="..\longtooth.Protocol.Implementations\longtooth.Protocol.Implementations.csproj">
       <Project>{0F20C7EC-ECF0-4602-820D-FE70A926603D}</Project>
       <Name>longtooth.Protocol.Implementations</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\longtooth.Server.Abstractions\longtooth.Server.Abstractions.csproj">
+    <ProjectReference Include="..\longtooth.Server.Abstractions\longtooth.Server.Abstractions.csproj">
       <Project>{20D0C8C0-F105-4A58-9D6C-60EE9B4AEFE4}</Project>
       <Name>longtooth.Server.Abstractions</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\longtooth.Server.Implementations\longtooth.Server.Implementations.csproj">
+    <ProjectReference Include="..\longtooth.Server.Implementations\longtooth.Server.Implementations.csproj">
       <Project>{0F4270F0-711D-4544-9846-C14BA51A7242}</Project>
       <Name>longtooth.Server.Implementations</Name>
     </ProjectReference>

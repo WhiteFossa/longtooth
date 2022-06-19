@@ -1,5 +1,6 @@
 ﻿using Acr.UserDialogs;
 using longtooth.Abstractions.DTOs;
+using longtooth.Abstractions.Interfaces.AppManager;
 using longtooth.Abstractions.Interfaces.Models;
 using longtooth.Abstractions.Interfaces.Permissions;
 using longtooth.Common.Abstractions.Interfaces.MessagesProcessor;
@@ -32,6 +33,11 @@ namespace longtooth.ViewModels
         /// </summary>
         public ICommand StopServerCommand { get; }
 
+        /// <summary>
+        /// Exit application
+        /// </summary>
+        public ICommand ExitCommand { get; }
+
         #endregion
 
         /// <summary>
@@ -61,6 +67,7 @@ namespace longtooth.ViewModels
         private readonly IMessagesProcessor _messagesProcessor;
         private readonly IServerSideMessagesProcessor _serverSideMessagesProcessor;
         private readonly IPermissionsManager _permissionsManager;
+        private readonly IAppManager _appManager;
 
         /// <summary>
         /// Constructor
@@ -73,10 +80,12 @@ namespace longtooth.ViewModels
             _messagesProcessor = App.Container.Resolve<IMessagesProcessor>();
             _serverSideMessagesProcessor = App.Container.Resolve<IServerSideMessagesProcessor>();
             _permissionsManager = App.Container.Resolve<IPermissionsManager>();
+            _appManager = App.Container.Resolve<IAppManager>();
 
             // Binding commands to handlers
             StartServerCommand = new Command(async () => await OnServerStartAsync());
             StopServerCommand = new Command(async() => await OnServerStopAsync());
+            ExitCommand = new Command(async() => await OnExitAppAsync());
 
             // Local IPs
             var localIps = _server
@@ -142,6 +151,11 @@ namespace longtooth.ViewModels
         public async Task OnServerStopAsync()
         {
             _server.Stop();
+        }
+
+        public async Task OnExitAppAsync()
+        {
+            _appManager.CloseApp();
         }
     }
 }

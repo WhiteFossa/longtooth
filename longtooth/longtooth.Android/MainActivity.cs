@@ -2,6 +2,7 @@
 using Android.Content.PM;
 using Android.OS;
 using Android.Runtime;
+using longtooth.Abstractions.Interfaces.AppManager;
 using longtooth.Abstractions.Interfaces.Models;
 using longtooth.Abstractions.Interfaces.Permissions;
 using longtooth.Common.Abstractions.Interfaces.FilesManager;
@@ -9,6 +10,7 @@ using longtooth.Common.Abstractions.Interfaces.MessagesProcessor;
 using longtooth.Common.Abstractions.Interfaces.MessagesProtocol;
 using longtooth.Common.Implementations.MessagesProcessor;
 using longtooth.Common.Implementations.MessagesProtocol;
+using longtooth.Droid.Implementations.AppManager;
 using longtooth.Droid.Implementations.FilesManager;
 using longtooth.Droid.Implementations.PermissionsManager;
 using longtooth.Models;
@@ -23,11 +25,16 @@ namespace longtooth.Droid
     [Activity(Label = "longtooth", Icon = "@mipmap/icon", Theme = "@style/MainTheme", MainLauncher = true, ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation | ConfigChanges.UiMode | ConfigChanges.ScreenLayout | ConfigChanges.SmallestScreenSize )]
     public class MainActivity : global::Xamarin.Forms.Platform.Android.FormsAppCompatActivity
     {
+        /// <summary>
+        /// This activity (we need it to be able to exit gracefully)
+        /// </summary>
+        public static MainActivity Instance { get; set; }
+
         protected override void OnCreate(Bundle savedInstanceState)
         {
-            #region IoC
+            #region DI
 
-            // Registering IoC stuff
+            // Registering DI stuff
             App.Container = new TinyIoCContainer();
             App.Container.Register<IMainModel, MainModel>().AsSingleton();
             App.Container.Register<IServer, ServerImplementation>().AsSingleton();
@@ -37,10 +44,12 @@ namespace longtooth.Droid
             App.Container.Register<IResponseToClientHeaderGenerator, ResponseToClientHeaderGenerator>().AsSingleton();
             App.Container.Register<IFilesManager, FilesManagerImplementation>().AsSingleton();
             App.Container.Register<IPermissionsManager, PermissionsManager>().AsSingleton();
+            App.Container.Register<IAppManager, AppManager>().AsSingleton();
 
             #endregion
 
             base.OnCreate(savedInstanceState);
+            Instance = this;
 
             Xamarin.Essentials.Platform.Init(this, savedInstanceState);
             global::Xamarin.Forms.Forms.Init(this, savedInstanceState);

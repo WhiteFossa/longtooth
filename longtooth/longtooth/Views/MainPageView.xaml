@@ -38,14 +38,35 @@
                                 Text="Server control"
                                 HorizontalOptions="Center" />
 
-                            <Button
-                                Text="Start server"
-                                Command="{Binding StartServerCommand}" />
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="*" />
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
 
-                            <Button
-                                Text="Stop server"
-                                Command="{Binding StopServerCommand}" />
+                                <Button
+                                    Grid.Column="0"
+                                    Grid.Row="0"
+                                    Text="Start server"
+                                    Command="{Binding StartServerCommand}" />
 
+                                <Button
+                                    Grid.Column="1"
+                                    Grid.Row="0"
+                                    Text="Stop server"
+                                    Command="{Binding StopServerCommand}" />
+
+                                <Button
+                                    Grid.Column="2"
+                                    Grid.Row="0"
+                                    Text="Exit"
+                                    Command="{Binding ExitCommand}" />
+
+                            </Grid>
                         </StackLayout>
                     </StackLayout>
                 </Frame>
