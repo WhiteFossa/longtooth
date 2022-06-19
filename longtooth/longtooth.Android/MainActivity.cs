@@ -1,4 +1,5 @@
-﻿using Android.App;
+﻿using Acr.UserDialogs;
+using Android.App;
 using Android.Content.PM;
 using Android.OS;
 using Android.Runtime;
@@ -14,7 +15,11 @@ using longtooth.Common.Implementations.MessagesProcessor;
 using longtooth.Common.Implementations.MessagesProtocol;
 using longtooth.Droid.Implementations.AppManager;
 using longtooth.Droid.Implementations.FilesManager;
+using longtooth.Droid.Implementations.FilesPicker;
 using longtooth.Droid.Implementations.PermissionsManager;
+using longtooth.Droid.Implementations.UserNotifier;
+using longtooth.Mobile.Abstractions.FilesPicker;
+using longtooth.Mobile.Abstractions.Interfaces.UserNotifier;
 using longtooth.Models;
 using longtooth.Protocol.Abstractions.Interfaces;
 using longtooth.Protocol.Implementations.Implementations;
@@ -48,6 +53,8 @@ namespace longtooth.Droid
             App.Container.Register<IPermissionsManager, PermissionsManager>().AsSingleton();
             App.Container.Register<IAppManager, AppManager>().AsSingleton();
             App.Container.Register<IDataCompressor, DataCompressor>().AsSingleton();
+            App.Container.Register<IFilesPicker, FilesPicker>().AsMultiInstance();
+            App.Container.Register<IUserNotifier, UserNotifier>().AsSingleton();
 
             #endregion
 
@@ -57,6 +64,8 @@ namespace longtooth.Droid
             Xamarin.Essentials.Platform.Init(this, savedInstanceState);
             global::Xamarin.Forms.Forms.Init(this, savedInstanceState);
             LoadApplication(new App());
+
+            UserDialogs.Init(this);
         }
 
         public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Android.Content.PM.Permission[] grantResults)

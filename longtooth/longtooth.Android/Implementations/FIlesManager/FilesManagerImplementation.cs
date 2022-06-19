@@ -19,12 +19,7 @@ namespace longtooth.Droid.Implementations.FilesManager
 
         public FilesManagerImplementation()
         {
-            // Mocked mountpoints
-            var externalStorageDir = Android.OS.Environment.ExternalStorageDirectory;
-
             _mountpoints = new List<MountpointDto>();
-            _mountpoints.Add(new MountpointDto("Downloads", FilesHelper.NormalizePath(@$"{ externalStorageDir }/Download")));
-            _mountpoints.Add(new MountpointDto("DCIM", FilesHelper.NormalizePath(@$"{ externalStorageDir }/DCIM")));
         }
 
         public async Task<IReadOnlyCollection<MountpointDto>> GetMountpointsAsync()
@@ -337,6 +332,32 @@ namespace longtooth.Droid.Implementations.FilesManager
             {
                 return new CreateDirectoryResultDto(false);
             }
+        }
+
+        public void AddMountpoint(MountpointDto mountpoint)
+        {
+            var isDuplicate = _mountpoints
+                .Where(mp => mp.Name.Equals(mountpoint.Name) ||  mp.ServerSidePath.Equals(mountpoint.ServerSidePath))
+                .Any();
+
+            if (isDuplicate)
+            {
+                throw new ArgumentException("Duplicated mountpoint!", nameof(mountpoint));
+            }
+
+            _mountpoints.Add(mountpoint);
+        }
+
+        public void RemoveMountpoint(string path)
+        {
+            _mountpoints = _mountpoints
+                .Where(mp => mp.ServerSidePath != path)
+                .ToList();
+        }
+
+        public IReadOnlyCollection<MountpointDto> ListMountpoints()
+        {
+            return _mountpoints;
         }
     }
 }

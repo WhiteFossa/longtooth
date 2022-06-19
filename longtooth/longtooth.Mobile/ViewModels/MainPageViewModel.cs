@@ -1,9 +1,13 @@
-﻿using Acr.UserDialogs;
-using longtooth.Abstractions.DTOs;
+﻿using longtooth.Abstractions.DTOs;
 using longtooth.Abstractions.Interfaces.AppManager;
 using longtooth.Abstractions.Interfaces.Models;
 using longtooth.Abstractions.Interfaces.Permissions;
+using longtooth.Common.Abstractions.DTOs;
+using longtooth.Common.Abstractions.Interfaces.FilesManager;
 using longtooth.Common.Abstractions.Interfaces.MessagesProcessor;
+using longtooth.Mobile.Abstractions.FilesPicke;
+using longtooth.Mobile.Abstractions.FilesPicker;
+using longtooth.Mobile.Abstractions.Interfaces.UserNotifier;
 using longtooth.Models;
 using longtooth.Protocol.Abstractions.Interfaces;
 using longtooth.Server.Abstractions.DTOs;
@@ -38,6 +42,11 @@ namespace longtooth.ViewModels
         /// </summary>
         public ICommand ExitCommand { get; }
 
+        /// <summary>
+        /// Add mountpoint
+        /// </summary>
+        public ICommand AddMountpointCommand { get; }
+
         #endregion
 
         /// <summary>
@@ -68,6 +77,8 @@ namespace longtooth.ViewModels
         private readonly IServerSideMessagesProcessor _serverSideMessagesProcessor;
         private readonly IPermissionsManager _permissionsManager;
         private readonly IAppManager _appManager;
+        private readonly IFilesManager _filesManager;
+        private readonly IUserNotifier _userNotifier;
 
         /// <summary>
         /// Constructor
@@ -81,11 +92,14 @@ namespace longtooth.ViewModels
             _serverSideMessagesProcessor = App.Container.Resolve<IServerSideMessagesProcessor>();
             _permissionsManager = App.Container.Resolve<IPermissionsManager>();
             _appManager = App.Container.Resolve<IAppManager>();
+            _filesManager = App.Container.Resolve<IFilesManager>();
+            _userNotifier = App.Container.Resolve<IUserNotifier>();
 
             // Binding commands to handlers
             StartServerCommand = new Command(async () => await OnServerStartAsync());
             StopServerCommand = new Command(async() => await OnServerStopAsync());
             ExitCommand = new Command(async() => await OnExitAppAsync());
+            AddMountpointCommand = new Command(async() => await AddMountpointAsync());
 
             // Local IPs
             var localIps = _server
@@ -116,7 +130,7 @@ namespace longtooth.ViewModels
             var doWeHavePermission = await _permissionsManager.RequestPermissionAsync<StorageWrite>();
             if (!doWeHavePermission)
             {
-                await UserDialogs.Instance.AlertAsync("Storage permission is required!", "Error", "OK");
+                await _userNotifier.ShowErrorMessageAsync("Error", "Storage permission is required!");
             }
 
             try
@@ -156,6 +170,31 @@ namespace longtooth.ViewModels
         public async Task OnExitAppAsync()
         {
             _appManager.CloseApp();
+        }
+
+        public async Task AddMountpointAsync()
+        {
+            var directorySelectionDialog = App.Container.Resolve<IFilesPicker>();
+            directorySelectionDialog.Setup(FileSelectionMode.FolderChoose);
+
+            var path = await directorySelectionDialog.GetFileOrDirectoryAsync(Android.OS.Environment.ExternalStorageDirectory.AbsolutePath);
+
+            if (path == null)
+            {
+                return;
+            }
+
+            var newMountpoint = new MountpointDto(path, path); // For now path equal to name
+
+            try
+            {
+                _filesManager.AddMountpoint(newMountpoint);
+            }
+            catch (ArgumentException)
+            {
+                await _userNotifier.ShowNotificationMessageAsync("Warning", "Mountpoint with this path or name already exist!");
+            }
+
         }
     }
 }

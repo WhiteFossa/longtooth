@@ -10,6 +10,21 @@ namespace longtooth.Common.Abstractions.Interfaces.FilesManager
     public interface IFilesManager
     {
         /// <summary>
+        /// Add mountpoint to mountpoints list
+        /// </summary>
+        void AddMountpoint(MountpointDto mountpoint);
+
+        /// <summary>
+        /// Remove mountpoint with given path
+        /// </summary>
+        void RemoveMountpoint(string path);
+
+        /// <summary>
+        /// Lists current mountpoints
+        /// </summary>
+        IReadOnlyCollection<MountpointDto> ListMountpoints();
+
+        /// <summary>
         /// Returns mountpoints, shared on server
         /// </summary>
         Task<IReadOnlyCollection<MountpointDto>> GetMountpointsAsync();

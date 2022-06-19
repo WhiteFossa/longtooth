@@ -70,7 +70,26 @@
                         </StackLayout>
                     </StackLayout>
                 </Frame>
-                <!-- End of service settings -->
+                <!-- End of server control -->
+
+                <!-- Mountpoints -->
+                <Frame
+                    Style="{StaticResource FramesStyle}">
+
+                    <StackLayout>
+                        <Label
+                            Text="Mountpoints"
+                            HorizontalOptions="Center" />
+
+                        <Button
+                            Text="Add mountpoint"
+                            Command="{Binding AddMountpointCommand}" />
+
+                    </StackLayout>
+
+                </Frame>
+                <!-- End of mountpoints-->
+                
             </StackLayout>
         </ScrollView>
     </ContentPage.Content>
