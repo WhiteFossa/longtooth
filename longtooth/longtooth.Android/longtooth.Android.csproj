@@ -120,9 +120,9 @@
       <Project>{0F4270F0-711D-4544-9846-C14BA51A7242}</Project>
       <Name>longtooth.Server.Implementations</Name>
     </ProjectReference>
-    <ProjectReference Include="..\longtooth\longtooth.csproj">
-      <Project>{A264A8D9-5617-4A1B-BA0E-A3A55178B17D}</Project>
-      <Name>longtooth</Name>
+    <ProjectReference Include="..\longtooth.Mobile\longtooth.Mobile.csproj">
+      <Project>{62A7343B-C6FB-4947-8B5E-8A0CDE94C862}</Project>
+      <Name>longtooth.Mobile</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />
