@@ -1,4 +1,5 @@
-﻿using longtooth.Abstractions.DTOs;
+﻿using Android.Content.Res;
+using longtooth.Abstractions.DTOs;
 using longtooth.Abstractions.Interfaces.AppManager;
 using longtooth.Abstractions.Interfaces.Models;
 using longtooth.Abstractions.Interfaces.Permissions;
@@ -8,6 +9,7 @@ using longtooth.Common.Abstractions.Interfaces.MessagesProcessor;
 using longtooth.Mobile.Abstractions.FilesPicke;
 using longtooth.Mobile.Abstractions.FilesPicker;
 using longtooth.Mobile.Abstractions.Interfaces.UserNotifier;
+using longtooth.Mobile.Views;
 using longtooth.Models;
 using longtooth.Protocol.Abstractions.Interfaces;
 using longtooth.Server.Abstractions.DTOs;
@@ -55,6 +57,11 @@ namespace longtooth.ViewModels
         public MainModel MainModel;
 
         /// <summary>
+        /// We use it for navigation
+        /// </summary>
+        public INavigation Navigation { get; set; }
+
+        /// <summary>
         /// Local server IPs
         /// </summary>
         private ObservableCollection<ServerIpDto> _serverIps = new ObservableCollection<ServerIpDto>();
@@ -71,6 +78,11 @@ namespace longtooth.ViewModels
                 OnPropertyChanged();
             }
         }
+
+        /// <summary>
+        /// Add mountpoint page
+        /// </summary>
+        private AddMountpointPageView _addMountpointPageView = new AddMountpointPageView();
 
         private readonly IServer _server;
         private readonly IMessagesProcessor _messagesProcessor;
@@ -174,27 +186,31 @@ namespace longtooth.ViewModels
 
         public async Task AddMountpointAsync()
         {
-            var directorySelectionDialog = App.Container.Resolve<IFilesPicker>();
-            directorySelectionDialog.Setup(FileSelectionMode.FolderChoose);
-
-            var path = await directorySelectionDialog.GetFileOrDirectoryAsync(Android.OS.Environment.ExternalStorageDirectory.AbsolutePath);
-
-            if (path == null)
+            Device.BeginInvokeOnMainThread(async () =>
             {
-                return;
-            }
+                await Navigation.PushModalAsync(_addMountpointPageView);
+            });
 
-            var newMountpoint = new MountpointDto(path, path); // For now path equal to name
+            //var directorySelectionDialog = App.Container.Resolve<IFilesPicker>();
+            //directorySelectionDialog.Setup(FileSelectionMode.FolderChoose);
 
-            try
-            {
-                _filesManager.AddMountpoint(newMountpoint);
-            }
-            catch (ArgumentException)
-            {
-                await _userNotifier.ShowNotificationMessageAsync("Warning", "Mountpoint with this path or name already exist!");
-            }
+            //var path = await directorySelectionDialog.GetFileOrDirectoryAsync(Android.OS.Environment.ExternalStorageDirectory.AbsolutePath);
 
+            //if (path == null)
+            //{
+            //    return;
+            //}
+
+            //var newMountpoint = new MountpointDto(path, path); // For now path equal to name
+
+            //try
+            //{
+            //    _filesManager.AddMountpoint(newMountpoint);
+            //}
+            //catch (ArgumentException)
+            //{
+            //    await _userNotifier.ShowNotificationMessageAsync("Warning", "Mountpoint with this path or name already exist!");
+            //}
         }
     }
 }

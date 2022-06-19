@@ -1,0 +1,62 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewModels="clr-namespace:longtooth.Mobile.ViewModels"
+             x:Class="longtooth.Mobile.Views.AddMountpointPageView">
+
+    <ContentPage.BindingContext>
+        <viewModels:AddMountpointPageViewModel />
+    </ContentPage.BindingContext>
+
+    <ContentPage.Content>
+        <ScrollView>
+            <StackLayout>
+
+                <StackLayout
+                    Orientation="Horizontal">
+
+                    <!-- Name -->
+                    <Label
+                        Text="Name:"
+                        HorizontalOptions="Start"
+                        VerticalOptions="Center" />
+
+                    <Editor
+                        Keyboard="Plain"
+                        HorizontalOptions="FillAndExpand"
+                        VerticalOptions="Center"
+                        Text="{Binding Name }" />
+                </StackLayout>
+
+                <!-- Path -->
+                <StackLayout
+                    Orientation="Horizontal">
+
+                    <Label
+                        Text="Path:"
+                        HorizontalOptions="Start"
+                        VerticalOptions="Center" />
+
+                    <Button
+                        Text="Select"
+                        Command="{Binding SelectPath}" />
+                </StackLayout>
+
+                <!-- Accept / cancel -->
+                <StackLayout
+                    Orientation="Horizontal">
+                    
+                    <Button
+                        Text="Accept"
+                        Command="{Binding Accept}" />
+
+                    <Button
+                        Text="Cancel"
+                        Command="{Binding Cancel}" />
+                </StackLayout>
+
+            </StackLayout>
+        </ScrollView>
+    </ContentPage.Content>
+    
+</ContentPage>
