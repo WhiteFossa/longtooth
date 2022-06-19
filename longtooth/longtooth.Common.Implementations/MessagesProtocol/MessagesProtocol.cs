@@ -1,5 +1,6 @@
 ﻿using longtooth.Common.Abstractions;
 using longtooth.Common.Abstractions.DTOs.MessagesProtocol;
+using longtooth.Common.Abstractions.Interfaces.DataCompressor;
 using longtooth.Common.Abstractions.Interfaces.MessagesProtocol;
 using longtooth.Common.Implementations.Extensions;
 using System;
@@ -29,17 +30,23 @@ namespace longtooth.Common.Implementations.MessagesProtocol
         /// </summary>
         private readonly IReadOnlyCollection<byte> MessageEndSignatureArray;
 
-        public MessagesProtocol()
+        private readonly IDataCompressor _dataCompressor;
+
+        public MessagesProtocol(IDataCompressor dataCompressor)
         {
             MessageBeginSignatureArray = new List<byte>(MessageBeginSignature.ToByteArray());
             MessageEndSignatureArray = new List<byte>(MessageEndSignature.ToByteArray());
+
+            _dataCompressor = dataCompressor;
         }
 
         public IReadOnlyCollection<byte> GenerateMessage(IReadOnlyCollection<byte> message)
         {
             _ = message ?? throw new ArgumentNullException(nameof(message));
 
-            if (message.Count + MessageBeginSignatureArray.Count + MessageEndSignatureArray.Count > Constants.MaxPacketSize)
+            var compressedMessage = _dataCompressor.Compress(message);
+
+            if (compressedMessage.Count + MessageBeginSignatureArray.Count + MessageEndSignatureArray.Count > Constants.MaxPacketSize)
             {
                 throw new ArgumentOutOfRangeException(nameof(message));
             }
@@ -47,7 +54,7 @@ namespace longtooth.Common.Implementations.MessagesProtocol
             var result = new List<byte>();
 
             result.AddRange(MessageBeginSignatureArray);
-            result.AddRange(message);
+            result.AddRange(compressedMessage);
             result.AddRange(MessageEndSignatureArray);
 
             return result;
@@ -76,16 +83,16 @@ namespace longtooth.Common.Implementations.MessagesProtocol
             var length = messageEndIndex - messageStartIndex - MessageBeginSignatureArray.Count;
 
             var bufferAsList = new List<byte>(buffer);
-            var result = bufferAsList.GetRange(startIndex, length);
+            var compressedMessage = bufferAsList.GetRange(startIndex, length);
+
+            var message = _dataCompressor.Decompress(compressedMessage);
 
             // Removing message from buffer
             var remainingLength = messageEndIndex + MessageEndSignatureArray.Count;
             var newBuffer = bufferAsList.GetRange(0, messageStartIndex);
             newBuffer.AddRange(bufferAsList.GetRange(remainingLength, buffer.Count - remainingLength));
 
-            return new FirstMessageDto(result, newBuffer);
+            return new FirstMessageDto(message, newBuffer);
         }
-
-
     }
 }

@@ -20,6 +20,14 @@
   </ItemGroup>
 
   <ItemGroup>
+    <AvaloniaResource Remove="Models\**" />
+    <AvaloniaXaml Remove="Models\**" />
+    <Compile Remove="Models\**" />
+    <EmbeddedResource Remove="Models\**" />
+    <None Remove="Models\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <!--This helps with theme dll-s trimming.
     If you will publish your application in self-contained mode with p:PublishTrimmed=true and it will use Fluent theme Default theme will be trimmed from the output and vice versa.
     https://github.com/AvaloniaUI/Avalonia/issues/5593 -->
@@ -43,8 +51,5 @@
     <ProjectReference Include="..\longtooth.Common.Implementations\longtooth.Common.Implementations.csproj" />
     <ProjectReference Include="..\longtooth.Protocol.Abstractions\longtooth.Protocol.Abstractions.csproj" />
     <ProjectReference Include="..\longtooth.Protocol.Implementations\longtooth.Protocol.Implementations.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Models\" />
   </ItemGroup>
 </Project>

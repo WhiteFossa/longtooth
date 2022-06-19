@@ -13,6 +13,8 @@ using longtooth.Protocol.Abstractions.Interfaces;
 using longtooth.Protocol.Implementations.Implementations;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using longtooth.Common.Abstractions.Interfaces.DataCompressor;
+using longtooth.Common.Implementations.DataCompressor;
 
 namespace longtooth.Desktop
 {
@@ -54,6 +56,7 @@ namespace longtooth.Desktop
             services.AddTransient<IMessagesProcessor, MessagesProcessor>();
             services.AddSingleton<ICommandToServerHeaderGenerator, CommandToServerHeaderGenerator>();
             services.AddSingleton<IClientSideMessagesProcessor, ClientSideMessagesProcessor>();
+            services.AddSingleton<IDataCompressor, DataCompressor>();
             return services;
         }
 

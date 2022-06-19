@@ -5,9 +5,11 @@ using Android.Runtime;
 using longtooth.Abstractions.Interfaces.AppManager;
 using longtooth.Abstractions.Interfaces.Models;
 using longtooth.Abstractions.Interfaces.Permissions;
+using longtooth.Common.Abstractions.Interfaces.DataCompressor;
 using longtooth.Common.Abstractions.Interfaces.FilesManager;
 using longtooth.Common.Abstractions.Interfaces.MessagesProcessor;
 using longtooth.Common.Abstractions.Interfaces.MessagesProtocol;
+using longtooth.Common.Implementations.DataCompressor;
 using longtooth.Common.Implementations.MessagesProcessor;
 using longtooth.Common.Implementations.MessagesProtocol;
 using longtooth.Droid.Implementations.AppManager;
@@ -45,6 +47,7 @@ namespace longtooth.Droid
             App.Container.Register<IFilesManager, FilesManagerImplementation>().AsSingleton();
             App.Container.Register<IPermissionsManager, PermissionsManager>().AsSingleton();
             App.Container.Register<IAppManager, AppManager>().AsSingleton();
+            App.Container.Register<IDataCompressor, DataCompressor>().AsSingleton();
 
             #endregion
 
