@@ -2,6 +2,7 @@
 using longtooth.Abstractions.Interfaces.AppManager;
 using longtooth.Abstractions.Interfaces.Models;
 using longtooth.Abstractions.Interfaces.Permissions;
+using longtooth.Common.Abstractions.DAO.Mountpoints;
 using longtooth.Common.Abstractions.DTOs;
 using longtooth.Common.Abstractions.Interfaces.FilesManager;
 using longtooth.Common.Abstractions.Interfaces.MessagesProcessor;
@@ -111,6 +112,7 @@ namespace longtooth.ViewModels
         private readonly IAppManager _appManager;
         private readonly IFilesManager _filesManager;
         private readonly IUserNotifier _userNotifier;
+        private readonly IMountpointsDao _mountpointsDao;
 
         /// <summary>
         /// Constructor
@@ -127,6 +129,7 @@ namespace longtooth.ViewModels
             _appManager = App.Container.Resolve<IAppManager>();
             _filesManager = App.Container.Resolve<IFilesManager>();
             _userNotifier = App.Container.Resolve<IUserNotifier>();
+            _mountpointsDao = App.Container.Resolve<IMountpointsDao>();
 
             // Binding commands to handlers
             StartServerCommand = new Command(async () => await OnServerStartAsync());
@@ -144,6 +147,9 @@ namespace longtooth.ViewModels
             {
                 ServerIps.Add(localIp);
             }
+
+            // Loading mountpoints list from DB
+            Task.Run(() => ReloadMountpointsListAsync()).Wait();
         }
 
         /// <summary>
@@ -219,22 +225,26 @@ namespace longtooth.ViewModels
         {
             _ = mountpoint ?? throw new ArgumentNullException(nameof(mountpoint));
 
-            try
-            {
-                _filesManager.AddMountpoint(mountpoint);
-            }
-            catch (ArgumentException)
-            {
-                await _userNotifier.ShowNotificationMessageAsync("Warning", "Mountpoint with this path or name already exist!");
-            }
-
-            Mountpoints.Add(mountpoint);
+            await _mountpointsDao.AddMountpointAsync(mountpoint);
+            await ReloadMountpointsListAsync();
         }
 
         public async Task OnDeleteMountpointAsync(MountpointDto mountpoint)
         {
-            _filesManager.RemoveMountpoint(mountpoint.ServerSidePath);
-            Mountpoints.Remove(mountpoint);
+            await _mountpointsDao.DeleteMountpointsAsync(mountpoint);
+            await ReloadMountpointsListAsync();
+        }
+
+        private async Task ReloadMountpointsListAsync()
+        {
+            _filesManager.ClearAllMountpoints();
+            Mountpoints.Clear();
+
+            foreach (var mountpoint in await _mountpointsDao.GetAllMountpointsAsync())
+            {
+                Mountpoints.Add(mountpoint);
+                _filesManager.AddMountpoint(mountpoint);
+            }
         }
     }
 }

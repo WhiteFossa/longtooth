@@ -6,6 +6,7 @@ using Android.Runtime;
 using longtooth.Abstractions.Interfaces.AppManager;
 using longtooth.Abstractions.Interfaces.Models;
 using longtooth.Abstractions.Interfaces.Permissions;
+using longtooth.Common.Abstractions.DAO.Mountpoints;
 using longtooth.Common.Abstractions.Interfaces.DataCompressor;
 using longtooth.Common.Abstractions.Interfaces.FilesManager;
 using longtooth.Common.Abstractions.Interfaces.MessagesProcessor;
@@ -14,6 +15,7 @@ using longtooth.Common.Implementations.DataCompressor;
 using longtooth.Common.Implementations.MessagesProcessor;
 using longtooth.Common.Implementations.MessagesProtocol;
 using longtooth.Droid.Implementations.AppManager;
+using longtooth.Droid.Implementations.DAO.Mountpoints;
 using longtooth.Droid.Implementations.FilesManager;
 using longtooth.Droid.Implementations.FilesPicker;
 using longtooth.Droid.Implementations.PermissionsManager;
@@ -55,6 +57,7 @@ namespace longtooth.Droid
             App.Container.Register<IDataCompressor, DataCompressor>().AsSingleton();
             App.Container.Register<IFilesPicker, FilesPicker>().AsMultiInstance();
             App.Container.Register<IUserNotifier, UserNotifier>().AsSingleton();
+            App.Container.Register<IMountpointsDao, MountpointsDao>().AsSingleton();
 
             #endregion
 

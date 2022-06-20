@@ -20,6 +20,11 @@ namespace longtooth.Common.Abstractions.Interfaces.FilesManager
         void RemoveMountpoint(string path);
 
         /// <summary>
+        /// Removes all mountpoints
+        /// </summary>
+        void ClearAllMountpoints();
+
+        /// <summary>
         /// Lists current mountpoints
         /// </summary>
         IReadOnlyCollection<MountpointDto> ListMountpoints();
