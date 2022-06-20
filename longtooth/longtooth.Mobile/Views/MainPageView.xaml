@@ -65,7 +65,6 @@
                                     Grid.Row="0"
                                     Text="Exit"
                                     Command="{Binding ExitCommand}" />
-
                             </Grid>
                         </StackLayout>
                     </StackLayout>
@@ -84,6 +83,32 @@
                         <Button
                             Text="Add mountpoint"
                             Command="{Binding AddMountpointCommand}" />
+
+                        <!-- Mountpoints list -->
+                        <StackLayout x:Name="MountpointsList" BindableLayout.ItemsSource="{Binding Mountpoints}">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate>
+                                    <StackLayout
+                                        x:Name="MountpointItem"
+                                        Orientation="Horizontal">
+                                        
+                                        <Label Text="{Binding Name}" VerticalOptions="Center" />
+
+                                        <Label Text=":" VerticalOptions="Center" />
+
+                                        <Label Text="{Binding ServerSidePath}" VerticalOptions="Center" />
+
+                                        <Button
+                                            Text="Delete"
+                                            BindingContext="{Binding Source={x:Reference MountpointsList}, Path=BindingContext}"
+                                            Command="{Binding DeleteMountpointCommand}"
+                                            CommandParameter="{Binding Source={x:Reference MountpointItem}, Path=BindingContext}"
+                                            VerticalOptions="Center" 
+                                            HorizontalOptions="EndAndExpand" />
+                                    </StackLayout>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </StackLayout>
 
                     </StackLayout>
 

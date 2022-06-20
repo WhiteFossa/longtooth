@@ -46,6 +46,11 @@ namespace longtooth.ViewModels
         /// </summary>
         public ICommand AddMountpointCommand { get; }
 
+        /// <summary>
+        /// Delete mountpoint
+        /// </summary>
+        public ICommand DeleteMountpointCommand { get; }
+
         #endregion
 
         /// <summary>
@@ -72,6 +77,24 @@ namespace longtooth.ViewModels
             set
             {
                 _serverIps = value;
+                OnPropertyChanged();
+            }
+        }
+
+        /// <summary>
+        /// Mountpoints
+        /// </summary>
+        private ObservableCollection<MountpointDto> _mountpoints = new ObservableCollection<MountpointDto>();
+
+        public ObservableCollection<MountpointDto> Mountpoints
+        {
+            get
+            {
+                return _mountpoints;
+            }
+            set
+            {
+                _mountpoints = value;
                 OnPropertyChanged();
             }
         }
@@ -109,7 +132,8 @@ namespace longtooth.ViewModels
             StartServerCommand = new Command(async () => await OnServerStartAsync());
             StopServerCommand = new Command(async() => await OnServerStopAsync());
             ExitCommand = new Command(async() => await OnExitAppAsync());
-            AddMountpointCommand = new Command(async() => await AddMountpointAsync());
+            AddMountpointCommand = new Command(async() => await OnAddMountpointAsync());
+            DeleteMountpointCommand = new Command(async(mp) => await OnDeleteMountpointAsync((MountpointDto)mp));
 
             // Local IPs
             var localIps = _server
@@ -182,7 +206,7 @@ namespace longtooth.ViewModels
             _appManager.CloseApp();
         }
 
-        public async Task AddMountpointAsync()
+        public async Task OnAddMountpointAsync()
         {
             Device.BeginInvokeOnMainThread(async () =>
             {
@@ -202,6 +226,14 @@ namespace longtooth.ViewModels
             {
                 await _userNotifier.ShowNotificationMessageAsync("Warning", "Mountpoint with this path or name already exist!");
             }
+
+            Mountpoints.Add(mountpoint);
+        }
+
+        public async Task OnDeleteMountpointAsync(MountpointDto mountpoint)
+        {
+            _filesManager.RemoveMountpoint(mountpoint.ServerSidePath);
+            Mountpoints.Remove(mountpoint);
         }
     }
 }
