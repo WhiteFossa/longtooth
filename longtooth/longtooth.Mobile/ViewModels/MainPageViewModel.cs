@@ -210,6 +210,7 @@ namespace longtooth.ViewModels
         {
             Device.BeginInvokeOnMainThread(async () =>
             {
+                _addMountpointPageView.ViewModel.Reset();
                 await Navigation.PushModalAsync(_addMountpointPageView);
             });
         }

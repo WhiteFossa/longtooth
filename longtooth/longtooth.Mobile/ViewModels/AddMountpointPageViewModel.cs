@@ -83,6 +83,15 @@ namespace longtooth.Mobile.ViewModels
             _navigation = navigation ?? throw new ArgumentNullException(nameof(navigation));
         }
 
+        /// <summary>
+        /// Resets mountpoint parameters
+        /// </summary>
+        public void Reset()
+        {
+            Name = string.Empty;
+            Path = string.Empty;
+        }
+
         public async Task OnSelectPathAsync()
         {
             var directorySelectionDialog = App.Container.Resolve<IFilesPicker>();
