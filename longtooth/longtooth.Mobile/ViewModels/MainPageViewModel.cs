@@ -159,22 +159,6 @@ namespace longtooth.ViewModels
             //{
             //    await UserDialogs.Instance.AlertAsync("Root access is required!", "Error", "OK");
             //}
-
-            // And storage access
-            var doWeHavePermission = await _permissionsManager.RequestPermissionAsync<StorageWrite>();
-            if (!doWeHavePermission)
-            {
-                await _userNotifier.ShowErrorMessageAsync("Error", "Storage permission is required!");
-            }
-
-            try
-            {
-                await _server.StartAsync(OnNewDataReadFromClientAsync);
-            }
-            catch(Exception)
-            {
-                // TODO: Handle me
-            }
         }
 
         /// <summary>
@@ -208,6 +192,22 @@ namespace longtooth.ViewModels
 
         public async Task OnAddMountpointAsync()
         {
+            // Asking for access to filesystem
+            var doWeHavePermission = await _permissionsManager.RequestPermissionAsync<StorageWrite>();
+            if (!doWeHavePermission)
+            {
+                await _userNotifier.ShowErrorMessageAsync("Error", "Storage permission is required!");
+            }
+
+            try
+            {
+                await _server.StartAsync(OnNewDataReadFromClientAsync);
+            }
+            catch (Exception)
+            {
+                // TODO: Handle me
+            }
+
             Device.BeginInvokeOnMainThread(async () =>
             {
                 _addMountpointPageView.ViewModel.Reset();
