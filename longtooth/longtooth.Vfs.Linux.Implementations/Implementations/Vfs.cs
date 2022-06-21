@@ -2,6 +2,7 @@
 using System.Text;
 using Tmds.Fuse;
 using Tmds.Linux;
+using static Tmds.Linux.LibC;
 
 namespace longtooth.Vfs.Linux.Implementations.Implementations
 {
