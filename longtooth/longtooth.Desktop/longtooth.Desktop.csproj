@@ -53,9 +53,4 @@
     <ProjectReference Include="..\longtooth.Protocol.Implementations\longtooth.Protocol.Implementations.csproj" />
     <ProjectReference Include="..\longtooth.Vfs.Linux.Abstractions\longtooth.Vfs.Linux.Abstractions.csproj" />
   </ItemGroup>
-  <ItemGroup>
-    <Reference Include="longtooth.Vfs.Linux.Abstractions">
-      <HintPath>bin\Debug\net6.0\longtooth.Vfs.Linux.Abstractions.dll</HintPath>
-    </Reference>
-  </ItemGroup>
 </Project>
