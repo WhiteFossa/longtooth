@@ -247,7 +247,7 @@ namespace longtooth.Desktop.ViewModels
             // TODO : Remove me, debug
             LocalMountpoint = @"/home/fossa/longtooth-mountpoint";
 
-            //_vfs = Program.Di.GetService<IVfsManager>();
+            _vfs = Program.Di.GetService<IVfsManager>();
 
             #endregion
 

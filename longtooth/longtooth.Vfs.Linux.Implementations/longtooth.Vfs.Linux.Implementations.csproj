@@ -7,7 +7,7 @@
 
   <ItemGroup>
     <PackageReference Include="Tmds.Fuse" Version="0.1.0-190711-50" />
-    <PackageReference Include="Tmds.LibC" Version="0.3.0" />
+    <PackageReference Include="Tmds.LibC" Version="0.5.1-g225d6d54a8" />
   </ItemGroup>
 
   <ItemGroup>
