@@ -20,6 +20,7 @@ using System.Linq;
 using System.Net;
 using System.Reactive;
 using System.Threading.Tasks;
+using longtooth.Vfs.Linux.Abstractions.Interfaces;
 
 namespace longtooth.Desktop.ViewModels
 {
@@ -38,6 +39,7 @@ namespace longtooth.Desktop.ViewModels
         private FileDto _currentFile;
         private double _progressValue;
         private string _newDirectoryName;
+        private string _localMountpoint;
 
         /// <summary>
         /// Server IP
@@ -129,6 +131,15 @@ namespace longtooth.Desktop.ViewModels
             set => this.RaiseAndSetIfChanged(ref _newDirectoryName, value);
         }
 
+        /// <summary>
+        /// FUSE will be mounted here
+        /// </summary>
+        public string LocalMountpoint
+        {
+            get => _localMountpoint;
+            set => this.RaiseAndSetIfChanged(ref _localMountpoint, value);
+        }
+
         #endregion
 
         #region Commands
@@ -142,7 +153,7 @@ namespace longtooth.Desktop.ViewModels
         /// Disconnect from server command
         /// </summary>
         public ReactiveCommand<Unit, Unit> DisconnectAsyncCommand { get; }
-        
+
         /// <summary>
         /// Ping server
         /// </summary>
@@ -183,6 +194,16 @@ namespace longtooth.Desktop.ViewModels
         /// </summary>
         public ReactiveCommand<Unit, Unit> DeleteDirectoryAsyncCommand { get; }
 
+        /// <summary>
+        /// Mount FUSE
+        /// </summary>
+        public ReactiveCommand<Unit, Unit> MountFuseAsyncCommand { get; }
+
+        /// <summary>
+        /// Umount FUSE
+        /// </summary>
+        public ReactiveCommand<Unit, Unit> UnmountFuseAsyncCommand { get; }
+
         #endregion
 
         /// <summary>
@@ -195,6 +216,7 @@ namespace longtooth.Desktop.ViewModels
         private readonly IMessagesProcessor _messagesProcessor;
         private readonly ICommandToServerHeaderGenerator _commandGenerator;
         private readonly IClientSideMessagesProcessor _clientSideMessagesProcessor;
+        private readonly IVfs _vfs;
 
         private const int DownloadChunkSize = 1000000;
         private long _alreadyDownloaded;
@@ -221,6 +243,11 @@ namespace longtooth.Desktop.ViewModels
 
             _commandGenerator = Program.Di.GetService<ICommandToServerHeaderGenerator>();
             _clientSideMessagesProcessor = Program.Di.GetService<IClientSideMessagesProcessor>();
+
+            // TODO : Remove me, debug
+            LocalMountpoint = @"/home/fossa/longtooth-mountpoint";
+
+            _vfs = Program.Di.GetService<IVfs>();
 
             #endregion
 
@@ -254,6 +281,8 @@ namespace longtooth.Desktop.ViewModels
             DeleteFileAsyncCommand = ReactiveCommand.Create(DeleteFileAsync);
             CreateDirectoryAsyncCommand = ReactiveCommand.Create(CreateDirectoryAsync);
             DeleteDirectoryAsyncCommand = ReactiveCommand.Create(DeleteDirectoryAsync);
+            MountFuseAsyncCommand = ReactiveCommand.Create(MountFuseAsync);
+            UnmountFuseAsyncCommand = ReactiveCommand.Create(UnmountFuseAsync);
 
             #endregion
         }
@@ -635,6 +664,23 @@ namespace longtooth.Desktop.ViewModels
 
             var createDirectoryCommand = _commandGenerator.CreateDirectoryCommand(CurrentDirectory + @"/" + NewDirectoryName);
             await PrepareAndSendCommand(createDirectoryCommand);
+        }
+
+        private async void MountFuseAsync()
+        {
+            try
+            {
+                await _vfs.MountAsync(LocalMountpoint);
+            }
+            catch (Exception ex)
+            {
+                await _logger.LogErrorAsync(ex.Message);
+            }
+        }
+
+        private async void UnmountFuseAsync()
+        {
+            await _vfs.UnmountAsync();
         }
     }
 }

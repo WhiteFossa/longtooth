@@ -49,7 +49,14 @@
     <ProjectReference Include="..\longtooth.Client.Implementations\longtooth.Client.Implementations.csproj" />
     <ProjectReference Include="..\longtooth.Common.Abstractions\longtooth.Common.Abstractions.csproj" />
     <ProjectReference Include="..\longtooth.Common.Implementations\longtooth.Common.Implementations.csproj" />
+    <ProjectReference Include="..\longtooth.Vfs.Linux.Abstractions\longtooth.Vfs.Linux.Abstractions.csproj" />
+    <ProjectReference Include="..\longtooth.Vfs.Linux.Implementations\longtooth.Vfs.Linux.Implementations.csproj" />
     <ProjectReference Include="..\longtooth.Protocol.Abstractions\longtooth.Protocol.Abstractions.csproj" />
     <ProjectReference Include="..\longtooth.Protocol.Implementations\longtooth.Protocol.Implementations.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="longtooth.Vfs.Linux.Abstractions">
+      <HintPath>bin\Debug\net6.0\longtooth.Vfs.Linux.Abstractions.dll</HintPath>
+    </Reference>
   </ItemGroup>
 </Project>
