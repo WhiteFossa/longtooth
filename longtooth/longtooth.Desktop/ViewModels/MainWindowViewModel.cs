@@ -10,6 +10,7 @@ using longtooth.Common.Abstractions.Models;
 using longtooth.Common.Implementations.Helpers;
 using longtooth.Desktop.DTOs;
 using longtooth.Protocol.Abstractions.Interfaces;
+using longtooth.Vfs.Linux.Abstractions.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using ReactiveUI;
 using System;
@@ -20,7 +21,6 @@ using System.Linq;
 using System.Net;
 using System.Reactive;
 using System.Threading.Tasks;
-using longtooth.Vfs.Linux.Abstractions.Interfaces;
 
 namespace longtooth.Desktop.ViewModels
 {
@@ -216,7 +216,7 @@ namespace longtooth.Desktop.ViewModels
         private readonly IMessagesProcessor _messagesProcessor;
         private readonly ICommandToServerHeaderGenerator _commandGenerator;
         private readonly IClientSideMessagesProcessor _clientSideMessagesProcessor;
-        //private readonly IVfsManager _vfs;
+        private readonly IVfsManager _vfs;
 
         private const int DownloadChunkSize = 1000000;
         private long _alreadyDownloaded;
@@ -668,19 +668,19 @@ namespace longtooth.Desktop.ViewModels
 
         private async void MountFuseAsync()
         {
-            // try
-            // {
-            //     await _vfs.MountAsync(LocalMountpoint);
-            // }
-            // catch (Exception ex)
-            // {
-            //     await _logger.LogErrorAsync(ex.Message);
-            // }
+            try
+            {
+                await _vfs.MountAsync(LocalMountpoint);
+            }
+            catch (Exception ex)
+            {
+                await _logger.LogErrorAsync(ex.Message);
+            }
         }
 
         private async void UnmountFuseAsync()
         {
-            //await _vfs.UnmountAsync();
+            await _vfs.UnmountAsync();
         }
     }
 }
