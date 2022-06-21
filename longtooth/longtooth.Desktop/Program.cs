@@ -57,7 +57,7 @@ namespace longtooth.Desktop
             services.AddSingleton<ICommandToServerHeaderGenerator, CommandToServerHeaderGenerator>();
             services.AddSingleton<IClientSideMessagesProcessor, ClientSideMessagesProcessor>();
             services.AddSingleton<IDataCompressor, DataCompressor>();
-            //services.AddSingleton<IVfsManager, VfsManager>();
+            services.AddSingleton<IVfsManager, VfsManager>();
             return services;
         }
 
