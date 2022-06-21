@@ -1,6 +1,7 @@
 ﻿using longtooth.Vfs.Linux.Abstractions.Interfaces;
 using System;
 using System.Threading.Tasks;
+using Tmds.Fuse;
 
 namespace longtooth.Vfs.Linux.Implementations.Implementations
 {

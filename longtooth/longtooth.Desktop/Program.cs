@@ -15,6 +15,8 @@ using Microsoft.Extensions.DependencyInjection;
 using System;
 using longtooth.Common.Abstractions.Interfaces.DataCompressor;
 using longtooth.Common.Implementations.DataCompressor;
+using longtooth.Vfs.Linux.Abstractions.Interfaces;
+using longtooth.Vfs.Linux.Implementations.Implementations;
 
 namespace longtooth.Desktop
 {
