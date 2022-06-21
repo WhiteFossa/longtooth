@@ -1,20 +1,14 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net6.0</TargetFramework>
-        <ImplicitUsings>enable</ImplicitUsings>
-        <Nullable>enable</Nullable>
+        <TargetFramework>netstandard2.1</TargetFramework>
+        <Nullable>disable</Nullable>
         <RootNamespace>longtooth.Fuse.Linux.Implementations</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\longtooth.Common.Abstractions\longtooth.Common.Abstractions.csproj" />
       <ProjectReference Include="..\longtooth.Vfs.Linux.Abstractions\longtooth.Vfs.Linux.Abstractions.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <PackageReference Include="Tmds.Fuse" Version="0.1.0-190711-50" />
-      <PackageReference Include="Tmds.LibC" Version="0.5.1-g225d6d54a8" />
     </ItemGroup>
 
 </Project>
