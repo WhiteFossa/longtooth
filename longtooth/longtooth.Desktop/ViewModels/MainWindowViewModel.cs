@@ -216,7 +216,7 @@ namespace longtooth.Desktop.ViewModels
         private readonly IMessagesProcessor _messagesProcessor;
         private readonly ICommandToServerHeaderGenerator _commandGenerator;
         private readonly IClientSideMessagesProcessor _clientSideMessagesProcessor;
-        private readonly IVfs _vfs;
+        private readonly IVfsManager _vfsManager;
 
         private const int DownloadChunkSize = 1000000;
         private long _alreadyDownloaded;
@@ -247,7 +247,7 @@ namespace longtooth.Desktop.ViewModels
             // TODO : Remove me, debug
             LocalMountpoint = @"/home/fossa/longtooth-mountpoint";
 
-            _vfs = Program.Di.GetService<IVfs>();
+            _vfsManager = Program.Di.GetService<IVfsManager>();
 
             #endregion
 
@@ -670,7 +670,7 @@ namespace longtooth.Desktop.ViewModels
         {
             try
             {
-                await _vfs.MountAsync(LocalMountpoint);
+                await _vfsManager.MountAsync(LocalMountpoint);
             }
             catch (Exception ex)
             {
@@ -680,7 +680,7 @@ namespace longtooth.Desktop.ViewModels
 
         private async void UnmountFuseAsync()
         {
-            await _vfs.UnmountAsync();
+            await _vfsManager.UnmountAsync();
         }
     }
 }
