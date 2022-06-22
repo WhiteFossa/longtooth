@@ -1,5 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text;
+using longtooth.Common.Abstractions.DTOs;
+using longtooth.Common.Abstractions.DTOs.ClientService;
+using longtooth.Common.Abstractions.Interfaces.ClientService;
+using longtooth.Vfs.Linux.Abstractions.Interfaces;
 using Tmds.Fuse;
 using Tmds.Linux;
 using static Tmds.Linux.LibC;
@@ -9,30 +15,59 @@ namespace longtooth.Vfs.Linux.Implementations.Implementations
     /// <summary>
     /// FUSE implementation
     /// </summary>
-    public class Vfs : FuseFileSystemBase
+    public class Vfs : FuseFileSystemBase, IVfs
     {
+        private IClientService _clientService;
+
+        /// <summary>
+        /// Permissions for items, exported by FUSE
+        /// </summary>
+        private const int Permissions = 0b111_111_000;
+
+        /// <summary>
+        /// Cached content of current directory
+        /// </summary>
+        private FilesystemItemDto _currentItem =
+            new FilesystemItemDto(false, false, string.Empty, string.Empty, 0, new List<FilesystemItemDto>());
+
         private static readonly byte[] _helloFilePath = Encoding.UTF8.GetBytes("/hello");
         private static readonly byte[] _helloFileContent = Encoding.UTF8.GetBytes("hello world!");
 
+        private static readonly byte[] _yiffDirPath = Encoding.UTF8.GetBytes("/YiffDir");
+
+        public Vfs(IClientService clientService)
+        {
+            _clientService = clientService;
+        }
 
         public override int GetAttr(ReadOnlySpan<byte> path, ref stat stat, FuseFileInfoRef fiRef)
         {
-            if (path.SequenceEqual(RootPath))
+            var pathAsString = Encoding.UTF8.GetString(path);
+
+            UpdateCurrentDirectory(pathAsString);
+
+            if (!_currentItem.IsExist)
             {
-                stat.st_mode = S_IFDIR | 0b111_101_101; // rwxr-xr-x
-                stat.st_nlink = 2; // 2 + nr of subdirectories
-                return 0;
+                return -ENOENT;
             }
-            else if (path.SequenceEqual(_helloFilePath))
+
+            if (_currentItem == null || !_currentItem.IsExist)
             {
-                stat.st_mode = S_IFREG | 0b100_100_100; // r--r--r--
-                stat.st_nlink = 1;
-                stat.st_size = _helloFileContent.Length;
+                return -ENOENT;
+            }
+
+            if (_currentItem.IsDirectory)
+            {
+                stat.st_mode = S_IFDIR | Permissions;
+                stat.st_nlink = 2; // 2 + nr of subdirectories
                 return 0;
             }
             else
             {
-                return -ENOENT;
+                stat.st_mode = S_IFREG | Permissions;
+                stat.st_nlink = 1;
+                stat.st_size = _currentItem.Size;
+                return 0;
             }
         }
 
@@ -67,15 +102,29 @@ namespace longtooth.Vfs.Linux.Implementations.Implementations
         public override int ReadDir(ReadOnlySpan<byte> path, ulong offset, ReadDirFlags flags, DirectoryContent content,
             ref FuseFileInfo fi)
         {
-            if (!path.SequenceEqual(RootPath))
+            var pathAsString = Encoding.UTF8.GetString(path);
+
+            UpdateCurrentDirectory(pathAsString);
+
+            if (!_currentItem.IsExist || !_currentItem.IsDirectory)
             {
                 return -ENOENT;
             }
 
-            content.AddEntry(".");
-            content.AddEntry("..");
-            content.AddEntry("hello");
+            foreach (var item in _currentItem.Content)
+            {
+                content.AddEntry((item.Name));
+            }
+
             return 0;
+        }
+
+        private void UpdateCurrentDirectory(string path)
+        {
+            if (!_currentItem.Path.Equals(path))
+            {
+                _currentItem = _clientService.GetDirectoryContentAsync(path).Result;
+            }
         }
     }
 }

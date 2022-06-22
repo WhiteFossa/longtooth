@@ -2,6 +2,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using longtooth.Common.Abstractions.Interfaces.ClientService;
 using Tmds.Fuse;
 
 namespace longtooth.Vfs.Linux.Implementations.Implementations
@@ -19,6 +20,13 @@ namespace longtooth.Vfs.Linux.Implementations.Implementations
         private string _localMountpoint;
 
         private Thread _fuseThread;
+
+        private readonly IClientService _clientService;
+
+        public VfsManager(IClientService clientService)
+        {
+            _clientService = clientService;
+        }
 
         public async Task MountAsync(string localPath)
         {
@@ -41,7 +49,7 @@ namespace longtooth.Vfs.Linux.Implementations.Implementations
 
         private async void FuseMountThreadRunAsync()
         {
-            using (var mount = Fuse.Mount(_localMountpoint, new Vfs()))
+            using (var mount = Fuse.Mount(_localMountpoint, new Vfs(_clientService)))
             {
                 await mount.WaitForUnmountAsync();
             }

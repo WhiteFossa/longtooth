@@ -13,7 +13,9 @@ using longtooth.Protocol.Abstractions.Interfaces;
 using longtooth.Protocol.Implementations.Implementations;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using longtooth.Common.Abstractions.Interfaces.ClientService;
 using longtooth.Common.Abstractions.Interfaces.DataCompressor;
+using longtooth.Common.Implementations.ClientService;
 using longtooth.Common.Implementations.DataCompressor;
 using longtooth.Vfs.Linux.Abstractions.Interfaces;
 using longtooth.Vfs.Linux.Implementations.Implementations;
@@ -60,6 +62,7 @@ namespace longtooth.Desktop
             services.AddSingleton<IClientSideMessagesProcessor, ClientSideMessagesProcessor>();
             services.AddSingleton<IDataCompressor, DataCompressor>();
             services.AddSingleton<IVfsManager, VfsManager>();
+            services.AddSingleton<IClientService, ClientService>();
             return services;
         }
 
