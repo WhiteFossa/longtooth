@@ -1,5 +1,6 @@
 ﻿using longtooth.Vfs.Linux.Abstractions.Interfaces;
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Tmds.Fuse;
 
@@ -17,6 +18,8 @@ namespace longtooth.Vfs.Linux.Implementations.Implementations
         /// </summary>
         private string _localMountpoint;
 
+        private Thread _fuseThread;
+
         public async Task MountAsync(string localPath)
         {
             if (_isMounted)
@@ -29,13 +32,22 @@ namespace longtooth.Vfs.Linux.Implementations.Implementations
                 throw new InvalidOperationException("FUSE dependencies aren't met!");
             }
 
-            using (var mount = Fuse.Mount(localPath, new Vfs()))
+            _fuseThread = new Thread(new ThreadStart(FuseMountThreadRunAsync));
+            _fuseThread.Start();
+
+            _localMountpoint = localPath;
+            _isMounted = true;
+        }
+
+        private async void FuseMountThreadRunAsync()
+        {
+            using (var mount = Fuse.Mount(_localMountpoint, new Vfs()))
             {
                 await mount.WaitForUnmountAsync();
             }
 
-            _localMountpoint = localPath;
-            _isMounted = true;
+            // Unmounted
+            _isMounted = false;
         }
 
         public async Task UnmountAsync()
@@ -46,8 +58,6 @@ namespace longtooth.Vfs.Linux.Implementations.Implementations
             }
 
             Fuse.LazyUnmount(_localMountpoint);
-
-            _isMounted = false;
         }
     }
 }
