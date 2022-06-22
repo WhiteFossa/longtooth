@@ -1,6 +1,8 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
-using longtooth.Common.Abstractions.DTOs;
 using longtooth.Common.Abstractions.DTOs.ClientService;
 using longtooth.Common.Abstractions.Interfaces.ClientService;
 
@@ -63,6 +65,66 @@ namespace longtooth.Common.Implementations.ClientService
 
             // Incorrect directory
             return new FilesystemItemDto(false, false, @"", @"", 0, new List<FilesystemItemDto>());
+        }
+
+        public async Task<FileMetadata> GetFileMetadata(string path)
+        {
+            if (path.Equals(@"/testfile.txt"))
+            {
+                return new FileMetadata(true, "testfile.txt", @"/testfile.txt");
+            }
+            else if (path.Equals(@"/Dir 1/testfile1.txt"))
+            {
+                return new FileMetadata(true, "testfile1.txt", @"/Dir 1/testfile1.txt");
+            }
+            else if (path.Equals(@"/Dir 2/testfile2.txt"))
+            {
+                return new FileMetadata(true, "testfile2.txt", @"/Dir 2/testfile2.txt");
+            }
+
+            // Not found
+            return new FileMetadata(false, String.Empty, String.Empty);
+        }
+
+        public async Task<FileContent> GetFileContent(string path, long offset, long maxLength)
+        {
+            byte[] content = null;
+
+            if (path.Equals(@"/testfile.txt"))
+            {
+                content = Encoding.UTF8.GetBytes("This is testfile.txt sample content");
+            }
+            else if (path.Equals(@"/Dir 1/testfile1.txt"))
+            {
+                content = Encoding.UTF8.GetBytes("This is testfile1.txt sample content");
+            }
+            else if (path.Equals(@"/Dir 2/testfile2.txt"))
+            {
+                content = Encoding.UTF8.GetBytes("This is testfile2.txt sample content");
+            }
+            else
+            {
+                // Not found
+                return new FileContent(false, false, new List<byte>());
+            }
+
+            var isInRange = offset < content.Length;
+
+            var canRead = Math.Min(maxLength, content.Length - offset);
+
+            List<byte> result;
+
+            if (!isInRange)
+            {
+                result = new List<byte>();
+            }
+            else
+            {
+                result = content.ToList()
+                    .GetRange((int)offset, (int)canRead);
+            }
+
+            return new FileContent(true, isInRange, result);
         }
     }
 }

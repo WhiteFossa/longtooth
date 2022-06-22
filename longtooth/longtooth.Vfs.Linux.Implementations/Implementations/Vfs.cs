@@ -22,7 +22,7 @@ namespace longtooth.Vfs.Linux.Implementations.Implementations
         /// <summary>
         /// Permissions for items, exported by FUSE
         /// </summary>
-        private const int Permissions = 0b111_111_000;
+        private const int Permissions = 0b111_111_111;
 
         /// <summary>
         /// Cached content of current directory
@@ -30,10 +30,8 @@ namespace longtooth.Vfs.Linux.Implementations.Implementations
         private FilesystemItemDto _currentItem =
             new FilesystemItemDto(false, false, string.Empty, string.Empty, 0, new List<FilesystemItemDto>());
 
-        private static readonly byte[] _helloFilePath = Encoding.UTF8.GetBytes("/hello");
         private static readonly byte[] _helloFileContent = Encoding.UTF8.GetBytes("hello world!");
 
-        private static readonly byte[] _yiffDirPath = Encoding.UTF8.GetBytes("/YiffDir");
 
         public Vfs(IClientService clientService)
         {
@@ -46,11 +44,6 @@ namespace longtooth.Vfs.Linux.Implementations.Implementations
 
             UpdateCurrentDirectory(pathAsString);
 
-            if (!_currentItem.IsExist)
-            {
-                return -ENOENT;
-            }
-
             if (_currentItem == null || !_currentItem.IsExist)
             {
                 return -ENOENT;
@@ -58,8 +51,12 @@ namespace longtooth.Vfs.Linux.Implementations.Implementations
 
             if (_currentItem.IsDirectory)
             {
+                var subdirectoriesCount = _currentItem
+                    .Content
+                    .Count(i => i.IsDirectory);
+
                 stat.st_mode = S_IFDIR | Permissions;
-                stat.st_nlink = 2; // 2 + nr of subdirectories
+                stat.st_nlink = (ulong)subdirectoriesCount + 2; // Number of subdirectories + 2 (because . and .. directories)
                 return 0;
             }
             else
@@ -73,11 +70,16 @@ namespace longtooth.Vfs.Linux.Implementations.Implementations
 
         public override int Open(ReadOnlySpan<byte> path, ref FuseFileInfo fi)
         {
-            if (!path.SequenceEqual(_helloFilePath))
+            var pathAsString = Encoding.UTF8.GetString(path);
+
+            var metadata = _clientService.GetFileMetadata(pathAsString).Result;
+
+            if (!metadata.IsExist)
             {
                 return -ENOENT;
             }
 
+            // TODO: Temporarily read-only VFS
             if ((fi.flags & O_ACCMODE) != O_RDONLY)
             {
                 return -EACCES;
@@ -88,15 +90,17 @@ namespace longtooth.Vfs.Linux.Implementations.Implementations
 
         public override int Read(ReadOnlySpan<byte> path, ulong offset, Span<byte> buffer, ref FuseFileInfo fi)
         {
-            if (offset > (ulong)_helloFileContent.Length)
+            var pathAsString = Encoding.UTF8.GetString(path);
+
+            var fileContent = _clientService.GetFileContent(pathAsString, (long)offset, buffer.Length).Result;
+
+            if (!fileContent.IsExist || !fileContent.IsInRagne)
             {
                 return 0;
             }
 
-            int intOffset = (int)offset;
-            int length = (int)Math.Min(_helloFileContent.Length - intOffset, buffer.Length);
-            _helloFileContent.AsSpan().Slice(intOffset, length).CopyTo(buffer);
-            return length;
+            fileContent.Content.ToArray().CopyTo(buffer);
+            return fileContent.Content.Count;
         }
 
         public override int ReadDir(ReadOnlySpan<byte> path, ulong offset, ReadDirFlags flags, DirectoryContent content,

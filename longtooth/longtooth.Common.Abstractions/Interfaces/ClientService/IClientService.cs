@@ -14,5 +14,15 @@ namespace longtooth.Common.Abstractions.Interfaces.ClientService
         /// Called by VFS, returning the contents for given directory
         /// </summary>
         Task<FilesystemItemDto> GetDirectoryContentAsync(string path);
+
+        /// <summary>
+        /// Get file metadata by path
+        /// </summary>
+        Task<FileMetadata> GetFileMetadata(string path);
+
+        /// <summary>
+        /// Tries to read up to maxLength bytes from file, starting at offset
+        /// </summary>
+        Task<FileContent> GetFileContent(string path, long offset, long maxLength);
     }
 }
