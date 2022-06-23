@@ -121,6 +121,7 @@ namespace longtooth.Droid.Implementations.FilesManager
                 }
 
                 var buffer = new byte[length];
+                int bytesRead;
 
                 using (var stream = new FileStream(path, FileMode.Open))
                 {
@@ -130,14 +131,16 @@ namespace longtooth.Droid.Implementations.FilesManager
                         return new DownloadedFileWithContentDto(false, 0, 0, new List<byte>());
                     }
 
-                    var readAmount = stream.Read(buffer, 0, (int)length);
-                    if (readAmount != (int)length)
-                    {
-                        return new DownloadedFileWithContentDto(false, 0, 0, new List<byte>());
-                    }
+                    // We can't guarantee that length of bytes will be read
+                    bytesRead = stream.Read(buffer, 0, (int)length);
                 }
 
-                return new DownloadedFileWithContentDto(true, start, length, buffer.ToList());
+                if (bytesRead < length)
+                {
+                    return new DownloadedFileWithContentDto(true, start, bytesRead, buffer.ToList().GetRange(0, bytesRead));
+                }
+
+                return new DownloadedFileWithContentDto(true, start, bytesRead, buffer.ToList());
             }
             catch (Exception)
             {
