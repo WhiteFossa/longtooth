@@ -43,6 +43,11 @@ namespace longtooth.Common.Implementations.ClientService
         /// </summary>
         private DownloadFileRunResult _downloadFileRunResult;
 
+        /// <summary>
+        /// Result of last "get file info" call
+        /// </summary>
+        private GetFileInfoRunResult _getFileInfoRunResult;
+
         public ClientService(IClientSideMessagesProcessor clienSideMessagesProcessor,
             ICommandToServerHeaderGenerator commandGenerator,
             IMessagesProcessor messagesProcessor,
@@ -74,6 +79,11 @@ namespace longtooth.Common.Implementations.ClientService
 
                 case CommandType.DownloadFile:
                     _downloadFileRunResult = runResult as DownloadFileRunResult;
+                    _stopWaitHandle.Set();
+                    break;
+
+                case CommandType.GetFileInfo:
+                    _getFileInfoRunResult = runResult as GetFileInfoRunResult;
                     _stopWaitHandle.Set();
                     break;
 
@@ -182,31 +192,18 @@ namespace longtooth.Common.Implementations.ClientService
 
         public async Task<FileMetadata> GetFileMetadata(string path)
         {
-            // TODO: Implement "GetFileInfo" command
-            var parentDirectory = FilesHelper.MoveUp(path);
-
             await PrepareAndSendCommand(
-                _commandGenerator.GenerateGetDirectoryContentCommand(LocalPathToServerSidePath(parentDirectory)));
+                _commandGenerator.GetFileInfoCommand(LocalPathToServerSidePath(path)));
             _stopWaitHandle.WaitOne();
 
-            if (_directoryContent.DirectoryContent.IsSuccessful)
+            var fileInfo = _getFileInfoRunResult.GetFileInfoResult;
+
+            if (!fileInfo.IsExist)
             {
-                var filename = FilesHelper.GetFileOrDirectoryName(path);
-
-                var file = _directoryContent
-                    .DirectoryContent
-                    .Items
-                    .Where(i => !i.IsDirectory)
-                    .FirstOrDefault(i => i.Name.Equals(filename));
-
-                if (file != null)
-                {
-                    return new FileMetadata(true, file.Name, path);
-                }
+                return new FileMetadata(false, String.Empty, path);
             }
 
-            // Not found
-            return new FileMetadata(false, String.Empty, String.Empty);
+            return new FileMetadata(true, fileInfo.Name, path);
         }
 
         public async Task<FileContent> GetFileContent(string path, long offset, long maxLength)
