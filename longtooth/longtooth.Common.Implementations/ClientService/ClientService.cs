@@ -38,6 +38,11 @@ namespace longtooth.Common.Implementations.ClientService
         /// </summary>
         private GetDirectoryContentRunResult _directoryContent;
 
+        /// <summary>
+        /// Result of last download command
+        /// </summary>
+        private DownloadFileRunResult _downloadFileRunResult;
+
         public ClientService(IClientSideMessagesProcessor clienSideMessagesProcessor,
             ICommandToServerHeaderGenerator commandGenerator,
             IMessagesProcessor messagesProcessor,
@@ -64,6 +69,11 @@ namespace longtooth.Common.Implementations.ClientService
 
                 case CommandType.GetDirectoryContent:
                     _directoryContent = runResult as GetDirectoryContentRunResult;
+                    _stopWaitHandle.Set();
+                    break;
+
+                case CommandType.DownloadFile:
+                    _downloadFileRunResult = runResult as DownloadFileRunResult;
                     _stopWaitHandle.Set();
                     break;
 
@@ -172,17 +182,27 @@ namespace longtooth.Common.Implementations.ClientService
 
         public async Task<FileMetadata> GetFileMetadata(string path)
         {
-            if (path.Equals(@"/testfile.txt"))
+            // TODO: Implement "GetFileInfo" command
+            var parentDirectory = FilesHelper.MoveUp(path);
+
+            await PrepareAndSendCommand(
+                _commandGenerator.GenerateGetDirectoryContentCommand(LocalPathToServerSidePath(parentDirectory)));
+            _stopWaitHandle.WaitOne();
+
+            if (_directoryContent.DirectoryContent.IsSuccessful)
             {
-                return new FileMetadata(true, "testfile.txt", @"/testfile.txt");
-            }
-            else if (path.Equals(@"/Dir 1/testfile1.txt"))
-            {
-                return new FileMetadata(true, "testfile1.txt", @"/Dir 1/testfile1.txt");
-            }
-            else if (path.Equals(@"/Dir 2/testfile2.txt"))
-            {
-                return new FileMetadata(true, "testfile2.txt", @"/Dir 2/testfile2.txt");
+                var filename = FilesHelper.GetFileOrDirectoryName(path);
+
+                var file = _directoryContent
+                    .DirectoryContent
+                    .Items
+                    .Where(i => !i.IsDirectory)
+                    .FirstOrDefault(i => i.Name.Equals(filename));
+
+                if (file != null)
+                {
+                    return new FileMetadata(true, file.Name, path);
+                }
             }
 
             // Not found
@@ -191,43 +211,17 @@ namespace longtooth.Common.Implementations.ClientService
 
         public async Task<FileContent> GetFileContent(string path, long offset, long maxLength)
         {
-            byte[] content = null;
+            await PrepareAndSendCommand(
+                _commandGenerator.GenerateDownloadCommand(LocalPathToServerSidePath(path), offset, (int)maxLength));
+            _stopWaitHandle.WaitOne();
 
-            if (path.Equals(@"/testfile.txt"))
+            if (!_downloadFileRunResult.File.IsSuccessful)
             {
-                content = Encoding.UTF8.GetBytes("This is testfile.txt sample content");
-            }
-            else if (path.Equals(@"/Dir 1/testfile1.txt"))
-            {
-                content = Encoding.UTF8.GetBytes("This is testfile1.txt sample content");
-            }
-            else if (path.Equals(@"/Dir 2/testfile2.txt"))
-            {
-                content = Encoding.UTF8.GetBytes("This is testfile2.txt sample content");
-            }
-            else
-            {
-                // Not found
                 return new FileContent(false, false, new List<byte>());
             }
 
-            var isInRange = offset < content.Length;
+            return new FileContent(true, true, _downloadFileRunResult.File.Content);
 
-            var canRead = Math.Min(maxLength, content.Length - offset);
-
-            List<byte> result;
-
-            if (!isInRange)
-            {
-                result = new List<byte>();
-            }
-            else
-            {
-                result = content.ToList()
-                    .GetRange((int)offset, (int)canRead);
-            }
-
-            return new FileContent(true, isInRange, result);
         }
     }
 }
