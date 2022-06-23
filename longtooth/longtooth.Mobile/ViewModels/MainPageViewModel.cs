@@ -165,6 +165,15 @@ namespace longtooth.ViewModels
             //{
             //    await UserDialogs.Instance.AlertAsync("Root access is required!", "Error", "OK");
             //}
+
+            try
+            {
+                await _server.StartAsync(OnNewDataReadFromClientAsync);
+            }
+            catch (Exception)
+            {
+                // TODO: Handle me
+            }
         }
 
         /// <summary>
@@ -203,15 +212,6 @@ namespace longtooth.ViewModels
             if (!doWeHavePermission)
             {
                 await _userNotifier.ShowErrorMessageAsync("Error", "Storage permission is required!");
-            }
-
-            try
-            {
-                await _server.StartAsync(OnNewDataReadFromClientAsync);
-            }
-            catch (Exception)
-            {
-                // TODO: Handle me
             }
 
             Device.BeginInvokeOnMainThread(async () =>
