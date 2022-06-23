@@ -64,6 +64,16 @@ namespace longtooth.Common.Implementations.Helpers
         }
 
         /// <summary>
+        /// Get everything after rightmost slash
+        /// </summary>
+        public static string GetFileOrDirectoryName(string path)
+        {
+            var lastSlashIndex = path.LastIndexOf('/');
+            var result = path.Substring(lastSlashIndex + 1, path.Length - lastSlashIndex - 1);
+            return result;
+        }
+
+        /// <summary>
         /// Append filename to directory name to get full path
         /// </summary>
         public static string AppendFilename(string directory, string filename)

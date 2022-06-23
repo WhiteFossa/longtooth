@@ -21,6 +21,7 @@ using System.Linq;
 using System.Net;
 using System.Reactive;
 using System.Threading.Tasks;
+using longtooth.Common.Abstractions.Interfaces.ClientService;
 
 namespace longtooth.Desktop.ViewModels
 {
@@ -217,6 +218,7 @@ namespace longtooth.Desktop.ViewModels
         private readonly ICommandToServerHeaderGenerator _commandGenerator;
         private readonly IClientSideMessagesProcessor _clientSideMessagesProcessor;
         private readonly IVfsManager _vfs;
+        private readonly IClientService _clientService;
 
         private const int DownloadChunkSize = 1000000;
         private long _alreadyDownloaded;
@@ -239,19 +241,23 @@ namespace longtooth.Desktop.ViewModels
             _logger = Program.Di.GetService<ILogger>();
 
             _messagesProcessor = Program.Di.GetService<IMessagesProcessor>();
-            _messagesProcessor.SetupOnNewMessageDelegate(OnNewMessageAsync);
 
             _commandGenerator = Program.Di.GetService<ICommandToServerHeaderGenerator>();
             _clientSideMessagesProcessor = Program.Di.GetService<IClientSideMessagesProcessor>();
 
-            // TODO : Remove me, debug
-            LocalMountpoint = @"/home/fossa/longtooth-mountpoint";
-
             _vfs = Program.Di.GetService<IVfsManager>();
+
+            _clientService = Program.Di.GetService<IClientService>();
 
             #endregion
 
             #region Initialization
+
+            //_messagesProcessor.SetupOnNewMessageDelegate(OnNewMessageAsync);
+            _messagesProcessor.SetupOnNewMessageDelegate(_clientService.OnNewMessageAsync);
+
+            // TODO : Remove me, debug
+            LocalMountpoint = @"/home/fossa/longtooth-mountpoint";
 
             _logger.SetLoggingFunction(AddLineToConsole);
 

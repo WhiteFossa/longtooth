@@ -11,6 +11,11 @@ namespace longtooth.Common.Abstractions.Interfaces.ClientService
     public interface IClientService
     {
         /// <summary>
+        /// Call this method when decoded message comes from server
+        /// </summary>
+        Task OnNewMessageAsync(IReadOnlyCollection<byte> decodedMessage);
+
+        /// <summary>
         /// Called by VFS, returning the contents for given directory
         /// </summary>
         Task<FilesystemItemDto> GetDirectoryContentAsync(string path);

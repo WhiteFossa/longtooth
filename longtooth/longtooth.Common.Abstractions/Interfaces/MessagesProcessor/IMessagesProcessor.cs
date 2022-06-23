@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace longtooth.Common.Abstractions.Interfaces.MessagesProcessor
 {
     /// <summary>
     /// Will be called when new message is decoded
     /// </summary>
-    public delegate void OnNewMessageDelegate(IReadOnlyCollection<byte> decodedMessage);
+    public delegate Task OnNewMessageDelegate(IReadOnlyCollection<byte> decodedMessage);
 
     /// <summary>
     /// Interface to process low-level messages

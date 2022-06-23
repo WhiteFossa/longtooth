@@ -5,6 +5,7 @@ using System.Text;
 using longtooth.Common.Abstractions.DTOs;
 using longtooth.Common.Abstractions.DTOs.ClientService;
 using longtooth.Common.Abstractions.Interfaces.ClientService;
+using longtooth.Common.Implementations.Helpers;
 using longtooth.Vfs.Linux.Abstractions.Interfaces;
 using Tmds.Fuse;
 using Tmds.Linux;
@@ -117,7 +118,7 @@ namespace longtooth.Vfs.Linux.Implementations.Implementations
 
             foreach (var item in _currentItem.Content)
             {
-                content.AddEntry((item.Name));
+                content.AddEntry((FilesHelper.GetFileOrDirectoryName(item.Path)));
             }
 
             return 0;

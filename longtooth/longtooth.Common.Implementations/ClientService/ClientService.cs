@@ -2,68 +2,171 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
+using longtooth.Client.Abstractions.Interfaces;
+using longtooth.Common.Abstractions.DTOs;
 using longtooth.Common.Abstractions.DTOs.ClientService;
+using longtooth.Common.Abstractions.DTOs.Responses;
+using longtooth.Common.Abstractions.Enums;
 using longtooth.Common.Abstractions.Interfaces.ClientService;
+using longtooth.Common.Abstractions.Interfaces.MessagesProcessor;
+using longtooth.Common.Implementations.Helpers;
+using longtooth.Protocol.Abstractions.Interfaces;
 
 namespace longtooth.Common.Implementations.ClientService
 {
     public class ClientService : IClientService
     {
+        private readonly IClientSideMessagesProcessor _clientSideMessagesProcessor;
+        private readonly ICommandToServerHeaderGenerator _commandGenerator;
+        private readonly IMessagesProcessor _messagesProcessor;
+        private readonly IClient _client;
+
+        /// <summary>
+        /// To wait for callbacks
+        /// </summary>
+        private AutoResetEvent _stopWaitHandle = new AutoResetEvent(false);
+
+        /// <summary>
+        /// Last mountpoints enumeration result
+        /// </summary>
+        private IReadOnlyCollection<MountpointDto> _mountpoints;
+
+        /// <summary>
+        /// Last get directory content call result
+        /// </summary>
+        private GetDirectoryContentRunResult _directoryContent;
+
+        public ClientService(IClientSideMessagesProcessor clienSideMessagesProcessor,
+            ICommandToServerHeaderGenerator commandGenerator,
+            IMessagesProcessor messagesProcessor,
+            IClient client
+            )
+        {
+            _clientSideMessagesProcessor = clienSideMessagesProcessor;
+            _commandGenerator = commandGenerator;
+            _messagesProcessor = messagesProcessor;
+            _client = client;
+        }
+
+        public async Task OnNewMessageAsync(IReadOnlyCollection<byte> decodedMessage)
+        {
+            var response = _clientSideMessagesProcessor.ParseMessage(decodedMessage);
+            var runResult = await response.RunAsync();
+
+            switch (runResult.ResponseToCommand)
+            {
+                case CommandType.GetMountpoints:
+                    _mountpoints = (runResult as GetMountpointsRunResult).Mountpoints;
+                    _stopWaitHandle.Set();
+                    break;
+
+                case CommandType.GetDirectoryContent:
+                    _directoryContent = runResult as GetDirectoryContentRunResult;
+                    _stopWaitHandle.Set();
+                    break;
+
+                default:
+                    throw new InvalidOperationException("Unknown command type in response!");
+            }
+        }
+
+        private async Task PrepareAndSendCommand(IReadOnlyCollection<byte> commandMessage)
+        {
+            var encodedMessage = _messagesProcessor.PrepareMessageToSend(new List<byte>(commandMessage));
+            await _client.SendAsync(encodedMessage);
+        }
+
+        private string MountpointToLocalPath(string path)
+        {
+            // TODO: Make me better
+            return path.Replace(@"/storage/emulated/0", @"");
+        }
+
+        private string ServerSidePathToLocalPath(string path)
+        {
+            // TODO: Make me better
+            return path.Replace(@"/storage/emulated/0", @"/");
+        }
+
+        private string LocalPathToServerSidePath(string path)
+        {
+            // TODO: Make me better
+            return @$"/storage/emulated/0{ path }";
+        }
+
         public async Task<FilesystemItemDto> GetDirectoryContentAsync(string path)
         {
             if (path.Equals(@"/"))
             {
-                var subcontent = new List<FilesystemItemDto>();
-                subcontent.Add(new FilesystemItemDto(true, true, @"/Dir 1", "Dir 1", 0, new List<FilesystemItemDto>()));
-                subcontent.Add(new FilesystemItemDto(true, true, @"/Dir 2", "Dir 2", 0, new List<FilesystemItemDto>()));
-                subcontent.Add(new FilesystemItemDto(true, false, @"/testfile.txt", "testfile.txt", 1337, new List<FilesystemItemDto>()));
+                // Enumerating mountpoints
+                await PrepareAndSendCommand(_commandGenerator.GenerateGetMountpointsCommand());
+                _stopWaitHandle.WaitOne();
 
-                return new FilesystemItemDto(true, true, @"/", @"/", 0, subcontent);
-            }
-            else if (path.Equals(@"/testfile.txt"))
-            {
-                var subcontent = new List<FilesystemItemDto>();
-                return new FilesystemItemDto(true, false, @"/testfile.txt", @"testfile.txt", 1337, subcontent);
-            }
-            else if (path.Equals(@"/Dir 1"))
-            {
-                var subcontent = new List<FilesystemItemDto>();
-                subcontent.Add(new FilesystemItemDto(true, true, @"/Dir 1/Dir 3", "Dir 3", 0, new List<FilesystemItemDto>()));
-                subcontent.Add(new FilesystemItemDto(true, false, @"/Dir 1/testfile1.txt", "testfile1.txt", 1337, new List<FilesystemItemDto>()));
+                var content = _mountpoints
+                    .Select(mp => new FilesystemItemDto(true,
+                        true,
+                        MountpointToLocalPath(mp.ServerSidePath),
+                        mp.Name,
+                        0,
+                        new List<FilesystemItemDto>()))
+                    .ToList();
 
-                return new FilesystemItemDto(true, true, @"/Dir 1", @"Dir 1", 0, subcontent);
-            }
-            else if (path.Equals(@"/Dir 1/Dir 3"))
-            {
-                var subcontent = new List<FilesystemItemDto>();
-                return new FilesystemItemDto(true, true, @"/Dir 1/Dir 3", @"Dir 3", 0, subcontent);
-            }
-            else if (path.Equals(@"/Dir 1/testfile1.txt"))
-            {
-                var subcontent = new List<FilesystemItemDto>();
-                return new FilesystemItemDto(true, false, @"/Dir 1/testfile1.txt", @"testfile1.txt", 1337, subcontent);
-            }
-            else if (path.Equals(@"/Dir 2"))
-            {
-                var subcontent = new List<FilesystemItemDto>();
-                subcontent.Add(new FilesystemItemDto(true, true, @"/Dir 2/Dir 4", "Dir 4", 0, new List<FilesystemItemDto>()));
-                subcontent.Add(new FilesystemItemDto(true, false, @"/Dir 2/testfile2.txt", "testfile2.txt", 1337, new List<FilesystemItemDto>()));
-
-                return new FilesystemItemDto(true, true, @"/Dir 2", @"Dir 2", 0, subcontent);
-            }
-            else if (path.Equals(@"/Dir 2/Dir 4"))
-            {
-                var subcontent = new List<FilesystemItemDto>();
-                return new FilesystemItemDto(true, true, @"/Dir 2/Dir 4", @"Dir 4", 0, subcontent);
-            }
-            else if (path.Equals(@"/Dir 2/testfile2.txt"))
-            {
-                var subcontent = new List<FilesystemItemDto>();
-                return new FilesystemItemDto(true, false, @"/Dir 2/testfile2.txt", @"testfile2.txt", 1337, subcontent);
+                return new FilesystemItemDto(true, true, @"/", @"/", 0, content);
             }
 
-            // Incorrect directory
+            // Ordinary directory or file, trying to get directory first
+            await PrepareAndSendCommand(
+                _commandGenerator.GenerateGetDirectoryContentCommand(LocalPathToServerSidePath(path)));
+            _stopWaitHandle.WaitOne();
+
+            if (_directoryContent.DirectoryContent.IsSuccessful)
+            {
+                // Sure, this is directory
+                var content = _directoryContent
+                    .DirectoryContent
+                    .Items
+                    .Select(di => new FilesystemItemDto(true,
+                        di.IsDirectory,
+                        $@"{ path }/{ di.Name }",
+                        di.Name,
+                        di.Size,
+                        new List<FilesystemItemDto>()))
+                    .ToList();
+
+                return new FilesystemItemDto(true, true, path, path, 0, content);
+            }
+
+            // OK, it's a file, not a directory
+            // TODO: Implement "GetFileInfo" command
+            var parentDirectory = FilesHelper.MoveUp(path);
+            await PrepareAndSendCommand(
+                _commandGenerator.GenerateGetDirectoryContentCommand(LocalPathToServerSidePath(parentDirectory)));
+            _stopWaitHandle.WaitOne();
+
+            if (_directoryContent.DirectoryContent.IsSuccessful)
+            {
+                var filename = FilesHelper.GetFileOrDirectoryName(path);
+
+                var file = _directoryContent
+                    .DirectoryContent
+                    .Items
+                    .Where(i => !i.IsDirectory)
+                    .FirstOrDefault(i => i.Name.Equals(filename));
+
+                if (file != null)
+                {
+                    return new FilesystemItemDto(true,
+                        false,
+                        path,
+                        file.Name,
+                        file.Size,
+                        new List<FilesystemItemDto>());
+                }
+            }
+
+            // Non-existent item
             return new FilesystemItemDto(false, false, @"", @"", 0, new List<FilesystemItemDto>());
         }
 

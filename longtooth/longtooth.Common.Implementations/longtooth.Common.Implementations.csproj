@@ -6,6 +6,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\longtooth.Common.Abstractions\longtooth.Common.Abstractions.csproj" />
+    <ProjectReference Include="..\longtooth.Protocol.Abstractions\longtooth.Protocol.Abstractions.csproj" />
   </ItemGroup>
 
 </Project>
