@@ -4,17 +4,19 @@ using longtooth.Common.Abstractions.Interfaces.MessagesProcessor;
 using longtooth.Protocol.Abstractions.DataStructures;
 using longtooth.Protocol.Abstractions.Interfaces;
 using longtooth.Server.Abstractions.DTOs;
+using System;
 using System.Collections.Generic;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace longtooth.Protocol.Abstractions.Commands
 {
-    public class CreateDirectoryCommand : CommandHeader
+    public class GetFileInfoCommand : CommandHeader
     {
         /// <summary>
-        /// Create this directory
+        /// Get information about this file
         /// </summary>
         [JsonPropertyName("Path")]
         public string Path { get; private set; }
@@ -24,15 +26,15 @@ namespace longtooth.Protocol.Abstractions.Commands
         private readonly IFilesManager _filesManager;
 
         [JsonConstructor]
-        public CreateDirectoryCommand(string path) : base(CommandType.CreateDirectory)
+        public GetFileInfoCommand(string path) : base(CommandType.GetFileInfo)
         {
             Path = path;
         }
 
-        public CreateDirectoryCommand(string path,
+        public GetFileInfoCommand(string path,
             IMessagesProcessor messagesProcessor,
             IResponseToClientHeaderGenerator responseToClientHeaderGenerator,
-            IFilesManager filesManager) : base(CommandType.CreateDirectory)
+            IFilesManager filesManager) : base(CommandType.GetFileInfo)
         {
             Path = path;
 
@@ -44,11 +46,11 @@ namespace longtooth.Protocol.Abstractions.Commands
         public async Task<ResponseDto> ParseAsync(string header, IReadOnlyCollection<byte> payload)
         {
             // Do work here
-            var parsedHeader = JsonSerializer.Deserialize<CreateDirectoryCommand>(header);
+            var parsedHeader = JsonSerializer.Deserialize<GetFileInfoCommand>(header);
 
-            var createResult = await _filesManager.CreateDirectoryAsync(parsedHeader.Path);
+            var fileInfoResult = await _filesManager.GetFileInfoAsync(parsedHeader.Path);
 
-            var response = _responseToClientHeaderGenerator.GenerateCreateDirectoryResponse(createResult);
+            var response = _responseToClientHeaderGenerator.GenerateGetFileInfoResponse(fileInfoResult);
 
             var responseMessage = _messagesProcessor.PrepareMessageToSend(response);
 

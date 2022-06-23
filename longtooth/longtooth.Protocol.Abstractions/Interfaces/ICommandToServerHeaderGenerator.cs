@@ -56,5 +56,10 @@ namespace longtooth.Protocol.Abstractions.Interfaces
         /// Generate "create directory" command
         /// </summary>
         IReadOnlyCollection<byte> CreateDirectoryCommand(string path);
+
+        /// <summary>
+        /// Generate "get file info" command
+        /// </summary>
+        IReadOnlyCollection<byte> GetFileInfoCommand(string path);
     }
 }

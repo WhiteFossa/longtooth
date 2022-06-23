@@ -99,5 +99,12 @@ namespace longtooth.Protocol.Implementations.Implementations
 
             return EncodeResponse(createDirectoryResponse, null);
         }
+
+        public IReadOnlyCollection<byte> GenerateGetFileInfoResponse(GetFileInfoResultDto fileInfoResultDto)
+        {
+            var createDirectoryResponse = new GetFileInfoResponse(fileInfoResultDto);
+
+            return EncodeResponse(createDirectoryResponse, null);
+        }
     }
 }

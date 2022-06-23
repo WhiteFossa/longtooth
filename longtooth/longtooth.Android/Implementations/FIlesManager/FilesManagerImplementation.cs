@@ -115,6 +115,14 @@ namespace longtooth.Droid.Implementations.FilesManager
             {
                 _ = path ?? throw new ArgumentNullException(nameof(path));
 
+                var targetDirectory = Path.GetDirectoryName(path);
+
+                if (!IsDirectoryBelongsToMountpoint(targetDirectory))
+                {
+                    // Non-exported directory
+                    return new DownloadedFileWithContentDto(false, 0, 0, new List<byte>());
+                }
+
                 if (!File.Exists(path))
                 {
                     return new DownloadedFileWithContentDto(false, 0, 0, new List<byte>());
@@ -365,6 +373,28 @@ namespace longtooth.Droid.Implementations.FilesManager
         public void ClearAllMountpoints()
         {
             _mountpoints.Clear();
+        }
+
+        public async Task<GetFileInfoResultDto> GetFileInfoAsync(string path)
+        {
+            _ = path ?? throw new ArgumentNullException(nameof(path));
+
+            var targetDirectory = Path.GetDirectoryName(path);
+
+            if (!IsDirectoryBelongsToMountpoint(targetDirectory))
+            {
+                // Non-exported directory
+                return new GetFileInfoResultDto(false, path, "", 0);
+            }
+
+            if (!File.Exists(path))
+            {
+                return new GetFileInfoResultDto(false, path, "", 0);
+            }
+
+            var info = new FileInfo(path);
+
+            return new GetFileInfoResultDto(false, path, info.Name, info.Length);
         }
     }
 }

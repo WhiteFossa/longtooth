@@ -68,5 +68,12 @@ namespace longtooth.Common.Abstractions.Interfaces.FilesManager
         /// Create directory
         /// </summary>
         Task<CreateDirectoryResultDto> CreateDirectoryAsync(string path);
+
+        /// <summary>
+        /// Get information about file
+        /// </summary>
+        Task<GetFileInfoResultDto> GetFileInfoAsync(string path);
+
+
     }
 }

@@ -58,5 +58,10 @@ namespace longtooth.Protocol.Abstractions.Interfaces
         /// Generate response for directory creation
         /// </summary>
         IReadOnlyCollection<byte> GenerateCreateDirectoryResponse(CreateDirectoryResultDto createDirectoryResult);
+
+        /// <summary>
+        /// Generate response for file information
+        /// </summary>
+        IReadOnlyCollection<byte> GenerateGetFileInfoResponse(GetFileInfoResultDto fileInfoResultDto);
     }
 }

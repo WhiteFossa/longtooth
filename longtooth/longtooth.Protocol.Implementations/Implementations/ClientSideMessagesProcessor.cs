@@ -62,6 +62,9 @@ namespace longtooth.Protocol.Implementations.Implementations
                 case CommandType.CreateDirectory:
                     return CreateDirectoryResponse.Parse(stringHeader, payload);
 
+                case CommandType.GetFileInfo:
+                    return GetFileInfoResponse.Parse(stringHeader, payload);
+
                 default:
                     throw new InvalidOperationException($"Response to unknown command. Type: {header.Command}");
             }

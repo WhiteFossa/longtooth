@@ -54,5 +54,10 @@
         /// Create directory
         /// </summary>
         CreateDirectory = 9,
+
+        /// <summary>
+        /// Get information about file
+        /// </summary>
+        GetFileInfo = 10,
     }
 }

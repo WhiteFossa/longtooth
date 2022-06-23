@@ -114,5 +114,15 @@ namespace longtooth.Protocol.Implementations.Implementations
 
             return EncodeCommand(createDirectoryCommand, null);
         }
+
+        public IReadOnlyCollection<byte> GetFileInfoCommand(string path)
+        {
+            var getFileInfoCommand = new GetFileInfoCommand(path,
+                null,
+                null,
+                null);
+
+            return EncodeCommand(getFileInfoCommand, null);
+        }
     }
 }
