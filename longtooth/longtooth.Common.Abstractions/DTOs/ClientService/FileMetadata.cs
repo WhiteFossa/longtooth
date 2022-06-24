@@ -20,11 +20,17 @@ namespace longtooth.Common.Abstractions.DTOs.ClientService
         /// </summary>
         public string Path { get; private set; }
 
-        public FileMetadata(bool isExist, string name, string path)
+        /// <summary>
+        /// File size
+        /// </summary>
+        public long Size { get; private set; }
+
+        public FileMetadata(bool isExist, string name, string path, long size)
         {
             IsExist = isExist;
             Name = name;
             Path = path;
+            Size = size;
         }
     }
 }

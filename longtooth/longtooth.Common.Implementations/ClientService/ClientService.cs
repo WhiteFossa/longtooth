@@ -159,31 +159,15 @@ namespace longtooth.Common.Implementations.ClientService
             }
 
             // OK, it's a file, not a directory
-            // TODO: Implement "GetFileInfo" command
-            var parentDirectory = FilesHelper.MoveUp(path);
-            await PrepareAndSendCommand(
-                _commandGenerator.GenerateGetDirectoryContentCommand(LocalPathToServerSidePath(parentDirectory)));
-            _stopWaitHandle.WaitOne();
-
-            if (_directoryContent.DirectoryContent.IsSuccessful)
+            var metadata = await GetFileMetadata(path);
+            if (metadata.IsExist)
             {
-                var filename = FilesHelper.GetFileOrDirectoryName(path);
-
-                var file = _directoryContent
-                    .DirectoryContent
-                    .Items
-                    .Where(i => !i.IsDirectory)
-                    .FirstOrDefault(i => i.Name.Equals(filename));
-
-                if (file != null)
-                {
-                    return new FilesystemItemDto(true,
-                        false,
-                        path,
-                        file.Name,
-                        file.Size,
-                        new List<FilesystemItemDto>());
-                }
+                return new FilesystemItemDto(true,
+                    false,
+                    path,
+                    metadata.Name,
+                    metadata.Size,
+                    new List<FilesystemItemDto>());
             }
 
             // Non-existent item
@@ -200,10 +184,10 @@ namespace longtooth.Common.Implementations.ClientService
 
             if (!fileInfo.IsExist)
             {
-                return new FileMetadata(false, String.Empty, path);
+                return new FileMetadata(false, String.Empty, path, 0);
             }
 
-            return new FileMetadata(true, fileInfo.Name, path);
+            return new FileMetadata(true, fileInfo.Name, path, fileInfo.Size);
         }
 
         public async Task<FileContent> GetFileContent(string path, long offset, long maxLength)
