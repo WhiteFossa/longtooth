@@ -143,6 +143,11 @@ namespace longtooth.Droid.Implementations.FilesManager
                     bytesRead = stream.Read(buffer, 0, (int)length);
                 }
 
+                if (bytesRead > length)
+                {
+                    throw new InvalidOperationException("Got more that requested!");
+                }
+
                 if (bytesRead < length)
                 {
                     return new DownloadedFileWithContentDto(true, start, bytesRead, buffer.ToList().GetRange(0, bytesRead));
