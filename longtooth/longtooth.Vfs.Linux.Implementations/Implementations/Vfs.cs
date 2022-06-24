@@ -26,9 +26,9 @@ namespace longtooth.Vfs.Linux.Implementations.Implementations
         private const int Permissions = 0b111_111_111;
 
         /// <summary>
-        /// Reasonable read operation block size
+        /// Reasonable read operation block size. Check Constants.MaxPacketSize when setting it.
         /// </summary>
-        private const int ReadOperationBlockSize = 100000;
+        private const int ReadOperationBlockSize = 1000 * 1024;
 
         /// <summary>
         /// Cached content of current directory
