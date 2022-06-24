@@ -1,4 +1,5 @@
-﻿using longtooth.Common.Abstractions.Enums;
+﻿using System;
+using longtooth.Common.Abstractions.Enums;
 using System.Text.Json.Serialization;
 
 namespace longtooth.Common.Abstractions.DTOs.Responses
@@ -13,7 +14,7 @@ namespace longtooth.Common.Abstractions.DTOs.Responses
 
         public GetFileInfoRunResult(GetFileInfoResultDto getFileInfoResult) : base(CommandType.GetFileInfo)
         {
-            GetFileInfoResult = getFileInfoResult;
+            GetFileInfoResult = getFileInfoResult ?? throw new ArgumentNullException(nameof(getFileInfoResult));
         }
     }
 }
