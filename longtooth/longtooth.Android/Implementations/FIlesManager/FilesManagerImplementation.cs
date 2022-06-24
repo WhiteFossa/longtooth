@@ -12,6 +12,11 @@ namespace longtooth.Droid.Implementations.FilesManager
     public class FilesManagerImplementation : IFilesManager
     {
         /// <summary>
+        /// Maximal read block size. Check Constants.MaxPacketSize when setting this setting.
+        /// </summary>
+        private const int MaxReadBlockSize = 1000 * 1024;
+
+        /// <summary>
         /// Shared directories
         /// </summary>
         private List<MountpointDto> _mountpoints;
@@ -128,7 +133,9 @@ namespace longtooth.Droid.Implementations.FilesManager
                     return new DownloadedFileWithContentDto(false, 0, 0, new List<byte>());
                 }
 
-                var buffer = new byte[length];
+                var toRead = Math.Min(length, MaxReadBlockSize);
+
+                var buffer = new byte[toRead];
                 int bytesRead;
 
                 using (var stream = new FileStream(path, FileMode.Open))
@@ -140,15 +147,15 @@ namespace longtooth.Droid.Implementations.FilesManager
                     }
 
                     // We can't guarantee that length of bytes will be read
-                    bytesRead = stream.Read(buffer, 0, (int)length);
+                    bytesRead = stream.Read(buffer, 0, toRead);
                 }
 
-                if (bytesRead > length)
+                if (bytesRead > toRead)
                 {
                     throw new InvalidOperationException("Got more that requested!");
                 }
 
-                if (bytesRead < length)
+                if (bytesRead < toRead)
                 {
                     return new DownloadedFileWithContentDto(true, start, bytesRead, buffer.ToList().GetRange(0, bytesRead));
                 }
