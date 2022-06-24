@@ -26,6 +26,11 @@ namespace longtooth.Vfs.Linux.Implementations.Implementations
         private const int Permissions = 0b111_111_111;
 
         /// <summary>
+        /// Reasonable read operation block size
+        /// </summary>
+        private const int ReadOperationBlockSize = 100000;
+
+        /// <summary>
         /// Cached content of current directory
         /// </summary>
         private FilesystemItemDto _currentItem =
@@ -93,7 +98,8 @@ namespace longtooth.Vfs.Linux.Implementations.Implementations
         {
             var pathAsString = Encoding.UTF8.GetString(path);
 
-            var fileContent = _clientService.GetFileContent(pathAsString, (long)offset, buffer.Length).Result;
+            var toRead = Math.Min(buffer.Length, ReadOperationBlockSize);
+            var fileContent = _clientService.GetFileContent(pathAsString, (long)offset, toRead).Result;
 
             if (!fileContent.IsExist || !fileContent.IsInRagne)
             {
@@ -101,6 +107,7 @@ namespace longtooth.Vfs.Linux.Implementations.Implementations
             }
 
             fileContent.Content.ToArray().CopyTo(buffer);
+
             return fileContent.Content.Count;
         }
 
