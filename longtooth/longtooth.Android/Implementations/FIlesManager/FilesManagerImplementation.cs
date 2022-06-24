@@ -394,7 +394,7 @@ namespace longtooth.Droid.Implementations.FilesManager
 
             var info = new FileInfo(path);
 
-            return new GetFileInfoResultDto(false, path, info.Name, info.Length);
+            return new GetFileInfoResultDto(true, path, info.Name, info.Length);
         }
     }
 }
