@@ -82,11 +82,7 @@ namespace longtooth.Vfs.Linux.Implementations.Implementations
                 return -ENOENT;
             }
 
-            // TODO: Temporarily read-only VFS
-            if ((fi.flags & O_ACCMODE) != O_RDONLY)
-            {
-                return -EACCES;
-            }
+            // TODO: Put here access detection
 
             return 0;
         }
@@ -191,6 +187,20 @@ namespace longtooth.Vfs.Linux.Implementations.Implementations
             InvalidateCurrentDirectoryCachedContent();
 
             return 0;
+        }
+
+        public override int Write(
+            ReadOnlySpan<byte> path, ulong offset, ReadOnlySpan<byte> span, ref FuseFileInfo fi)
+        {
+            var pathAsString = Encoding.UTF8.GetString(path);
+
+            var result = _clientService.UpdateFileContentAsync(pathAsString, offset, span.ToArray());
+            if (!result.Result.IsSuccessful)
+            {
+                return -EIO;
+            }
+
+            return result.Result.BytesWritten;
         }
 
         private void UpdateCurrentDirectory(string path)

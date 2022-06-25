@@ -68,6 +68,11 @@ namespace longtooth.Common.Implementations.ClientService
         /// </summary>
         private DeleteFileRunResult _deleteFileRunResult;
 
+        /// <summary>
+        /// Result of last "update file" call
+        /// </summary>
+        private UpdateFileRunResult _updateFileRunResult;
+
         public ClientService(IClientSideMessagesProcessor clienSideMessagesProcessor,
             ICommandToServerHeaderGenerator commandGenerator,
             IMessagesProcessor messagesProcessor,
@@ -124,6 +129,11 @@ namespace longtooth.Common.Implementations.ClientService
 
                 case CommandType.DeleteFile:
                     _deleteFileRunResult = runResult as DeleteFileRunResult;
+                    _stopWaitHandle.Set();
+                    break;
+
+                case CommandType.UpdateFile:
+                    _updateFileRunResult = runResult as UpdateFileRunResult;
                     _stopWaitHandle.Set();
                     break;
 
@@ -279,6 +289,15 @@ namespace longtooth.Common.Implementations.ClientService
             _stopWaitHandle.WaitOne();
 
             return _deleteFileRunResult.DeleteFileResult.IsSuccessful;
+        }
+
+        public async Task<UpdateFileResultDto> UpdateFileContentAsync(string path, ulong offset, IReadOnlyCollection<byte> buffer)
+        {
+            await PrepareAndSendCommand(
+                _commandGenerator.UpdateFileCommand(LocalPathToServerSidePath(path), (long)offset, buffer.ToArray()));
+            _stopWaitHandle.WaitOne();
+
+            return _updateFileRunResult.UpdateFileResult;
         }
     }
 }

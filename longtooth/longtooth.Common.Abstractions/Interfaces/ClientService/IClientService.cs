@@ -49,5 +49,10 @@ namespace longtooth.Common.Abstractions.Interfaces.ClientService
         /// Delete file at given path. Returns true if successful, false otherwise
         /// </summary>
         Task<bool> DeleteFileAsync(string path);
+
+        /// <summary>
+        /// Write buffer to file at given offset
+        /// </summary>
+        Task<UpdateFileResultDto> UpdateFileContentAsync(string path, ulong offset, IReadOnlyCollection<byte> buffer);
     }
 }
