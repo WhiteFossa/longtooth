@@ -143,6 +143,8 @@ namespace longtooth.Vfs.Linux.Implementations.Implementations
                 return -EEXIST;
             }
 
+            InvalidateCurrentDirectoryCachedContent();
+
             return 0;
         }
 
@@ -155,6 +157,8 @@ namespace longtooth.Vfs.Linux.Implementations.Implementations
             {
                 return -ENOENT;
             }
+
+            InvalidateCurrentDirectoryCachedContent();
 
             return 0;
         }
@@ -169,6 +173,23 @@ namespace longtooth.Vfs.Linux.Implementations.Implementations
                 return -EEXIST;
             }
 
+            InvalidateCurrentDirectoryCachedContent();
+
+            return 0;
+        }
+
+        public override int Unlink(ReadOnlySpan<byte> path)
+        {
+            var pathAsString = Encoding.UTF8.GetString(path);
+
+            var result = _clientService.DeleteFileAsync(pathAsString).Result;
+            if (!result)
+            {
+                return -ENOENT;
+            }
+
+            InvalidateCurrentDirectoryCachedContent();
+
             return 0;
         }
 
@@ -178,6 +199,14 @@ namespace longtooth.Vfs.Linux.Implementations.Implementations
             {
                 _currentItem = _clientService.GetDirectoryContentAsync(path).Result;
             }
+        }
+
+        /// <summary>
+        /// Call this after changes in current directory (creating/removig files and directories and so on).
+        /// </summary>
+        private void InvalidateCurrentDirectoryCachedContent()
+        {
+            _currentItem = new FilesystemItemDto(false, true, string.Empty, string.Empty, 0, new List<FilesystemItemDto>());
         }
     }
 }

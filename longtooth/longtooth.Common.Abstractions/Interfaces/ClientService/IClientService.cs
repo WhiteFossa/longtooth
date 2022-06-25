@@ -44,5 +44,10 @@ namespace longtooth.Common.Abstractions.Interfaces.ClientService
         /// Create a file at given path. Returns true if successful, false otherwise
         /// </summary>
         Task<bool> CreateFileAsync(string path);
+
+        /// <summary>
+        /// Delete file at given path. Returns true if successful, false otherwise
+        /// </summary>
+        Task<bool> DeleteFileAsync(string path);
     }
 }
