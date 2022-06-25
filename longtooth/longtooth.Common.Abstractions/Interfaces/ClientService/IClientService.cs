@@ -23,11 +23,16 @@ namespace longtooth.Common.Abstractions.Interfaces.ClientService
         /// <summary>
         /// Get file metadata by path
         /// </summary>
-        Task<FileMetadata> GetFileMetadata(string path);
+        Task<FileMetadataDto> GetFileMetadataAsync(string path);
 
         /// <summary>
         /// Tries to read up to maxLength bytes from file, starting at offset
         /// </summary>
-        Task<FileContent> GetFileContent(string path, long offset, long maxLength);
+        Task<FileContentDto> GetFileContentAsync(string path, long offset, long maxLength);
+
+        /// <summary>
+        /// Create directory on server. Returns true in case of success, false otherwise
+        /// </summary>
+        Task<bool> CreateDirectoryAsync(string path);
     }
 }

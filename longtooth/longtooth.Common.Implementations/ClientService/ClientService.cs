@@ -48,6 +48,11 @@ namespace longtooth.Common.Implementations.ClientService
         /// </summary>
         private GetFileInfoRunResult _getFileInfoRunResult;
 
+        /// <summary>
+        /// Result of last "create directory" call
+        /// </summary>
+        private CreateDirectoryRunResult _createDirectoryRunResult;
+
         public ClientService(IClientSideMessagesProcessor clienSideMessagesProcessor,
             ICommandToServerHeaderGenerator commandGenerator,
             IMessagesProcessor messagesProcessor,
@@ -84,6 +89,11 @@ namespace longtooth.Common.Implementations.ClientService
 
                 case CommandType.GetFileInfo:
                     _getFileInfoRunResult = runResult as GetFileInfoRunResult;
+                    _stopWaitHandle.Set();
+                    break;
+
+                case CommandType.CreateDirectory:
+                    _createDirectoryRunResult = runResult as CreateDirectoryRunResult;
                     _stopWaitHandle.Set();
                     break;
 
@@ -159,7 +169,7 @@ namespace longtooth.Common.Implementations.ClientService
             }
 
             // OK, it's a file, not a directory
-            var metadata = await GetFileMetadata(path);
+            var metadata = await GetFileMetadataAsync(path);
             if (metadata.IsExist)
             {
                 return new FilesystemItemDto(true,
@@ -174,7 +184,7 @@ namespace longtooth.Common.Implementations.ClientService
             return new FilesystemItemDto(false, false, @"", @"", 0, new List<FilesystemItemDto>());
         }
 
-        public async Task<FileMetadata> GetFileMetadata(string path)
+        public async Task<FileMetadataDto> GetFileMetadataAsync(string path)
         {
             await PrepareAndSendCommand(
                 _commandGenerator.GetFileInfoCommand(LocalPathToServerSidePath(path)));
@@ -184,13 +194,13 @@ namespace longtooth.Common.Implementations.ClientService
 
             if (!fileInfo.IsExist)
             {
-                return new FileMetadata(false, String.Empty, path, 0);
+                return new FileMetadataDto(false, String.Empty, path, 0);
             }
 
-            return new FileMetadata(true, fileInfo.Name, path, fileInfo.Size);
+            return new FileMetadataDto(true, fileInfo.Name, path, fileInfo.Size);
         }
 
-        public async Task<FileContent> GetFileContent(string path, long offset, long maxLength)
+        public async Task<FileContentDto> GetFileContentAsync(string path, long offset, long maxLength)
         {
             await PrepareAndSendCommand(
                 _commandGenerator.GenerateDownloadCommand(LocalPathToServerSidePath(path), offset, (int)maxLength));
@@ -198,11 +208,20 @@ namespace longtooth.Common.Implementations.ClientService
 
             if (!_downloadFileRunResult.File.IsSuccessful)
             {
-                return new FileContent(false, false, new List<byte>());
+                return new FileContentDto(false, false, new List<byte>());
             }
 
-            return new FileContent(true, true, _downloadFileRunResult.File.Content);
+            return new FileContentDto(true, true, _downloadFileRunResult.File.Content);
 
+        }
+
+        public async Task<bool> CreateDirectoryAsync(string path)
+        {
+            await PrepareAndSendCommand(
+                _commandGenerator.CreateDirectoryCommand(LocalPathToServerSidePath(path)));
+            _stopWaitHandle.WaitOne();
+
+            return _createDirectoryRunResult.CreateDirectoryResult.IsSuccessful;
         }
     }
 }

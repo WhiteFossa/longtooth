@@ -6,7 +6,7 @@ namespace longtooth.Common.Abstractions.DTOs.ClientService
     /// <summary>
     /// Part of file content
     /// </summary>
-    public class FileContent
+    public class FileContentDto
     {
         /// <summary>
         /// Is file exist
@@ -23,7 +23,7 @@ namespace longtooth.Common.Abstractions.DTOs.ClientService
         /// </summary>
         public IReadOnlyCollection<byte> Content { get; private set; }
 
-        public FileContent(bool isExist, bool isInRagne, IReadOnlyCollection<byte> content)
+        public FileContentDto(bool isExist, bool isInRagne, IReadOnlyCollection<byte> content)
         {
             IsExist = isExist;
             IsInRagne = isInRagne;

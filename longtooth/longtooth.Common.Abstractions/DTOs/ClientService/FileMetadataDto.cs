@@ -3,7 +3,7 @@ namespace longtooth.Common.Abstractions.DTOs.ClientService
     /// <summary>
     /// Information about file
     /// </summary>
-    public class FileMetadata
+    public class FileMetadataDto
     {
         /// <summary>
         /// Returns true if file exist
@@ -25,7 +25,7 @@ namespace longtooth.Common.Abstractions.DTOs.ClientService
         /// </summary>
         public long Size { get; private set; }
 
-        public FileMetadata(bool isExist, string name, string path, long size)
+        public FileMetadataDto(bool isExist, string name, string path, long size)
         {
             IsExist = isExist;
             Name = name;

@@ -78,7 +78,7 @@ namespace longtooth.Vfs.Linux.Implementations.Implementations
         {
             var pathAsString = Encoding.UTF8.GetString(path);
 
-            var metadata = _clientService.GetFileMetadata(pathAsString).Result;
+            var metadata = _clientService.GetFileMetadataAsync(pathAsString).Result;
 
             if (!metadata.IsExist)
             {
@@ -99,7 +99,7 @@ namespace longtooth.Vfs.Linux.Implementations.Implementations
             var pathAsString = Encoding.UTF8.GetString(path);
 
             var toRead = Math.Min(buffer.Length, ReadOperationBlockSize);
-            var fileContent = _clientService.GetFileContent(pathAsString, (long)offset, toRead).Result;
+            var fileContent = _clientService.GetFileContentAsync(pathAsString, (long)offset, toRead).Result;
 
             if (!fileContent.IsExist || !fileContent.IsInRagne)
             {
@@ -126,6 +126,19 @@ namespace longtooth.Vfs.Linux.Implementations.Implementations
             foreach (var item in _currentItem.Content)
             {
                 content.AddEntry((FilesHelper.GetFileOrDirectoryName(item.Path)));
+            }
+
+            return 0;
+        }
+
+        public override int MkDir(ReadOnlySpan<byte> path, mode_t mode)
+        {
+            var pathAsString = Encoding.UTF8.GetString(path);
+
+            var result = _clientService.CreateDirectoryAsync(pathAsString).Result;
+            if (!result)
+            {
+                return -ENOSYS;
             }
 
             return 0;
