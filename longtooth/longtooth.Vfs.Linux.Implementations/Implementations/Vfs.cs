@@ -35,8 +35,6 @@ namespace longtooth.Vfs.Linux.Implementations.Implementations
         private FilesystemItemDto _currentItem =
             new FilesystemItemDto(false, false, string.Empty, string.Empty, 0, new List<FilesystemItemDto>());
 
-        private static readonly byte[] _helloFileContent = Encoding.UTF8.GetBytes("hello world!");
-
 
         public Vfs(IClientService clientService)
         {
@@ -100,9 +98,14 @@ namespace longtooth.Vfs.Linux.Implementations.Implementations
             var toRead = Math.Min(buffer.Length, ReadOperationBlockSize);
             var fileContent = _clientService.GetFileContentAsync(pathAsString, (long)offset, toRead).Result;
 
-            if (!fileContent.IsExist || !fileContent.IsInRagne)
+            if (!fileContent.IsExist)
             {
-                return 0;
+                return -ENOENT;
+            }
+
+            if (!fileContent.IsInRagne)
+            {
+                return -EINVAL;
             }
 
             fileContent.Content.ToArray().CopyTo(buffer);
@@ -137,7 +140,7 @@ namespace longtooth.Vfs.Linux.Implementations.Implementations
             var result = _clientService.CreateDirectoryAsync(pathAsString).Result;
             if (!result)
             {
-                return -ENOSYS;
+                return -EEXIST;
             }
 
             return 0;
@@ -150,7 +153,20 @@ namespace longtooth.Vfs.Linux.Implementations.Implementations
             var result = _clientService.DeleteDirectoryAsync(pathAsString).Result;
             if (!result)
             {
-                return -ENOSYS;
+                return -ENOENT;
+            }
+
+            return 0;
+        }
+
+        public override int Create(ReadOnlySpan<byte> path, mode_t mode, ref FuseFileInfo fi)
+        {
+            var pathAsString = Encoding.UTF8.GetString(path);
+
+            var result = _clientService.CreateFileAsync(pathAsString).Result;
+            if (!result)
+            {
+                return -EEXIST;
             }
 
             return 0;

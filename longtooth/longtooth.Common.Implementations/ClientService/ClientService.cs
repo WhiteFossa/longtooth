@@ -58,6 +58,11 @@ namespace longtooth.Common.Implementations.ClientService
         /// </summary>
         private DeleteDirectoryRunResult _deleteDirectoryRunResult;
 
+        /// <summary>
+        /// Result of last "create file" call
+        /// </summary>
+        private CreateFileRunResult _createFileRunResult;
+
         public ClientService(IClientSideMessagesProcessor clienSideMessagesProcessor,
             ICommandToServerHeaderGenerator commandGenerator,
             IMessagesProcessor messagesProcessor,
@@ -104,6 +109,11 @@ namespace longtooth.Common.Implementations.ClientService
 
                 case CommandType.DeleteDirectory:
                     _deleteDirectoryRunResult = runResult as DeleteDirectoryRunResult;
+                    _stopWaitHandle.Set();
+                    break;
+
+                case CommandType.CreateFile:
+                    _createFileRunResult = runResult as CreateFileRunResult;
                     _stopWaitHandle.Set();
                     break;
 
@@ -241,6 +251,15 @@ namespace longtooth.Common.Implementations.ClientService
             _stopWaitHandle.WaitOne();
 
             return _deleteDirectoryRunResult.DeleteDirectoryResult.IsSuccessful;
+        }
+
+        public async Task<bool> CreateFileAsync(string path)
+        {
+            await PrepareAndSendCommand(
+                _commandGenerator.CreateFileCommand(LocalPathToServerSidePath(path)));
+            _stopWaitHandle.WaitOne();
+
+            return _createFileRunResult.CreateFileResult.IsSuccessful;
         }
     }
 }
