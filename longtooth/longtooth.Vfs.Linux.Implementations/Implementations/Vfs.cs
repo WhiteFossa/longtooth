@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using longtooth.Common.Abstractions.DTOs;
 using longtooth.Common.Abstractions.DTOs.ClientService;
 using longtooth.Common.Abstractions.Interfaces.ClientService;
 using longtooth.Common.Implementations.Helpers;
@@ -136,6 +135,19 @@ namespace longtooth.Vfs.Linux.Implementations.Implementations
             var pathAsString = Encoding.UTF8.GetString(path);
 
             var result = _clientService.CreateDirectoryAsync(pathAsString).Result;
+            if (!result)
+            {
+                return -ENOSYS;
+            }
+
+            return 0;
+        }
+
+        public override int RmDir(ReadOnlySpan<byte> path)
+        {
+            var pathAsString = Encoding.UTF8.GetString(path);
+
+            var result = _clientService.DeleteDirectoryAsync(pathAsString).Result;
             if (!result)
             {
                 return -ENOSYS;
