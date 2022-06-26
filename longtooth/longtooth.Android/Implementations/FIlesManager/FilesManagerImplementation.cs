@@ -438,6 +438,8 @@ namespace longtooth.Droid.Implementations.FilesManager
                 {
                     var toWrite = newSize - (ulong)info.Length;
 
+                    stream.Seek(0, SeekOrigin.End);
+
                     // TODO: Dirty, optimize me
                     var buffer = new byte[toWrite];
                     for (ulong i = 0; i < toWrite; i++)
