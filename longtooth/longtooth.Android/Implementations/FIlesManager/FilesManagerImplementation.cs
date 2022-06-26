@@ -47,15 +47,41 @@ namespace longtooth.Droid.Implementations.FilesManager
                 if (!IsDirectoryBelongsToMountpoints(normalizedPath))
                 {
                     // Non-exported directory
-                    return new DirectoryContentDto(false, new List<DirectoryContentItemDto>());
+                    return new DirectoryContentDto(false,
+                        DateTime.UnixEpoch,
+                        DateTime.UnixEpoch,
+                        DateTime.UnixEpoch,
+                        new List<DirectoryContentItemDto>());
                 }
 
+                var currentDirectoryInfo = new DirectoryInfo(normalizedPath);
+
                 var directories = Directory.GetDirectories(normalizedPath);
-                var files = (new DirectoryInfo(normalizedPath)).GetFiles();
+                var files = currentDirectoryInfo.GetFiles();
 
                 var result = directories
-                        .Select(d => new DirectoryContentItemDto(true, d, 0)) // Directories have no size
-                         .Union(files.Select(f => new DirectoryContentItemDto(false, f.Name, f.Length)))
+                        .Select(d =>
+                        {
+                            var directoryInfo = new DirectoryInfo(d); // Smells like N + 1
+
+                            return new DirectoryContentItemDto(
+                                true,
+                                d,
+                                0,
+                                directoryInfo.LastAccessTimeUtc,
+                                directoryInfo.LastWriteTimeUtc,
+                                directoryInfo.LastWriteTimeUtc);
+                        })
+                         .Union(files.Select(f =>
+                         {
+                             return new DirectoryContentItemDto(
+                                 false,
+                                 f.Name,
+                                 f.Length,
+                                 f.LastAccessTimeUtc,
+                                 f.LastWriteTimeUtc,
+                                 f.LastWriteTimeUtc);
+                         }))
                          .ToList();
 
                 // Removing base directory
@@ -63,7 +89,10 @@ namespace longtooth.Droid.Implementations.FilesManager
                     .Select(dci => new DirectoryContentItemDto(
                         dci.IsDirectory,
                         dci.IsDirectory ? dci.Name.Substring(normalizedPath.Length + 1) : dci.Name, // +1 for trailing / of normalized path
-                        dci.Size))
+                        dci.Size,
+                        dci.Atime,
+                        dci.Ctime,
+                        dci.Mtime))
                     .ToList();
 
                 // Adding "move up" if not root directory
@@ -79,16 +108,32 @@ namespace longtooth.Droid.Implementations.FilesManager
 
                 if (!isMountpoint)
                 {
-                    result = new List<DirectoryContentItemDto>() { new DirectoryContentItemDto(true, "..", 0) }
-                        .Union(result)
-                        .ToList();
+                    result = new List<DirectoryContentItemDto>()
+                    {
+                        new DirectoryContentItemDto(true,
+                        "..",
+                        0,
+                        DateTime.UnixEpoch,
+                        DateTime.UnixEpoch,
+                        DateTime.UnixEpoch)
+                    }
+                    .Union(result)
+                    .ToList();
                 }
 
-                return new DirectoryContentDto(true, result);
+                return new DirectoryContentDto(true,
+                    currentDirectoryInfo.LastAccessTimeUtc,
+                    currentDirectoryInfo.LastWriteTimeUtc,
+                    currentDirectoryInfo.LastWriteTimeUtc,
+                    result);
             }
             catch (Exception)
             {
-                return new DirectoryContentDto(false, new List<DirectoryContentItemDto>());
+                return new DirectoryContentDto(false,
+                    DateTime.UnixEpoch,
+                    DateTime.UnixEpoch,
+                    DateTime.UnixEpoch,
+                    new List<DirectoryContentItemDto>());
             }
         }
 
@@ -401,17 +446,35 @@ namespace longtooth.Droid.Implementations.FilesManager
             if (!IsDirectoryBelongsToMountpoints(targetDirectory))
             {
                 // Non-exported directory
-                return new GetFileInfoResultDto(false, path, "", 0);
+                return new GetFileInfoResultDto(false,
+                    path,
+                    "",
+                    0,
+                    DateTime.UnixEpoch,
+                    DateTime.UnixEpoch,
+                    DateTime.UnixEpoch);
             }
 
             if (!File.Exists(path))
             {
-                return new GetFileInfoResultDto(false, path, "", 0);
+                return new GetFileInfoResultDto(false,
+                    path,
+                    "",
+                    0,
+                    DateTime.UnixEpoch,
+                    DateTime.UnixEpoch,
+                    DateTime.UnixEpoch);
             }
 
             var info = new FileInfo(path);
 
-            return new GetFileInfoResultDto(true, path, info.Name, info.Length);
+            return new GetFileInfoResultDto(true,
+                path,
+                info.Name,
+                info.Length,
+                info.LastAccessTimeUtc,
+                info.LastWriteTimeUtc,
+                info.LastWriteTimeUtc);
         }
 
         public async Task<TruncateFileResultDto> TruncateFileAsync(string path, ulong newSize)
