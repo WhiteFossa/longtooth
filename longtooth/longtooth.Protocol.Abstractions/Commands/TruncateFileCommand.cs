@@ -40,7 +40,7 @@ namespace longtooth.Protocol.Abstractions.Commands
             ulong newSize,
             IMessagesProcessor messagesProcessor,
             IResponseToClientHeaderGenerator responseToClientHeaderGenerator,
-            IFilesManager filesManager) : base(CommandType.GetFileInfo)
+            IFilesManager filesManager) : base(CommandType.TruncateFile)
         {
             Path = path;
             NewSize = newSize;

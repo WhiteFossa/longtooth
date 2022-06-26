@@ -142,6 +142,11 @@ namespace longtooth.Common.Implementations.ClientService
                     _stopWaitHandle.Set();
                     break;
 
+                case CommandType.TruncateFile:
+                    _truncateFileRunResult = runResult as TruncateFileRunResult;
+                    _stopWaitHandle.Set();
+                    break;
+
                 default:
                     throw new InvalidOperationException("Unknown command type in response!");
             }
