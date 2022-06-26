@@ -17,6 +17,11 @@ namespace longtooth.Droid.Implementations.FilesManager
         private const int MaxReadBlockSize = 1000 * 1024;
 
         /// <summary>
+        /// Grow file with this blocks
+        /// </summary>
+        private const int FileGrowBlockSize = 16384;
+
+        /// <summary>
         /// Shared directories
         /// </summary>
         private List<MountpointDto> _mountpoints;
@@ -436,17 +441,32 @@ namespace longtooth.Droid.Implementations.FilesManager
                 }
                 else if ((long)newSize > info.Length)
                 {
-                    var toWrite = newSize - (ulong)info.Length;
-
                     stream.Seek(0, SeekOrigin.End);
 
-                    // TODO: Dirty, optimize me
-                    var buffer = new byte[toWrite];
-                    for (ulong i = 0; i < toWrite; i++)
+                    var toWrite = newSize - (ulong)info.Length;
+                    ulong written = 0;
+
+                    var fileGrowBuffer = new byte[FileGrowBlockSize];
+                    for (var i = 0; i < FileGrowBlockSize; i++)
                     {
-                        buffer[i] = 0x00;
+                        fileGrowBuffer[i] = 0;
                     }
-                    stream.Write(buffer);
+
+                    while (toWrite - written >= FileGrowBlockSize)
+                    {
+                        stream.Write(fileGrowBuffer);
+
+                        written += FileGrowBlockSize;
+                    }
+
+                    // Tail
+                    var tailSize = (int)(newSize - written);
+                    var tailBuffer = new byte[tailSize];
+                    for (var i = 0; i < tailSize; i++)
+                    {
+                        tailBuffer[i] = 0;
+                    }
+                    stream.Write(tailBuffer);
                 }
             }
 
