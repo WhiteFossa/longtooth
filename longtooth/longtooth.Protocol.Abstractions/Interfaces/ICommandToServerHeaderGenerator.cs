@@ -61,5 +61,10 @@ namespace longtooth.Protocol.Abstractions.Interfaces
         /// Generate "get file info" command
         /// </summary>
         IReadOnlyCollection<byte> GetFileInfoCommand(string path);
+
+        /// <summary>
+        /// Generate "truncate file" command
+        /// </summary>
+        IReadOnlyCollection<byte> TruncateFileCommand(string path, ulong newSize);
     }
 }

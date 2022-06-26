@@ -124,5 +124,16 @@ namespace longtooth.Protocol.Implementations.Implementations
 
             return EncodeCommand(getFileInfoCommand, null);
         }
+
+        public IReadOnlyCollection<byte> TruncateFileCommand(string path, ulong newSize)
+        {
+            var truncateFileCommand = new TruncateFileCommand(path,
+                newSize,
+                null,
+                null,
+                null);
+
+            return EncodeCommand(truncateFileCommand, null);
+        }
     }
 }

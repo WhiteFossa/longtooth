@@ -73,6 +73,11 @@ namespace longtooth.Common.Implementations.ClientService
         /// </summary>
         private UpdateFileRunResult _updateFileRunResult;
 
+        /// <summary>
+        /// Result of last "truncate file" call
+        /// </summary>
+        private TruncateFileRunResult _truncateFileRunResult;
+
         public ClientService(IClientSideMessagesProcessor clienSideMessagesProcessor,
             ICommandToServerHeaderGenerator commandGenerator,
             IMessagesProcessor messagesProcessor,
@@ -298,6 +303,15 @@ namespace longtooth.Common.Implementations.ClientService
             _stopWaitHandle.WaitOne();
 
             return _updateFileRunResult.UpdateFileResult;
+        }
+
+        public async Task<bool> TruncateFileAsync(string path, ulong newSize)
+        {
+            await PrepareAndSendCommand(
+                _commandGenerator.TruncateFileCommand(LocalPathToServerSidePath(path), newSize));
+            _stopWaitHandle.WaitOne();
+
+            return _truncateFileRunResult.TruncateFileResult.IsSuccessful;
         }
     }
 }

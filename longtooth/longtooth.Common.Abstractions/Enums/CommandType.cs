@@ -59,5 +59,10 @@
         /// Get information about file
         /// </summary>
         GetFileInfo = 10,
+
+        /// <summary>
+        /// Truncate / grow file to given size
+        /// </summary>
+        TruncateFile = 11,
     }
 }

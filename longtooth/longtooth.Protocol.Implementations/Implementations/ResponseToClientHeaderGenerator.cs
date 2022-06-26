@@ -106,5 +106,12 @@ namespace longtooth.Protocol.Implementations.Implementations
 
             return EncodeResponse(createDirectoryResponse, null);
         }
+
+        public IReadOnlyCollection<byte> GenerateTruncateFileResponse(TruncateFileResultDto truncateFileResultDto)
+        {
+            var truncateFileResponse = new TruncateFileResponse(truncateFileResultDto);
+
+            return EncodeResponse(truncateFileResponse, null);
+        }
     }
 }

@@ -65,6 +65,9 @@ namespace longtooth.Protocol.Implementations.Implementations
                 case CommandType.GetFileInfo:
                     return GetFileInfoResponse.Parse(stringHeader, payload);
 
+                case CommandType.TruncateFile:
+                    return TruncateFileResponse.Parse(stringHeader, payload);
+
                 default:
                     throw new InvalidOperationException($"Response to unknown command. Type: {header.Command}");
             }

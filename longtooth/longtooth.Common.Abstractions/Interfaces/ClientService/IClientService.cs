@@ -54,5 +54,10 @@ namespace longtooth.Common.Abstractions.Interfaces.ClientService
         /// Write buffer to file at given offset
         /// </summary>
         Task<UpdateFileResultDto> UpdateFileContentAsync(string path, ulong offset, IReadOnlyCollection<byte> buffer);
+
+        /// <summary>
+        /// Truncate / grow file to given size
+        /// </summary>
+        Task<bool> TruncateFileAsync(string path, ulong newSize);
     }
 }

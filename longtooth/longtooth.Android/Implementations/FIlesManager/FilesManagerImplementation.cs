@@ -408,5 +408,10 @@ namespace longtooth.Droid.Implementations.FilesManager
 
             return new GetFileInfoResultDto(true, path, info.Name, info.Length);
         }
+
+        public async Task<TruncateFileResultDto> TruncateFileAsync(string path, ulong newSize)
+        {
+            return new TruncateFileResultDto(true);
+        }
     }
 }

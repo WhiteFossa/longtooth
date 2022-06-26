@@ -11,7 +11,7 @@ namespace longtooth.Common.Abstractions.DTOs
         public bool IsExist { get; private set; }
 
         /// <summary>
-        /// Server-side path to phile
+        /// Server-side path to file
         /// </summary>
         [JsonPropertyName("Path")]
         public string Path { get; private set; }
@@ -27,7 +27,7 @@ namespace longtooth.Common.Abstractions.DTOs
         /// </summary>
         [JsonPropertyName("Size")]
         public long Size { get; private set; }
-        
+
 
         public GetFileInfoResultDto(bool isExist, string path, string name, long size)
         {

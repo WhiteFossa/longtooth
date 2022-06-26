@@ -138,6 +138,15 @@ namespace longtooth.Protocol.Implementations.Implementations
                         .ParseAsync(stringHeader, payload);
                     break;
 
+                case CommandType.TruncateFile:
+                    result = await new TruncateFileCommand(string.Empty,
+                            0,
+                            _messagesProcessor,
+                            _responseToClientHeaderGenerator,
+                            _filesManager)
+                        .ParseAsync(stringHeader, payload);
+                    break;
+
                 default:
                     throw new InvalidOperationException($"Unknown command type: { header.Command }");
             }

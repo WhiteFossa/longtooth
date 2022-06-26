@@ -74,6 +74,9 @@ namespace longtooth.Common.Abstractions.Interfaces.FilesManager
         /// </summary>
         Task<GetFileInfoResultDto> GetFileInfoAsync(string path);
 
-
+        /// <summary>
+        /// Truncate / grow file to given size
+        /// </summary>
+        Task<TruncateFileResultDto> TruncateFileAsync(string path, ulong newSize);
     }
 }
