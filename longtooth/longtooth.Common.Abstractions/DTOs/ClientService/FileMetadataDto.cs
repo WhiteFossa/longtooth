@@ -1,3 +1,5 @@
+using System;
+
 namespace longtooth.Common.Abstractions.DTOs.ClientService
 {
     /// <summary>
@@ -25,12 +27,36 @@ namespace longtooth.Common.Abstractions.DTOs.ClientService
         /// </summary>
         public long Size { get; private set; }
 
-        public FileMetadataDto(bool isExist, string name, string path, long size)
+        /// <summary>
+        /// Last access time
+        /// </summary>
+        public DateTime Atime { get; private set; }
+
+        /// <summary>
+        /// Last metadata change time
+        /// </summary>
+        public DateTime Ctime { get; private set; }
+
+        /// <summary>
+        /// Last content change time
+        /// </summary>
+        public DateTime Mtime { get; private set; }
+
+        public FileMetadataDto(bool isExist,
+            string name,
+            string path,
+            long size,
+            DateTime atime,
+            DateTime ctime,
+            DateTime mtime)
         {
             IsExist = isExist;
             Name = name;
             Path = path;
             Size = size;
+            Atime = atime;
+            Ctime = ctime;
+            Mtime = mtime;
         }
     }
 }

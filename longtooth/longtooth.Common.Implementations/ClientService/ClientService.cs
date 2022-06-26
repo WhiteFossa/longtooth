@@ -190,10 +190,21 @@ namespace longtooth.Common.Implementations.ClientService
                         MountpointToLocalPath(mp.ServerSidePath),
                         mp.Name,
                         0,
+                        DateTime.UnixEpoch,
+                        DateTime.UnixEpoch,
+                        DateTime.UnixEpoch,
                         new List<FilesystemItemDto>()))
                     .ToList();
 
-                return new FilesystemItemDto(true, true, @"/", @"/", 0, content);
+                return new FilesystemItemDto(true,
+                    true,
+                    @"/",
+                    @"/",
+                    0,
+                    DateTime.UnixEpoch,
+                    DateTime.UnixEpoch,
+                    DateTime.UnixEpoch,
+                    content);
             }
 
             // Ordinary directory or file, trying to get directory first
@@ -212,10 +223,21 @@ namespace longtooth.Common.Implementations.ClientService
                         $@"{ path }/{ di.Name }",
                         di.Name,
                         di.Size,
+                        di.Atime,
+                        di.Ctime,
+                        di.Mtime,
                         new List<FilesystemItemDto>()))
                     .ToList();
 
-                return new FilesystemItemDto(true, true, path, path, 0, content);
+                return new FilesystemItemDto(true,
+                    true,
+                    path,
+                    path,
+                    0,
+                    _directoryContent.DirectoryContent.Atime,
+                    _directoryContent.DirectoryContent.Ctime,
+                    _directoryContent.DirectoryContent.Mtime,
+                    content);
             }
 
             // OK, it's a file, not a directory
@@ -227,11 +249,22 @@ namespace longtooth.Common.Implementations.ClientService
                     path,
                     metadata.Name,
                     metadata.Size,
+                    metadata.Atime,
+                    metadata.Ctime,
+                    metadata.Mtime,
                     new List<FilesystemItemDto>());
             }
 
             // Non-existent item
-            return new FilesystemItemDto(false, false, @"", @"", 0, new List<FilesystemItemDto>());
+            return new FilesystemItemDto(false,
+                false,
+                @"",
+                @"",
+                0,
+                DateTime.UnixEpoch,
+                DateTime.UnixEpoch,
+                DateTime.UnixEpoch,
+                new List<FilesystemItemDto>());
         }
 
         public async Task<FileMetadataDto> GetFileMetadataAsync(string path)
@@ -244,10 +277,22 @@ namespace longtooth.Common.Implementations.ClientService
 
             if (!fileInfo.IsExist)
             {
-                return new FileMetadataDto(false, String.Empty, path, 0);
+                return new FileMetadataDto(false,
+                    String.Empty,
+                    path,
+                    0,
+                    DateTime.UnixEpoch,
+                    DateTime.UnixEpoch,
+                    DateTime.UnixEpoch);
             }
 
-            return new FileMetadataDto(true, fileInfo.Name, path, fileInfo.Size);
+            return new FileMetadataDto(true,
+                fileInfo.Name,
+                path,
+                fileInfo.Size,
+                fileInfo.Atime,
+                fileInfo.Ctime,
+                fileInfo.Mtime);
         }
 
         public async Task<FileContentDto> GetFileContentAsync(string path, long offset, long maxLength)

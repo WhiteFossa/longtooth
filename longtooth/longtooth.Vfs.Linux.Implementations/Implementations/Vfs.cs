@@ -33,8 +33,15 @@ namespace longtooth.Vfs.Linux.Implementations.Implementations
         /// Cached content of current directory
         /// </summary>
         private FilesystemItemDto _currentItem =
-            new FilesystemItemDto(false, false, string.Empty, string.Empty, 0, new List<FilesystemItemDto>());
-
+            new FilesystemItemDto(false,
+                false,
+                string.Empty,
+                string.Empty,
+                0,
+                DateTime.UnixEpoch,
+                DateTime.UnixEpoch,
+                DateTime.UnixEpoch,
+                new List<FilesystemItemDto>());
 
         public Vfs(IClientService clientService)
         {
@@ -52,6 +59,10 @@ namespace longtooth.Vfs.Linux.Implementations.Implementations
                 return -ENOENT;
             }
 
+            stat.st_atim = _currentItem.Atime.ToTimespec();
+            stat.st_ctim = _currentItem.Ctime.ToTimespec();
+            stat.st_mtim = _currentItem.Mtime.ToTimespec();
+
             if (_currentItem.IsDirectory)
             {
                 var subdirectoriesCount = _currentItem
@@ -60,15 +71,16 @@ namespace longtooth.Vfs.Linux.Implementations.Implementations
 
                 stat.st_mode = S_IFDIR | Permissions;
                 stat.st_nlink = (ulong)subdirectoriesCount + 2; // Number of subdirectories + 2 (because . and .. directories)
+
                 return 0;
             }
-            else
-            {
-                stat.st_mode = S_IFREG | Permissions;
-                stat.st_nlink = 1;
-                stat.st_size = _currentItem.Size;
-                return 0;
-            }
+
+            // File
+            stat.st_mode = S_IFREG | Permissions;
+            stat.st_nlink = 1;
+            stat.st_size = _currentItem.Size;
+
+            return 0;
         }
 
         public override int Open(ReadOnlySpan<byte> path, ref FuseFileInfo fi)
@@ -229,7 +241,15 @@ namespace longtooth.Vfs.Linux.Implementations.Implementations
         /// </summary>
         private void InvalidateCurrentDirectoryCachedContent()
         {
-            _currentItem = new FilesystemItemDto(false, true, string.Empty, string.Empty, 0, new List<FilesystemItemDto>());
+            _currentItem = new FilesystemItemDto(false,
+                true,
+                string.Empty,
+                string.Empty,
+                0,
+                DateTime.UnixEpoch,
+                DateTime.UnixEpoch,
+                DateTime.UnixEpoch,
+                new List<FilesystemItemDto>());
         }
     }
 }

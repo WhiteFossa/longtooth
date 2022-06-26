@@ -31,6 +31,21 @@ namespace longtooth.Common.Abstractions.DTOs.ClientService
         public long Size { get; private set; }
 
         /// <summary>
+        /// Last access time
+        /// </summary>
+        public DateTime Atime { get; private set; }
+
+        /// <summary>
+        /// Last metadata change time
+        /// </summary>
+        public DateTime Ctime { get; private set; }
+
+        /// <summary>
+        /// Last content change time
+        /// </summary>
+        public DateTime Mtime { get; private set; }
+
+        /// <summary>
         /// Sub-items
         /// </summary>
         public IReadOnlyCollection<FilesystemItemDto> Content { get; private set; }
@@ -40,6 +55,9 @@ namespace longtooth.Common.Abstractions.DTOs.ClientService
             string path,
             string name,
             long size,
+            DateTime atime,
+            DateTime ctime,
+            DateTime mtime,
             IReadOnlyCollection<FilesystemItemDto> content)
         {
             IsExist = isExist;
@@ -47,6 +65,9 @@ namespace longtooth.Common.Abstractions.DTOs.ClientService
             Path = path;
             Name = name;
             Size = size;
+            Atime = atime;
+            Ctime = ctime;
+            Mtime = mtime;
             Content = content ?? throw new ArgumentNullException(nameof(content));
         }
     }

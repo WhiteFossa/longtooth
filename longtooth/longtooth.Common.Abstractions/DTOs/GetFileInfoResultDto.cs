@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using System;
+using System.Text.Json.Serialization;
 
 namespace longtooth.Common.Abstractions.DTOs
 {
@@ -28,13 +29,37 @@ namespace longtooth.Common.Abstractions.DTOs
         [JsonPropertyName("Size")]
         public long Size { get; private set; }
 
+        /// <summary>
+        /// Last access time
+        /// </summary>
+        public DateTime Atime { get; private set; }
 
-        public GetFileInfoResultDto(bool isExist, string path, string name, long size)
+        /// <summary>
+        /// Last metadata change time
+        /// </summary>
+        public DateTime Ctime { get; private set; }
+
+        /// <summary>
+        /// Last content change time
+        /// </summary>
+        public DateTime Mtime { get; private set; }
+
+
+        public GetFileInfoResultDto(bool isExist,
+            string path,
+            string name,
+            long size,
+            DateTime atime,
+            DateTime ctime,
+            DateTime mtime)
         {
             IsExist = isExist;
             Path = path;
             Name = name;
             Size = size;
+            Atime = atime;
+            Ctime = ctime;
+            Mtime = mtime;
         }
     }
 }
