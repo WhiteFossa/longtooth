@@ -39,7 +39,7 @@ namespace longtooth.Droid.Implementations.FilesManager
 
                 var normalizedPath = FilesHelper.NormalizePath(serverSidePath);
 
-                if (!IsDirectoryBelongsToMountpoint(normalizedPath))
+                if (!IsDirectoryBelongsToMountpoints(normalizedPath))
                 {
                     // Non-exported directory
                     return new DirectoryContentDto(false, new List<DirectoryContentItemDto>());
@@ -122,7 +122,7 @@ namespace longtooth.Droid.Implementations.FilesManager
 
                 var targetDirectory = Path.GetDirectoryName(path);
 
-                if (!IsDirectoryBelongsToMountpoint(targetDirectory))
+                if (!IsDirectoryBelongsToMountpoints(targetDirectory))
                 {
                     // Non-exported directory
                     return new DownloadedFileWithContentDto(false, 0, 0, new List<byte>());
@@ -176,7 +176,7 @@ namespace longtooth.Droid.Implementations.FilesManager
 
                 var targetDirectory = Path.GetDirectoryName(newFilePath);
 
-                if (!IsDirectoryBelongsToMountpoint(targetDirectory))
+                if (!IsDirectoryBelongsToMountpoints(targetDirectory))
                 {
                     // Non-exported directory
                     return new CreateFileResultDto(false);
@@ -201,7 +201,7 @@ namespace longtooth.Droid.Implementations.FilesManager
             }
         }
 
-        private bool IsDirectoryBelongsToMountpoint(string path)
+        private bool IsDirectoryBelongsToMountpoints(string path)
         {
             // Is directory belongs to one of mountpoints?
             var isChildDirectory = false;
@@ -225,7 +225,7 @@ namespace longtooth.Droid.Implementations.FilesManager
 
                 var targetDirectory = Path.GetDirectoryName(path);
 
-                if (!IsDirectoryBelongsToMountpoint(targetDirectory))
+                if (!IsDirectoryBelongsToMountpoints(targetDirectory))
                 {
                     // Non-exported directory
                     return new UpdateFileResultDto(false, 0);
@@ -266,7 +266,7 @@ namespace longtooth.Droid.Implementations.FilesManager
 
                 var targetDirectory = Path.GetDirectoryName(path);
 
-                if (!IsDirectoryBelongsToMountpoint(targetDirectory))
+                if (!IsDirectoryBelongsToMountpoints(targetDirectory))
                 {
                     // Non-exported directory
                     return new DeleteFileResultDto(false);
@@ -296,7 +296,7 @@ namespace longtooth.Droid.Implementations.FilesManager
 
                 var targetDirectory = Path.GetDirectoryName(path);
 
-                if (!IsDirectoryBelongsToMountpoint(targetDirectory))
+                if (!IsDirectoryBelongsToMountpoints(targetDirectory))
                 {
                     // Non-exported directory
                     return new DeleteDirectoryResultDto(false);
@@ -334,7 +334,7 @@ namespace longtooth.Droid.Implementations.FilesManager
 
                 var targetDirectory = Path.GetDirectoryName(path);
 
-                if (!IsDirectoryBelongsToMountpoint(targetDirectory))
+                if (!IsDirectoryBelongsToMountpoints(targetDirectory))
                 {
                     // Non-exported directory
                     return new CreateDirectoryResultDto(false);
@@ -393,7 +393,7 @@ namespace longtooth.Droid.Implementations.FilesManager
 
             var targetDirectory = Path.GetDirectoryName(path);
 
-            if (!IsDirectoryBelongsToMountpoint(targetDirectory))
+            if (!IsDirectoryBelongsToMountpoints(targetDirectory))
             {
                 // Non-exported directory
                 return new GetFileInfoResultDto(false, path, "", 0);
@@ -411,6 +411,43 @@ namespace longtooth.Droid.Implementations.FilesManager
 
         public async Task<TruncateFileResultDto> TruncateFileAsync(string path, ulong newSize)
         {
+            _ = path ?? throw new ArgumentNullException(nameof(path));
+
+            var targetDirectory = Path.GetDirectoryName(path);
+
+            if (!IsDirectoryBelongsToMountpoints(targetDirectory))
+            {
+                // Non-exported directory
+                return new TruncateFileResultDto(false);
+            }
+
+            if (!File.Exists(path))
+            {
+                return new TruncateFileResultDto(false);
+            }
+
+            var info = new FileInfo(path);
+
+            using (var stream = new FileStream(path, FileMode.Open))
+            {
+                if ((long)newSize < info.Length)
+                {
+                    stream.SetLength((long)newSize);
+                }
+                else if ((long)newSize > info.Length)
+                {
+                    var toWrite = newSize - (ulong)info.Length;
+
+                    // TODO: Dirty, optimize me
+                    var buffer = new byte[toWrite];
+                    for (ulong i = 0; i < toWrite; i++)
+                    {
+                        buffer[i] = 0x00;
+                    }
+                    stream.Write(buffer);
+                }
+            }
+
             return new TruncateFileResultDto(true);
         }
     }
