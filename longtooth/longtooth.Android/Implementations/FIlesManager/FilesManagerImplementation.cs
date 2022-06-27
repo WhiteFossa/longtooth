@@ -541,8 +541,33 @@ namespace longtooth.Droid.Implementations.FilesManager
             DateTime ctime,
             DateTime mtime)
         {
-            // TODO: Implement me
-            return true;
+            _ = path ?? throw new ArgumentNullException(nameof(path));
+
+            var targetDirectory = Path.GetDirectoryName(path);
+
+            if (!IsDirectoryBelongsToMountpoints(targetDirectory))
+            {
+                // Non-exported directory
+                return new SetTimestampsResultDto(false);
+            }
+
+            if (Directory.Exists(path))
+            {
+                Directory.SetLastAccessTimeUtc(path, atime);
+                Directory.SetLastWriteTimeUtc(path, mtime); // Looks like we have no method to set ctime
+            }
+            else if (File.Exists(path))
+            {
+                File.SetLastAccessTimeUtc(path, atime);
+                File.SetLastWriteTimeUtc(path, mtime); // Looks like we have no method to set ctime
+            }
+            else
+            {
+                // Incorrect path
+                return new SetTimestampsResultDto(false);
+            }
+
+            return new SetTimestampsResultDto(true);
         }
     }
 }
