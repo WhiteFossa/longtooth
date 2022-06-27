@@ -64,5 +64,10 @@
         /// Truncate / grow file to given size
         /// </summary>
         TruncateFile = 11,
+
+        /// <summary>
+        /// Set timestamps for file / directory
+        /// </summary>
+        SetTimestamps = 12,
     }
 }

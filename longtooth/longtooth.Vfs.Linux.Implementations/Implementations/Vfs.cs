@@ -228,6 +228,23 @@ namespace longtooth.Vfs.Linux.Implementations.Implementations
             return 0;
         }
 
+        public override int UpdateTimestamps(
+            ReadOnlySpan<byte> path,
+            ref timespec atime,
+            ref timespec mtime,
+            FuseFileInfoRef fiRef)
+        {
+            var pathAsString = Encoding.UTF8.GetString(path);
+
+            var result = _clientService.SetTimestampsAsync(pathAsString, atime.ToDateTime(), mtime.ToDateTime(), mtime.ToDateTime()).Result;
+            if (!result)
+            {
+                return -EIO;
+            }
+
+            return 0;
+        }
+
         private void UpdateCurrentDirectory(string path)
         {
             if (!_currentItem.Path.Equals(path))

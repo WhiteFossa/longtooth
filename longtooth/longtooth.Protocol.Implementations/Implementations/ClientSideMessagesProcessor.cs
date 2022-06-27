@@ -68,6 +68,9 @@ namespace longtooth.Protocol.Implementations.Implementations
                 case CommandType.TruncateFile:
                     return TruncateFileResponse.Parse(stringHeader, payload);
 
+                case CommandType.SetTimestamps:
+                    return SetTimestampsResponse.Parse(stringHeader, payload);
+
                 default:
                     throw new InvalidOperationException($"Response to unknown command. Type: {header.Command}");
             }

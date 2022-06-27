@@ -78,6 +78,11 @@ namespace longtooth.Common.Implementations.ClientService
         /// </summary>
         private TruncateFileRunResult _truncateFileRunResult;
 
+        /// <summary>
+        /// Reult of "set timestamp" command
+        /// </summary>
+        private SetTimestampsRunResult _setTimestampsRunResult;
+
         public ClientService(IClientSideMessagesProcessor clienSideMessagesProcessor,
             ICommandToServerHeaderGenerator commandGenerator,
             IMessagesProcessor messagesProcessor,
@@ -144,6 +149,11 @@ namespace longtooth.Common.Implementations.ClientService
 
                 case CommandType.TruncateFile:
                     _truncateFileRunResult = runResult as TruncateFileRunResult;
+                    _stopWaitHandle.Set();
+                    break;
+
+                case CommandType.SetTimestamps:
+                    _setTimestampsRunResult = runResult as SetTimestampsRunResult;
                     _stopWaitHandle.Set();
                     break;
 
@@ -362,6 +372,15 @@ namespace longtooth.Common.Implementations.ClientService
             _stopWaitHandle.WaitOne();
 
             return _truncateFileRunResult.TruncateFileResult.IsSuccessful;
+        }
+
+        public async Task<bool> SetTimestampsAsync(string path, DateTime atime, DateTime ctime, DateTime mtime)
+        {
+            await PrepareAndSendCommand(
+                _commandGenerator.SetTimestampsCommand(LocalPathToServerSidePath(path), atime, ctime, mtime));
+            _stopWaitHandle.WaitOne();
+
+            return _setTimestampsRunResult.SetTimestampsResult.IsSuccessful;
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace longtooth.Protocol.Abstractions.Interfaces
 {
@@ -66,5 +67,10 @@ namespace longtooth.Protocol.Abstractions.Interfaces
         /// Generate "truncate file" command
         /// </summary>
         IReadOnlyCollection<byte> TruncateFileCommand(string path, ulong newSize);
+
+        /// <summary>
+        /// Generate "set timestamps" command
+        /// </summary>
+        IReadOnlyCollection<byte> SetTimestampsCommand(string path, DateTime atime, DateTime ctime, DateTime mtime);
     }
 }

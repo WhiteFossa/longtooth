@@ -1,6 +1,8 @@
-﻿using longtooth.Common.Abstractions.DTOs;
+﻿using System;
+using longtooth.Common.Abstractions.DTOs;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using longtooth.Common.Abstractions.DTOs.Responses;
 
 namespace longtooth.Common.Abstractions.Interfaces.FilesManager
 {
@@ -78,5 +80,13 @@ namespace longtooth.Common.Abstractions.Interfaces.FilesManager
         /// Truncate / grow file to given size
         /// </summary>
         Task<TruncateFileResultDto> TruncateFileAsync(string path, ulong newSize);
+
+        /// <summary>
+        /// Set timestamps for file / directory
+        /// </summary>
+        Task<SetTimestampsResultDto> SetTimestampsAsync(string path,
+            DateTime atime,
+            DateTime ctime,
+            DateTime mtime);
     }
 }

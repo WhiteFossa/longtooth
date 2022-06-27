@@ -535,5 +535,14 @@ namespace longtooth.Droid.Implementations.FilesManager
 
             return new TruncateFileResultDto(true);
         }
+
+        public async Task<SetTimestampsResultDto> SetTimestampsAsync(string path,
+            DateTime atime,
+            DateTime ctime,
+            DateTime mtime)
+        {
+            // TODO: Implement me
+            return true;
+        }
     }
 }

@@ -6,6 +6,7 @@ using longtooth.Protocol.Abstractions.Responses;
 using System.Collections.Generic;
 using System.Text;
 using System.Text.Json;
+using longtooth.Common.Abstractions.DTOs.Responses;
 
 namespace longtooth.Protocol.Implementations.Implementations
 {
@@ -112,6 +113,13 @@ namespace longtooth.Protocol.Implementations.Implementations
             var truncateFileResponse = new TruncateFileResponse(truncateFileResultDto);
 
             return EncodeResponse(truncateFileResponse, null);
+        }
+
+        public IReadOnlyCollection<byte> GenerateSetTimestampsResponse(SetTimestampsResultDto setTimestampsResultDto)
+        {
+            var setTimestampsResponse = new SetTimestampsResponse(setTimestampsResultDto);
+
+            return EncodeResponse(setTimestampsResponse, null);
         }
     }
 }

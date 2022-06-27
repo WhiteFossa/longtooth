@@ -147,6 +147,17 @@ namespace longtooth.Protocol.Implementations.Implementations
                         .ParseAsync(stringHeader, payload);
                     break;
 
+                case CommandType.SetTimestamps:
+                    result = await new SetTimestampsCommand(string.Empty,
+                            DateTime.UnixEpoch,
+                            DateTime.UnixEpoch,
+                            DateTime.UnixEpoch,
+                            _messagesProcessor,
+                            _responseToClientHeaderGenerator,
+                            _filesManager)
+                        .ParseAsync(stringHeader, payload);
+                    break;
+
                 default:
                     throw new InvalidOperationException($"Unknown command type: { header.Command }");
             }

@@ -1,5 +1,6 @@
 ﻿using longtooth.Common.Abstractions.DTOs;
 using System.Collections.Generic;
+using longtooth.Common.Abstractions.DTOs.Responses;
 
 namespace longtooth.Protocol.Abstractions.Interfaces
 {
@@ -68,5 +69,10 @@ namespace longtooth.Protocol.Abstractions.Interfaces
         /// Generate response for file truncation / grow
         /// </summary>
         IReadOnlyCollection<byte> GenerateTruncateFileResponse(TruncateFileResultDto truncateFileResultDto);
+
+        /// <summary>
+        /// Generate response for timestamps setting
+        /// </summary>
+        IReadOnlyCollection<byte> GenerateSetTimestampsResponse(SetTimestampsResultDto setTimestampsResultDto);
     }
 }

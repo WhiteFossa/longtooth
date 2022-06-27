@@ -1,4 +1,5 @@
-﻿using longtooth.Protocol.Abstractions.Commands;
+﻿using System;
+using longtooth.Protocol.Abstractions.Commands;
 using longtooth.Protocol.Abstractions.DataStructures;
 using longtooth.Protocol.Abstractions.Interfaces;
 using System.Collections.Generic;
@@ -134,6 +135,19 @@ namespace longtooth.Protocol.Implementations.Implementations
                 null);
 
             return EncodeCommand(truncateFileCommand, null);
+        }
+
+        public IReadOnlyCollection<byte> SetTimestampsCommand(string path, DateTime atime, DateTime ctime, DateTime mtime)
+        {
+            var setTimestampsCommand = new SetTimestampsCommand(path,
+                atime,
+                ctime,
+                mtime,
+                null,
+                null,
+                null);
+
+            return EncodeCommand(setTimestampsCommand, null);
         }
     }
 }

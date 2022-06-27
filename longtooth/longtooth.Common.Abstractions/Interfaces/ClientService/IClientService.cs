@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using longtooth.Common.Abstractions.DTOs;
@@ -59,5 +60,10 @@ namespace longtooth.Common.Abstractions.Interfaces.ClientService
         /// Truncate / grow file to given size
         /// </summary>
         Task<bool> TruncateFileAsync(string path, ulong newSize);
+
+        /// <summary>
+        /// Sets timestamps for given file / directory. Returns true in case of success
+        /// </summary>
+        Task<bool> SetTimestampsAsync(string path, DateTime atime, DateTime ctime, DateTime mtime);
     }
 }
