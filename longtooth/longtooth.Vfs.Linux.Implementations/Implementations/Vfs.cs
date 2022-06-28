@@ -22,7 +22,7 @@ namespace longtooth.Vfs.Linux.Implementations.Implementations
         /// <summary>
         /// Permissions for items, exported by FUSE
         /// </summary>
-        private const int Permissions = 0b111_111_111;
+        private const int Permissions = 0b111_111_000;
 
         /// <summary>
         /// Reasonable read operation block size. Check Constants.MaxPacketSize when setting it.
@@ -43,9 +43,22 @@ namespace longtooth.Vfs.Linux.Implementations.Implementations
                 DateTime.UnixEpoch,
                 new List<FilesystemItemDto>());
 
+        /// <summary>
+        /// User, who started the client
+        /// </summary>
+        private uid_t _curentUser;
+
+        /// <summary>
+        /// Group of user, who started the client
+        /// </summary>
+        private gid_t _currentGroup;
+
         public Vfs(IClientService clientService)
         {
             _clientService = clientService;
+
+            _curentUser = getuid();
+            _currentGroup = getgid();
         }
 
         public override int GetAttr(ReadOnlySpan<byte> path, ref stat stat, FuseFileInfoRef fiRef)
@@ -59,9 +72,14 @@ namespace longtooth.Vfs.Linux.Implementations.Implementations
                 return -ENOENT;
             }
 
+            // Modification times
             stat.st_atim = _currentItem.Atime.ToTimespec();
             stat.st_ctim = _currentItem.Ctime.ToTimespec();
             stat.st_mtim = _currentItem.Mtime.ToTimespec();
+
+            // Owner and group - always return the current user and group
+            stat.st_uid = _curentUser;
+            stat.st_gid = _currentGroup;
 
             if (_currentItem.IsDirectory)
             {
