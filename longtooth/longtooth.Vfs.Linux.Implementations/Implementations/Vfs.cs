@@ -236,13 +236,34 @@ namespace longtooth.Vfs.Linux.Implementations.Implementations
         {
             var pathAsString = Encoding.UTF8.GetString(path);
 
-            var result = _clientService.SetTimestampsAsync(pathAsString, atime.ToDateTime(), mtime.ToDateTime(), mtime.ToDateTime()).Result;
+            // Current times
+            var item = _clientService.GetDirectoryContentAsync(pathAsString).Result;
+
+            var newAtime = ProcessDateTimeForUtime(DateTime.UtcNow, item.Atime.ToTimespec());
+            var newMtime = ProcessDateTimeForUtime(DateTime.UtcNow, item.Mtime.ToTimespec());
+
+            var result = _clientService.SetTimestampsAsync(pathAsString, newAtime, newMtime, newMtime).Result;
             if (!result)
             {
                 return -EIO;
             }
 
             return 0;
+        }
+
+        private DateTime ProcessDateTimeForUtime(DateTime currentDateTime, timespec newDateTime)
+        {
+            if (newDateTime.IsNow())
+            {
+                return DateTime.UtcNow;
+            }
+
+            if (newDateTime.IsOmit())
+            {
+                return currentDateTime;
+            }
+
+            return newDateTime.ToDateTime();
         }
 
         private void UpdateCurrentDirectory(string path)
