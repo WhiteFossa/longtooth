@@ -269,6 +269,23 @@ namespace longtooth.Vfs.Linux.Implementations.Implementations
             return 0;
         }
 
+
+        public override int Access(ReadOnlySpan<byte> path, mode_t mode)
+        {
+            var pathAsString = Encoding.UTF8.GetString(path);
+
+            var item = _clientService.GetDirectoryContentAsync(pathAsString).Result;
+
+            if (!item.IsExist)
+            {
+                return -ENOENT;
+            }
+
+            // We don't actually checking the permissions, 770 is for all directories and files, i.e. current user
+            // always have full access
+            return 0;
+        }
+
         private DateTime ProcessDateTimeForUtime(DateTime currentDateTime, timespec newDateTime)
         {
             if (newDateTime.IsNow())
