@@ -46,7 +46,7 @@
             <StackPanel>
                 <TextBlock Text="Experiments" />
 
-                <Grid ColumnDefinitions="Auto, Auto, Auto, Auto, Auto, Auto, Auto" RowDefinitions="Auto, Auto, Auto" >
+                <Grid ColumnDefinitions="Auto, Auto" RowDefinitions="Auto" >
 
                     <!-- Ping -->
                     <Button Grid.Column="0" Grid.Row="0" Content="Ping" Command="{ Binding PingAsync }" />
@@ -54,100 +54,24 @@
                     <!-- Graceful disconnect -->
                     <Button Grid.Column="1" Grid.Row="0" Content="Graceful disconnect" Command="{ Binding GracefulDisconnectAsync }" />
 
-                    <!-- Get mountpoints -->
-                    <Button Grid.Column="2" Grid.Row="0" Content="Get mountpoints" Command="{ Binding GetMountpointsAsync }" />
+                </Grid>
 
-                    <!-- Download file -->
-                    <Button Grid.Column="3" Grid.Row="0" Content="Download file" Command="{ Binding DownloadFileAsync }" />
+                <!-- Linux -->
+                <Grid ColumnDefinitions="Auto, Auto, Auto" RowDefinitions="Auto" >
+                    <TextBox Watermark="Local mountpoint" Grid.Column="0" Grid.Row="0" Text="{ Binding LocalMountpoint }" />
+                    <Button Grid.Column="1" Grid.Row="0" Content="Mount Linux" Command="{ Binding MountFuseAsync }" />
+                    <Button Grid.Column="2" Grid.Row="0" Content="Unmount Linux" Command="{ Binding UnmountFuseAsync }" />
+                </Grid>
 
-                    <!-- Upload new file -->
-                    <Button Grid.Column="4" Grid.Row="0" Content="Upload file" Command="{ Binding UploadFileAsync }" />
-
-                    <!-- Delete current file -->
-                    <Button Grid.Column="5" Grid.Row="0" Content="Delete file" Command="{ Binding DeleteFileAsync }" />
-
-                    <!-- Delete current directory -->
-                    <Button Grid.Column="6" Grid.Row="0" Content="Delete directory" Command="{ Binding DeleteDirectoryAsync }" />
-
-                    <!-- New directory -->
-                    <TextBox Watermark="New directory name" Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2" Text="{ Binding NewDirectoryName }" />
-                    <Button Grid.Column="2" Grid.Row="1" Content="Create directory" Command="{ Binding CreateDirectoryAsync }" />
-                    
-                    <!-- Local mountpoint -->
-                    <TextBox Watermark="Local mountpoint" Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="2" Text="{ Binding LocalMountpoint }" />
-                    <Button Grid.Column="2" Grid.Row="2" Content="Mount" Command="{ Binding MountFuseAsync }" />
-                    <Button Grid.Column="3" Grid.Row="2" Content="Unmount" Command="{ Binding UnmountFuseAsync }" />
-                    
+                <!-- Windows -->
+                <Grid ColumnDefinitions="Auto, Auto, Auto" RowDefinitions="Auto" >
+                    <TextBox Watermark="X" Grid.Column="0" Grid.Row="0" Text="{ Binding DiskLetter }" />
+                    <Button Grid.Column="1" Grid.Row="0" Content="Mount Windows" Command="{ Binding MountDokanAsync }" />
+                    <Button Grid.Column="2" Grid.Row="0" Content="Unmount Windows" Command="{ Binding UnmountDokanAsync }" />
                 </Grid>
             </StackPanel>
         </Border>
 
-        <!-- Files manager -->
-        <Border Classes="VisibleBorders" Grid.Column="0" Grid.Row="2" >
-            <Grid ColumnDefinitions="Auto, *" RowDefinitions="*">
-                
-                <!-- Mountpoints -->
-                <Border Classes="VisibleBorders" Grid.Column="0" Grid.Row="0">
-                    <Grid ColumnDefinitions="*" RowDefinitions="*">
-                        <DataGrid
-                            Items="{ Binding Mountpoints }"
-                            HeadersVisibility="All"
-                            GridLinesVisibility="All"
-                            VerticalScrollBarVisibility="Visible"
-                            Grid.Column="0"
-                            Grid.Row="0"
-                            IsReadOnly="true"
-                            CellPointerPressed="OnMountpointCellPressedAsync"
-                            >
-
-                            <DataGrid.Columns>
-                                <DataGridTextColumn Header="Mountpoint" Binding="{ Binding Name }" />
-                                <DataGridTextColumn Header="Path" Binding="{ Binding ServerSidePath }" MinWidth="300"/>
-                            </DataGrid.Columns>
-                        </DataGrid>
-                    </Grid>
-                </Border>
-
-                <!-- Files and directories -->
-                <Border Classes="VisibleBorders" Grid.Column="1" Grid.Row="0">
-                    <Grid ColumnDefinitions="*" RowDefinitions="Auto, Auto, *">
-                        <!-- Current directory -->
-                        <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="0">
-                            <TextBlock Text="Current directory: " Classes="VCenterRightMargin" />
-
-                            <TextBlock Text="{ Binding CurrentDirectory }" Classes="VCenterRightMargin"/>
-                        </StackPanel>
-
-                        <!-- Current file -->
-                        <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="1">
-                            <TextBlock Text="Current file: " Classes="VCenterRightMargin" />
-
-                            <TextBlock Text="{ Binding CurrentFile.Name }" Classes="VCenterRightMargin"/>
-                        </StackPanel>
-                        
-                        <!-- Files -->
-                        <DataGrid
-                            Items="{ Binding DirectoryContent }"
-                            HeadersVisibility="All"
-                            GridLinesVisibility="All"
-                            VerticalScrollBarVisibility="Visible"
-                            Grid.Column="0"
-                            Grid.Row="2"
-                            Classes="VisibleBorders"
-                            IsReadOnly="true"
-                            CellPointerPressed="OnDirectoryContentCellPressedAsync"
-                            >
-
-                            <DataGrid.Columns>
-                                <DataGridTextColumn Header="Name" Binding="{ Binding Name }" />
-                                <DataGridTextColumn Header="Size" Binding="{ Binding Size }" />
-                            </DataGrid.Columns>
-                        </DataGrid>
-                    </Grid>
-                </Border>
-            </Grid>
-        </Border>
-        
         <!-- Logs -->
         <Border Classes="VisibleBorders" Grid.Column="0" Grid.Row="3" >
             <DockPanel>
@@ -155,13 +79,6 @@
 
                 <TextBox AcceptsReturn="True" IsReadOnly="True" Text="{Binding ConsoleText}" CaretIndex="{Binding ConsoleCaretIndex}" />
             </DockPanel>
-        </Border>
-
-        <!-- Progressbar -->
-        <Border Classes="VisibleBorders" Grid.Column="0" Grid.Row="4" >
-            <StackPanel>
-                <ProgressBar Height="15" Minimum="0" Value="{Binding ProgressValue}" Maximum="1" Classes="TopMargin"/>
-            </StackPanel>
         </Border>
 
     </Grid>
