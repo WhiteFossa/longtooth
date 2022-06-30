@@ -6,7 +6,6 @@ using longtooth.Common.Abstractions.Interfaces.Logger;
 using longtooth.Common.Abstractions.Interfaces.MessagesProcessor;
 using longtooth.Common.Abstractions.Models;
 using longtooth.Protocol.Abstractions.Interfaces;
-using longtooth.Vfs.Linux.Abstractions.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using ReactiveUI;
 using System;
@@ -131,8 +130,9 @@ namespace longtooth.Desktop.ViewModels
         private readonly IMessagesProcessor _messagesProcessor;
         private readonly ICommandToServerHeaderGenerator _commandGenerator;
         private readonly IClientSideMessagesProcessor _clientSideMessagesProcessor;
-        private readonly IVfsManager _vfsLinux;
+        private readonly longtooth.Vfs.Linux.Abstractions.Interfaces.IVfsManager _vfsLinux;
         private readonly IClientService _clientService;
+        private readonly longtooth.Vfs.Windows.Abstractions.Interfaces.IVfsManager _vfsWindows;
 
         public MainWindowViewModel(MainModel model)
         {
@@ -150,7 +150,8 @@ namespace longtooth.Desktop.ViewModels
             _commandGenerator = Program.Di.GetService<ICommandToServerHeaderGenerator>();
             _clientSideMessagesProcessor = Program.Di.GetService<IClientSideMessagesProcessor>();
 
-            _vfsLinux = Program.Di.GetService<IVfsManager>();
+            _vfsLinux = Program.Di.GetService<longtooth.Vfs.Linux.Abstractions.Interfaces.IVfsManager>();
+            _vfsWindows = Program.Di.GetService<longtooth.Vfs.Windows.Abstractions.Interfaces.IVfsManager>();
 
             _clientService = Program.Di.GetService<IClientService>();
 
@@ -292,7 +293,7 @@ namespace longtooth.Desktop.ViewModels
         {
             try
             {
-                _logger.LogInfoAsync("Mounting");
+                await _vfsWindows.MountAsync(DiskLetter);
             }
             catch (Exception ex)
             {
@@ -302,7 +303,7 @@ namespace longtooth.Desktop.ViewModels
 
         private async void UnmountDokanAsync()
         {
-            await _logger.LogInfoAsync("Unmounting");
+            await _vfsWindows.UnmountAsync();
         }
     }
 }

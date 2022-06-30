@@ -65,7 +65,7 @@
 
                 <!-- Windows -->
                 <Grid ColumnDefinitions="Auto, Auto, Auto" RowDefinitions="Auto" >
-                    <TextBox Watermark="X" Grid.Column="0" Grid.Row="0" Text="{ Binding DiskLetter }" />
+                    <TextBox Watermark="X:\\" Grid.Column="0" Grid.Row="0" Text="{ Binding DiskLetter }" />
                     <Button Grid.Column="1" Grid.Row="0" Content="Mount Windows" Command="{ Binding MountDokanAsync }" />
                     <Button Grid.Column="2" Grid.Row="0" Content="Unmount Windows" Command="{ Binding UnmountDokanAsync }" />
                 </Grid>
