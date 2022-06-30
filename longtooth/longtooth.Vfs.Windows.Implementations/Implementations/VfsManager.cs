@@ -41,6 +41,7 @@ namespace longtooth.Vfs.Windows.Implementations.Implementations
 
         private async void DokanMountThreadRunAsync()
         {
+            using (_mountEvent = new ManualResetEvent(false))
             using (var dokanLogger = new ConsoleLogger("[Dokan] "))
             using (var dokan = new Dokan(dokanLogger))
             {

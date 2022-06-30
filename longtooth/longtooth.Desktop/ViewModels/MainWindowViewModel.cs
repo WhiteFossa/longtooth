@@ -163,7 +163,8 @@ namespace longtooth.Desktop.ViewModels
 
             // TODO : Remove me, debug
             LocalMountpoint = @"/home/fossa/longtooth-mountpoint";
-
+            DiskLetter = @"X";
+            
             _logger.SetLoggingFunction(AddLineToConsole);
 
             ServerPort = "5934";
