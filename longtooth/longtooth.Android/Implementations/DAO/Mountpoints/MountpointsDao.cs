@@ -49,9 +49,16 @@ namespace longtooth.Droid.Implementations.DAO.Mountpoints
         {
             _ = mountpoint ?? throw new ArgumentNullException(nameof(mountpoint));
 
-            var mountpointToDelete = Map(mountpoint);
+            var mountpointToDelete = await GetMountpointModelAsync(mountpoint.Name, mountpoint.ServerSidePath);
+            if (mountpointToDelete == null)
+            {
+                throw new ArgumentException("Attempt to delete nonexistent mountpoint!");
+            }
 
-            await _connection.DeleteAsync(mountpointToDelete);
+            if (await _connection.DeleteAsync(mountpointToDelete) != 1)
+            {
+                throw new ArgumentException("Mountpoint removal failed!");
+            }
         }
 
         public async Task<IReadOnlyCollection<MountpointDto>> GetAllMountpointsAsync()
@@ -63,12 +70,17 @@ namespace longtooth.Droid.Implementations.DAO.Mountpoints
                 .ToList();
         }
 
-        public async Task<MountpointDto> GetMountpointAsync(string name, string serverSidePath)
+        private async Task<MountpointModel> GetMountpointModelAsync(string name, string serverSidePath)
         {
-            var mountpoint = await _connection
+            return await _connection
                 .Table<MountpointModel>()
                 .Where(mp => mp.Name == name && mp.ServerSidePath == serverSidePath)
                 .FirstOrDefaultAsync();
+        }
+
+        public async Task<MountpointDto> GetMountpointAsync(string name, string serverSidePath)
+        {
+            var mountpoint = await GetMountpointModelAsync(name, serverSidePath);
 
             return Map(mountpoint);
         }

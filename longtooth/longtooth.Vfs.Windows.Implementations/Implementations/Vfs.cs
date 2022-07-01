@@ -5,6 +5,7 @@ using longtooth.Vfs.Windows.Abstractions.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Security.AccessControl;
 using System.Text;
 
@@ -78,7 +79,8 @@ namespace longtooth.Vfs.Windows.Implementations.Implementations
 
         public NtStatus FindFiles(string fileName, out IList<FileInformation> files, IDokanFileInfo info)
         {
-            UpdateCurrentDirectory(fileName);
+            var unixPath = WindowsPathToUnixPath(fileName);
+            UpdateCurrentDirectory(unixPath);
 
             if (!_currentItem.IsExist || !_currentItem.IsDirectory)
             {
@@ -93,7 +95,8 @@ namespace longtooth.Vfs.Windows.Implementations.Implementations
 
         public NtStatus FindFilesWithPattern(string fileName, string searchPattern, out IList<FileInformation> files, IDokanFileInfo info)
         {
-            UpdateCurrentDirectory(fileName);
+            var unixPath = WindowsPathToUnixPath(fileName);
+            UpdateCurrentDirectory(unixPath);
 
             if (!_currentItem.IsExist || !_currentItem.IsDirectory)
             {
@@ -102,6 +105,9 @@ namespace longtooth.Vfs.Windows.Implementations.Implementations
             }
 
             files = new List<FileInformation>(GetFilesList(_currentItem.Content));
+            files = files
+                .Where(f => DokanHelper.DokanIsNameInExpression(searchPattern, f.FileName, false))
+                .ToList();
 
             return DokanResult.Success;
         }
@@ -278,6 +284,11 @@ namespace longtooth.Vfs.Windows.Implementations.Implementations
             }
 
             return files;
+        }
+
+        private string WindowsPathToUnixPath(string windowsPath)
+        {
+            return windowsPath.Replace(@"\", "/");
         }
     }
 }
