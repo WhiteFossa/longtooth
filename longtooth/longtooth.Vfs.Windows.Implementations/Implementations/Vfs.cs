@@ -1,4 +1,6 @@
 ﻿using DokanNet;
+using longtooth.Common.Abstractions.DTOs.ClientService;
+using longtooth.Common.Abstractions.Interfaces.ClientService;
 using longtooth.Vfs.Windows.Abstractions.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -22,6 +24,27 @@ namespace longtooth.Vfs.Windows.Implementations.Implementations
         /// Filesystem name
         /// </summary>
         private const string FilesystemName = "longtooth";
+
+        private IClientService _clientService;
+
+        /// <summary>
+        /// Cached content of current directory
+        /// </summary>
+        private FilesystemItemDto _currentItem =
+            new FilesystemItemDto(false,
+                false,
+                string.Empty,
+                string.Empty,
+                0,
+                DateTime.UnixEpoch,
+                DateTime.UnixEpoch,
+                DateTime.UnixEpoch,
+                new List<FilesystemItemDto>());
+
+        public Vfs(IClientService clientService)
+        {
+            _clientService = clientService;
+        }
 
         public void Cleanup(string fileName, IDokanFileInfo info)
         {
@@ -55,28 +78,32 @@ namespace longtooth.Vfs.Windows.Implementations.Implementations
 
         public NtStatus FindFiles(string fileName, out IList<FileInformation> files, IDokanFileInfo info)
         {
-            files = new List<FileInformation>();
+            UpdateCurrentDirectory(fileName);
 
-            if (fileName.Equals(@"\"))
+            if (!_currentItem.IsExist || !_currentItem.IsDirectory)
             {
-                files.Add(new FileInformation
-                {
-                    FileName = "testfile.txt",
-                    LastAccessTime = DateTime.UtcNow,
-                    LastWriteTime = DateTime.UtcNow,
-                    CreationTime = DateTime.UtcNow
-                });
-
+                files = new List<FileInformation>();
                 return DokanResult.Success;
             }
+
+            files = new List<FileInformation>(GetFilesList(_currentItem.Content));
 
             return DokanResult.Success;
         }
 
         public NtStatus FindFilesWithPattern(string fileName, string searchPattern, out IList<FileInformation> files, IDokanFileInfo info)
         {
-            files = new FileInformation[0];
-            return DokanResult.NotImplemented;
+            UpdateCurrentDirectory(fileName);
+
+            if (!_currentItem.IsExist || !_currentItem.IsDirectory)
+            {
+                files = new List<FileInformation>();
+                return DokanResult.Success;
+            }
+
+            files = new List<FileInformation>(GetFilesList(_currentItem.Content));
+
+            return DokanResult.Success;
         }
 
         public NtStatus FindStreams(string fileName, out IList<FileInformation> streams, IDokanFileInfo info)
@@ -213,6 +240,44 @@ namespace longtooth.Vfs.Windows.Implementations.Implementations
         {
             bytesWritten = 0;
             return DokanResult.Error;
+        }
+
+        private void UpdateCurrentDirectory(string path)
+        {
+            if (!_currentItem.Path.Equals(path))
+            {
+                _currentItem = _clientService.GetDirectoryContentAsync(path).Result;
+            }
+        }
+
+        private FileAttributes GetAttributes(FilesystemItemDto item)
+        {
+            if (item.IsDirectory)
+            {
+                return FileAttributes.Directory;
+            }
+
+            return FileAttributes.Normal;
+        }
+
+        private IReadOnlyCollection<FileInformation> GetFilesList(IReadOnlyCollection<FilesystemItemDto> items)
+        {
+            var files = new List<FileInformation>();
+
+            foreach (var item in _currentItem.Content)
+            {
+                files.Add(new FileInformation()
+                {
+                    FileName = item.Name,
+                    Attributes = GetAttributes(item),
+                    LastAccessTime = item.Atime,
+                    CreationTime = item.Ctime,
+                    LastWriteTime = item.Mtime,
+                    Length = item.Size
+                });
+            }
+
+            return files;
         }
     }
 }
