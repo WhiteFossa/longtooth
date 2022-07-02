@@ -64,8 +64,151 @@ namespace longtooth.Vfs.Windows.Implementations.Implementations
             FileAttributes attributes,
             IDokanFileInfo info)
         {
-            // TODO: Implement me
-            return DokanResult.Success;
+            var unixPath = WindowsPathToUnixPath(fileName);
+            var fileInfo = _clientService.GetDirectoryContentAsync(unixPath).Result;
+
+            if (info.IsDirectory && fileInfo.IsExist && !fileInfo.IsDirectory)
+            {
+                return DokanResult.NotADirectory;
+            }
+
+            if (mode == FileMode.Create)
+            {
+                // Create file, if exist - overwrite it
+                if (!fileInfo.IsExist)
+                {
+                    if (!CreateFileOrDirectory(info.IsDirectory, unixPath))
+                    {
+                        return DokanResult.Error;
+                    }
+
+                    InvalidateCurrentDirectoryCachedContent();
+                    return DokanResult.Success;
+                }
+                else
+                {
+                    // Already exist, overwriting if not a directory
+                    if (fileInfo.IsDirectory)
+                    {
+                        info.IsDirectory = true;
+                        return DokanResult.Success;
+                    }
+
+                    if (!_clientService.TruncateFileAsync(unixPath, 0).Result)
+                    {
+                        return DokanResult.Error;
+                    }
+                    else
+                    {
+                        return DokanResult.Success;
+                    }
+                }
+            }
+            else if (mode == FileMode.OpenOrCreate)
+            {
+                // Open file, create if not exist
+                if (!fileInfo.IsExist)
+                {
+                    if (!CreateFileOrDirectory(info.IsDirectory, unixPath))
+                    {
+                        return DokanResult.Error;
+                    }
+
+                    InvalidateCurrentDirectoryCachedContent();
+                }
+
+                return DokanResult.Success;
+            }
+            else if (mode == FileMode.CreateNew)
+            {
+                // Create only if not exist
+                if (fileInfo.IsExist)
+                {
+                    return DokanResult.Error;
+                }
+                else
+                {
+                    if (!CreateFileOrDirectory(info.IsDirectory, unixPath))
+                    {
+                        return DokanResult.Error;
+                    }
+                    InvalidateCurrentDirectoryCachedContent();
+
+                    return DokanResult.Success;
+                }
+            }
+            else if (mode == FileMode.Open)
+            {
+                // Just open file
+
+                if (!fileInfo.IsExist)
+                {
+                    return DokanResult.Error;
+                }
+
+                return DokanResult.Success;
+            }
+            else if (mode == FileMode.Truncate)
+            {
+                // Truncate an existing file
+                if (info.IsDirectory)
+                {
+                    return DokanResult.Error;
+                }
+
+                if (!fileInfo.IsExist)
+                {
+                    return DokanResult.Error;
+                }
+
+                if (!_clientService.TruncateFileAsync(unixPath, 0).Result)
+                {
+                    return DokanResult.Error;
+                }
+
+                return DokanResult.Success;
+            }
+            else if (mode == FileMode.Append)
+            {
+                // Create if not exist, then seek to the end
+                if (fileInfo.IsDirectory)
+                {
+                    return DokanResult.Error;
+                }
+
+                if (!fileInfo.IsExist)
+                {
+                    if (!CreateFileOrDirectory(false, unixPath))
+                    {
+                        return DokanResult.Error;
+                    }
+                    InvalidateCurrentDirectoryCachedContent();
+                }
+
+                return DokanResult.Success;
+            }
+            else
+            {
+                throw new ArgumentException(nameof(mode));
+            }
+        }
+
+        private bool CreateFileOrDirectory(bool isDirectory, string unixPath)
+        {
+            bool result;
+
+            if (isDirectory)
+            {
+                result = _clientService.CreateDirectoryAsync(unixPath).Result;
+            }
+            else
+            {
+                result = _clientService.CreateFileAsync(unixPath).Result;
+            }
+
+            InvalidateCurrentDirectoryCachedContent();
+
+            return result;
         }
 
         public NtStatus DeleteDirectory(string fileName, IDokanFileInfo info)
@@ -253,6 +396,22 @@ namespace longtooth.Vfs.Windows.Implementations.Implementations
             {
                 _currentItem = _clientService.GetDirectoryContentAsync(path).Result;
             }
+        }
+
+        /// <summary>
+        /// Call this after changes in current directory (creating/removig files and directories and so on).
+        /// </summary>
+        private void InvalidateCurrentDirectoryCachedContent()
+        {
+            _currentItem = new FilesystemItemDto(false,
+                true,
+                string.Empty,
+                string.Empty,
+                0,
+                DateTime.UnixEpoch,
+                DateTime.UnixEpoch,
+                DateTime.UnixEpoch,
+                new List<FilesystemItemDto>());
         }
 
         private FileAttributes GetAttributes(FilesystemItemDto item)
