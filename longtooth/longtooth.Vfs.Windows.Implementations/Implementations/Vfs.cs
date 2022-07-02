@@ -1,6 +1,7 @@
 ﻿using DokanNet;
 using longtooth.Common.Abstractions.DTOs.ClientService;
 using longtooth.Common.Abstractions.Interfaces.ClientService;
+using longtooth.Common.Implementations.Helpers;
 using longtooth.Vfs.Windows.Abstractions.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -137,31 +138,29 @@ namespace longtooth.Vfs.Windows.Implementations.Implementations
         {
             fileInfo = new FileInformation { FileName = fileName };
 
-            // Root directory
-            if (fileName.Equals(@"\"))
+            var unixPath = WindowsPathToUnixPath(fileName);
+            UpdateCurrentDirectory(unixPath);
+
+            if (_currentItem == null || !_currentItem.IsExist)
+            {
+                return DokanResult.FileNotFound;
+            }
+
+            fileInfo.LastAccessTime = _currentItem.Atime;
+            fileInfo.CreationTime = _currentItem.Ctime;
+            fileInfo.LastWriteTime = _currentItem.Mtime;
+
+            if (_currentItem.IsDirectory)
             {
                 fileInfo.Attributes = FileAttributes.Directory;
-
-                var rootTime = DateTime.UtcNow;
-
-                fileInfo.LastAccessTime = rootTime;
-                fileInfo.LastWriteTime = rootTime;
-                fileInfo.CreationTime = rootTime;
-
-                return DokanResult.Success;
             }
-
-            // Test file
-            if (fileName.Equals("testfile.txt"))
+            else
             {
-                fileInfo.LastAccessTime = DateTime.UtcNow;
-                fileInfo.LastWriteTime = DateTime.UtcNow;
-                fileInfo.CreationTime = DateTime.UtcNow;
-
-                return DokanResult.Success;
+                fileInfo.Attributes = FileAttributes.Normal;
+                fileInfo.Length = _currentItem.Size;
             }
 
-            return DokanResult.Error;
+            return DokanResult.Success;
         }
 
         public NtStatus GetFileSecurity(string fileName, out FileSystemSecurity security, AccessControlSections sections, IDokanFileInfo info)
@@ -274,7 +273,7 @@ namespace longtooth.Vfs.Windows.Implementations.Implementations
             {
                 files.Add(new FileInformation()
                 {
-                    FileName = item.Name,
+                    FileName = FilesHelper.GetFileOrDirectoryName(item.Path),
                     Attributes = GetAttributes(item),
                     LastAccessTime = item.Atime,
                     CreationTime = item.Ctime,
