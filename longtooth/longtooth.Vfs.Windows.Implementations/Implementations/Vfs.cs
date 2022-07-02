@@ -380,7 +380,15 @@ namespace longtooth.Vfs.Windows.Implementations.Implementations
 
         public NtStatus MoveFile(string oldName, string newName, bool replace, IDokanFileInfo info)
         {
-            return DokanResult.Error;
+            var fromUnixPath = WindowsPathToUnixPath(oldName);
+            var toUnixPath = WindowsPathToUnixPath(newName);
+
+            if (!_clientService.MoveAsync(fromUnixPath, toUnixPath, replace).Result)
+            {
+                return DokanResult.Error;
+            }
+
+            return DokanResult.Success;
         }
 
         public NtStatus ReadFile(string fileName, byte[] buffer, out int bytesRead, long offset, IDokanFileInfo info)

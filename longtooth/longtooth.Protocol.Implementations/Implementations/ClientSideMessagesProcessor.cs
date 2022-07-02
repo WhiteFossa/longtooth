@@ -71,6 +71,9 @@ namespace longtooth.Protocol.Implementations.Implementations
                 case CommandType.SetTimestamps:
                     return SetTimestampsResponse.Parse(stringHeader, payload);
 
+                case CommandType.Move:
+                    return MoveResponse.Parse(stringHeader, payload);
+
                 default:
                     throw new InvalidOperationException($"Response to unknown command. Type: {header.Command}");
             }

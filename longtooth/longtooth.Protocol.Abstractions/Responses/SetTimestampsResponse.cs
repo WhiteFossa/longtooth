@@ -15,7 +15,7 @@ namespace longtooth.Protocol.Abstractions.Responses
         /// <summary>
         /// Result
         /// </summary>
-        [JsonPropertyName("TSetTimestampsResult")]
+        [JsonPropertyName("SetTimestampsResult")]
         public SetTimestampsResultDto SetTimestampsResult { get; set; }
 
         public SetTimestampsResponse(SetTimestampsResultDto setTimestampsResult) : base(CommandType.SetTimestamps)

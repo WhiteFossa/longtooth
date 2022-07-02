@@ -158,6 +158,16 @@ namespace longtooth.Protocol.Implementations.Implementations
                         .ParseAsync(stringHeader, payload);
                     break;
 
+                case CommandType.Move:
+                    result = await new MoveCommand(string.Empty,
+                        string.Empty,
+                        false,
+                        _messagesProcessor,
+                        _responseToClientHeaderGenerator,
+                        _filesManager)
+                        .ParseAsync(stringHeader, payload);
+                    break;
+
                 default:
                     throw new InvalidOperationException($"Unknown command type: { header.Command }");
             }

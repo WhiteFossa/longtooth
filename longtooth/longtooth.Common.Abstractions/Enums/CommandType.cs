@@ -69,5 +69,10 @@
         /// Set timestamps for file / directory
         /// </summary>
         SetTimestamps = 12,
+
+        /// <summary>
+        /// Move file / directory
+        /// </summary>
+        Move = 13,
     }
 }

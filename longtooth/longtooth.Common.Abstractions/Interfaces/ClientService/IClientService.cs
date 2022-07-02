@@ -65,5 +65,10 @@ namespace longtooth.Common.Abstractions.Interfaces.ClientService
         /// Sets timestamps for given file / directory. Returns true in case of success
         /// </summary>
         Task<bool> SetTimestampsAsync(string path, DateTime atime, DateTime ctime, DateTime mtime);
+
+        /// <summary>
+        /// Move file / directory
+        /// </summary>
+        Task<bool> MoveAsync(string from, string to, bool isOverwrite);
     }
 }

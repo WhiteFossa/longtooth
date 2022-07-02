@@ -88,6 +88,12 @@ namespace longtooth.Common.Implementations.ClientService
         private AutoResetEvent _setTimestampsWaitHandle = new AutoResetEvent(false);
 
         /// <summary>
+        /// Result of "move file/directory" command
+        /// </summary>
+        private MoveRunResult _moveRunResult;
+        private AutoResetEvent _moveWaitHandle = new AutoResetEvent(false);
+
+        /// <summary>
         /// To make multithreaded calls synchronous single-threaded
         /// </summary>
         private AutoResetEvent _syncWaitHandle = new AutoResetEvent(true);
@@ -166,6 +172,11 @@ namespace longtooth.Common.Implementations.ClientService
                 case CommandType.SetTimestamps:
                     _setTimestampsRunResult = runResult as SetTimestampsRunResult;
                     _setTimestampsWaitHandle.Set();
+                    break;
+
+                case CommandType.Move:
+                    _moveRunResult = runResult as MoveRunResult;
+                    _moveWaitHandle.Set();
                     break;
 
                 default:
@@ -395,6 +406,15 @@ namespace longtooth.Common.Implementations.ClientService
             _setTimestampsWaitHandle.WaitOne();
 
             return _setTimestampsRunResult.SetTimestampsResult.IsSuccessful;
+        }
+
+        public async Task<bool> MoveAsync(string from, string to, bool isOverwrite)
+        {
+            await PrepareAndSendCommand(
+                _commandGenerator.MoveCommand(LocalPathToServerSidePath(from), LocalPathToServerSidePath(to), isOverwrite));
+            _moveWaitHandle.WaitOne();
+
+            return _moveRunResult.MoveResult.IsSuccessful;
         }
     }
 }

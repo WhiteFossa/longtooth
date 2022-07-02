@@ -121,5 +121,12 @@ namespace longtooth.Protocol.Implementations.Implementations
 
             return EncodeResponse(setTimestampsResponse, null);
         }
+
+        public IReadOnlyCollection<byte> GenerateMoveResponse(MoveResultDto moveResultDto)
+        {
+            var moveResponse = new MoveResponse(moveResultDto);
+
+            return EncodeResponse(moveResponse, null);
+        }
     }
 }
