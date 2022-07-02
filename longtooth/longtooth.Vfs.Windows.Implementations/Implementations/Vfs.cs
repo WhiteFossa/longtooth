@@ -83,6 +83,11 @@ namespace longtooth.Vfs.Windows.Implementations.Implementations
                     }
 
                     InvalidateCurrentDirectoryCachedContent();
+                    info.Context = new FileContext()
+                    {
+                        Position = 0
+                    };
+
                     return DokanResult.Success;
                 }
                 else
@@ -98,10 +103,12 @@ namespace longtooth.Vfs.Windows.Implementations.Implementations
                     {
                         return DokanResult.Error;
                     }
-                    else
+
+                    info.Context = new FileContext()
                     {
-                        return DokanResult.Success;
-                    }
+                        Position = 0
+                    };
+                    return DokanResult.Success;
                 }
             }
             else if (mode == FileMode.OpenOrCreate)
@@ -117,6 +124,10 @@ namespace longtooth.Vfs.Windows.Implementations.Implementations
                     InvalidateCurrentDirectoryCachedContent();
                 }
 
+                info.Context = new FileContext()
+                {
+                    Position = 0
+                };
                 return DokanResult.Success;
             }
             else if (mode == FileMode.CreateNew)
@@ -134,18 +145,25 @@ namespace longtooth.Vfs.Windows.Implementations.Implementations
                     }
                     InvalidateCurrentDirectoryCachedContent();
 
+                    info.Context = new FileContext()
+                    {
+                        Position = 0
+                    };
                     return DokanResult.Success;
                 }
             }
             else if (mode == FileMode.Open)
             {
                 // Just open file
-
                 if (!fileInfo.IsExist)
                 {
                     return DokanResult.Error;
                 }
 
+                info.Context = new FileContext()
+                {
+                    Position = 0
+                };
                 return DokanResult.Success;
             }
             else if (mode == FileMode.Truncate)
@@ -166,6 +184,10 @@ namespace longtooth.Vfs.Windows.Implementations.Implementations
                     return DokanResult.Error;
                 }
 
+                info.Context = new FileContext()
+                {
+                    Position = 0
+                };
                 return DokanResult.Success;
             }
             else if (mode == FileMode.Append)
@@ -185,6 +207,10 @@ namespace longtooth.Vfs.Windows.Implementations.Implementations
                     InvalidateCurrentDirectoryCachedContent();
                 }
 
+                info.Context = new FileContext()
+                {
+                    Position = fileInfo.Size - 1
+                };
                 return DokanResult.Success;
             }
             else
@@ -213,12 +239,26 @@ namespace longtooth.Vfs.Windows.Implementations.Implementations
 
         public NtStatus DeleteDirectory(string fileName, IDokanFileInfo info)
         {
-            return DokanResult.Error;
+            var unixPath = WindowsPathToUnixPath(fileName);
+
+            if (!_clientService.DeleteDirectoryAsync(unixPath).Result)
+            {
+                return DokanResult.Error;
+            }
+
+            return DokanResult.Success;
         }
 
         public NtStatus DeleteFile(string fileName, IDokanFileInfo info)
         {
-            return DokanResult.Error;
+            var unixPath = WindowsPathToUnixPath(fileName);
+
+            if(!_clientService.DeleteFileAsync(unixPath).Result)
+            {
+                return DokanResult.Error;
+            }
+
+            return DokanResult.Success;
         }
 
         public NtStatus FindFiles(string fileName, out IList<FileInformation> files, IDokanFileInfo info)

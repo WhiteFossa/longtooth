@@ -1,9 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using longtooth.Client.Abstractions.Interfaces;
 using longtooth.Common.Abstractions.DTOs;
 using longtooth.Common.Abstractions.DTOs.ClientService;
@@ -11,8 +5,12 @@ using longtooth.Common.Abstractions.DTOs.Responses;
 using longtooth.Common.Abstractions.Enums;
 using longtooth.Common.Abstractions.Interfaces.ClientService;
 using longtooth.Common.Abstractions.Interfaces.MessagesProcessor;
-using longtooth.Common.Implementations.Helpers;
 using longtooth.Protocol.Abstractions.Interfaces;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace longtooth.Common.Implementations.ClientService
 {
