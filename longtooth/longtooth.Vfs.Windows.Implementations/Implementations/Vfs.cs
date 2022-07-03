@@ -8,7 +8,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security.AccessControl;
-using System.Text;
 
 namespace longtooth.Vfs.Windows.Implementations.Implementations
 {
@@ -26,6 +25,12 @@ namespace longtooth.Vfs.Windows.Implementations.Implementations
         /// Filesystem name
         /// </summary>
         private const string FilesystemName = "longtooth";
+
+        /// <summary>
+        /// Reasonable read operation block size. Check Constants.MaxPacketSize when setting it.
+        /// </summary>
+        private const int ReadOperationBlockSize = 1000 * 1024;
+        //private const int ReadOperationBlockSize = 10;
 
         private IClientService _clientService;
 
@@ -393,8 +398,36 @@ namespace longtooth.Vfs.Windows.Implementations.Implementations
 
         public NtStatus ReadFile(string fileName, byte[] buffer, out int bytesRead, long offset, IDokanFileInfo info)
         {
-            bytesRead = 0;
-            return DokanResult.Error;
+            var unixPath = WindowsPathToUnixPath(fileName);
+
+            var toReadTotal = buffer.Count();
+
+            var alreadyRead = 0;
+
+            while (alreadyRead < toReadTotal)
+            {
+                var toRead = Math.Min(toReadTotal - alreadyRead, ReadOperationBlockSize);
+
+                var content = _clientService.GetFileContentAsync(unixPath, offset + alreadyRead, toRead).Result;
+                if (!content.IsExist || !content.IsInRagne)
+                {
+                    bytesRead = 0;
+                    return DokanResult.Error;
+                }
+
+                if (content.Content.Count == 0)
+                {
+                    // End of file
+                    break;
+                }
+
+                Array.Copy(content.Content.ToArray(), 0, buffer, alreadyRead, content.Content.Count);
+
+                alreadyRead += content.Content.Count;
+            }
+
+            bytesRead = alreadyRead;
+            return DokanResult.Success;
         }
 
         public NtStatus SetAllocationSize(string fileName, long length, IDokanFileInfo info)
