@@ -432,27 +432,49 @@ namespace longtooth.Vfs.Windows.Implementations.Implementations
 
         public NtStatus SetAllocationSize(string fileName, long length, IDokanFileInfo info)
         {
-            return DokanResult.Error;
+            return DokanResult.NotImplemented;
         }
 
         public NtStatus SetEndOfFile(string fileName, long length, IDokanFileInfo info)
         {
-            return DokanResult.Error;
+            return DokanResult.NotImplemented;
         }
 
         public NtStatus SetFileAttributes(string fileName, FileAttributes attributes, IDokanFileInfo info)
         {
-            return DokanResult.Error;
+            // Imitating success but doing nothing, it's because we need SetFileAttributes to be implemented for SetFileTime calls
+            return DokanResult.Success;
         }
 
         public NtStatus SetFileSecurity(string fileName, FileSystemSecurity security, AccessControlSections sections, IDokanFileInfo info)
         {
-            return DokanResult.Error;
+            return DokanResult.NotImplemented;
         }
 
         public NtStatus SetFileTime(string fileName, DateTime? creationTime, DateTime? lastAccessTime, DateTime? lastWriteTime, IDokanFileInfo info)
         {
-            return DokanResult.Error;
+            var unixPath = WindowsPathToUnixPath(fileName);
+
+            // Current times
+            var currentItem = _clientService.GetDirectoryContentAsync(unixPath).Result;
+            if (!currentItem.IsExist)
+            {
+                return DokanResult.Error;
+            }
+
+            var newAtime = lastAccessTime ?? currentItem.Atime;
+            var newCtime = creationTime ?? currentItem.Ctime;
+            var newMtime = lastWriteTime ?? currentItem.Mtime;
+
+            var result = _clientService.SetTimestampsAsync(unixPath, newAtime, newCtime, newMtime).Result;
+            if (!result)
+            {
+                return DokanResult.Error;
+            }
+
+            InvalidateCurrentDirectoryCachedContent();
+
+            return DokanResult.Success;
         }
 
         public NtStatus UnlockFile(string fileName, long offset, long length, IDokanFileInfo info)
