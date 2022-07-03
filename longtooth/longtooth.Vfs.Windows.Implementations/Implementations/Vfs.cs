@@ -313,7 +313,7 @@ namespace longtooth.Vfs.Windows.Implementations.Implementations
 
         public NtStatus FlushFileBuffers(string fileName, IDokanFileInfo info)
         {
-            return DokanResult.Error;
+            return DokanResult.NotImplemented;
         }
 
         public NtStatus GetDiskFreeSpace(out long freeBytesAvailable, out long totalNumberOfBytes, out long totalNumberOfFreeBytes, IDokanFileInfo info)
@@ -358,7 +358,7 @@ namespace longtooth.Vfs.Windows.Implementations.Implementations
         public NtStatus GetFileSecurity(string fileName, out FileSystemSecurity security, AccessControlSections sections, IDokanFileInfo info)
         {
             security = null;
-            return DokanResult.Error;
+            return DokanResult.NotImplemented;
         }
 
         public NtStatus GetVolumeInformation(out string volumeLabel, out FileSystemFeatures features, out string fileSystemName, out uint maximumComponentLength, IDokanFileInfo info)
@@ -501,7 +501,7 @@ namespace longtooth.Vfs.Windows.Implementations.Implementations
 
             while (alreadyWritten < toWriteTotal)
             {
-                var toWrite = Math.Min(toWriteTotal - alreadyWritten, ReadOperationBlockSize);
+                var toWrite = Math.Min(toWriteTotal - alreadyWritten, WriteOperationBlockSize);
 
                 if (toWrite == 0)
                 {
