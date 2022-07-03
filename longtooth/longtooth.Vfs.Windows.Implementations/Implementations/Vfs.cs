@@ -30,7 +30,11 @@ namespace longtooth.Vfs.Windows.Implementations.Implementations
         /// Reasonable read operation block size. Check Constants.MaxPacketSize when setting it.
         /// </summary>
         private const int ReadOperationBlockSize = 1000 * 1024;
-        //private const int ReadOperationBlockSize = 10;
+
+        /// <summary>
+        /// Reasonable write operation block size. Check Constants.MaxPacketSize when setting it.
+        /// </summary>
+        private const int WriteOperationBlockSize = 1000 * 1024;
 
         private IClientService _clientService;
 
@@ -489,8 +493,43 @@ namespace longtooth.Vfs.Windows.Implementations.Implementations
 
         public NtStatus WriteFile(string fileName, byte[] buffer, out int bytesWritten, long offset, IDokanFileInfo info)
         {
-            bytesWritten = 0;
-            return DokanResult.Error;
+            var unixPath = WindowsPathToUnixPath(fileName);
+
+            var toWriteTotal = buffer.Count();
+
+            var alreadyWritten = 0;
+
+            while (alreadyWritten < toWriteTotal)
+            {
+                var toWrite = Math.Min(toWriteTotal - alreadyWritten, ReadOperationBlockSize);
+
+                if (toWrite == 0)
+                {
+                    // End of file
+                    break;
+                }
+
+                var bufferToWrite = new byte[toWrite];
+                Array.Copy(buffer, alreadyWritten, bufferToWrite, 0, toWrite);
+
+                var result = _clientService.UpdateFileContentAsync(unixPath, (ulong)(alreadyWritten + offset), bufferToWrite).Result;
+                if (!result.IsSuccessful)
+                {
+                    bytesWritten = 0;
+                    return DokanResult.Error;
+                }
+
+                if (result.BytesWritten != toWrite)
+                {
+                    bytesWritten = 0;
+                    return DokanResult.Error;
+                }
+
+                alreadyWritten += result.BytesWritten;
+            }
+
+            bytesWritten = alreadyWritten;
+            return DokanResult.Success;
         }
 
         private void UpdateCurrentDirectory(string path)
