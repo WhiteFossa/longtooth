@@ -17,8 +17,7 @@ using longtooth.Common.Abstractions.Interfaces.ClientService;
 using longtooth.Common.Abstractions.Interfaces.DataCompressor;
 using longtooth.Common.Implementations.ClientService;
 using longtooth.Common.Implementations.DataCompressor;
-using longtooth.Vfs.Linux.Abstractions.Interfaces;
-using longtooth.Vfs.Linux.Implementations.Implementations;
+
 
 namespace longtooth.Desktop
 {
@@ -61,8 +60,9 @@ namespace longtooth.Desktop
             services.AddSingleton<ICommandToServerHeaderGenerator, CommandToServerHeaderGenerator>();
             services.AddSingleton<IClientSideMessagesProcessor, ClientSideMessagesProcessor>();
             services.AddSingleton<IDataCompressor, DataCompressor>();
-            services.AddSingleton<IVfsManager, VfsManager>();
+            services.AddSingleton<longtooth.Vfs.Linux.Abstractions.Interfaces.IVfsManager, longtooth.Vfs.Linux.Implementations.Implementations.VfsManager>();
             services.AddSingleton<IClientService, ClientService>();
+            services.AddSingleton<longtooth.Vfs.Windows.Abstractions.Interfaces.IVfsManager, longtooth.Vfs.Windows.Implementations.Implementations.VfsManager>();
             return services;
         }
 

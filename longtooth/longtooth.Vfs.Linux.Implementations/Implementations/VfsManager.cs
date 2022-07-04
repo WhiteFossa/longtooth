@@ -40,10 +40,11 @@ namespace longtooth.Vfs.Linux.Implementations.Implementations
                 throw new InvalidOperationException("FUSE dependencies aren't met!");
             }
 
+            _localMountpoint = localPath;
+
             _fuseThread = new Thread(new ThreadStart(FuseMountThreadRunAsync));
             _fuseThread.Start();
 
-            _localMountpoint = localPath;
             _isMounted = true;
         }
 

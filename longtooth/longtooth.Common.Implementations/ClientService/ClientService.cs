@@ -1,9 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using longtooth.Client.Abstractions.Interfaces;
 using longtooth.Common.Abstractions.DTOs;
 using longtooth.Common.Abstractions.DTOs.ClientService;
@@ -11,8 +5,12 @@ using longtooth.Common.Abstractions.DTOs.Responses;
 using longtooth.Common.Abstractions.Enums;
 using longtooth.Common.Abstractions.Interfaces.ClientService;
 using longtooth.Common.Abstractions.Interfaces.MessagesProcessor;
-using longtooth.Common.Implementations.Helpers;
 using longtooth.Protocol.Abstractions.Interfaces;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace longtooth.Common.Implementations.ClientService
 {
@@ -24,64 +22,87 @@ namespace longtooth.Common.Implementations.ClientService
         private readonly IClient _client;
 
         /// <summary>
-        /// To wait for callbacks
-        /// </summary>
-        private AutoResetEvent _stopWaitHandle = new AutoResetEvent(false);
-
-        /// <summary>
         /// Last mountpoints enumeration result
         /// </summary>
         private IReadOnlyCollection<MountpointDto> _mountpoints;
+        private AutoResetEvent _getMountpointsWaitHandle = new AutoResetEvent(false);
 
         /// <summary>
         /// Last get directory content call result
         /// </summary>
         private GetDirectoryContentRunResult _directoryContent;
+        private AutoResetEvent _getDirectoryContentWaitHandle = new AutoResetEvent(false);
 
         /// <summary>
         /// Result of last download command
         /// </summary>
         private DownloadFileRunResult _downloadFileRunResult;
+        private AutoResetEvent _downloadFileWaitHandle = new AutoResetEvent(false);
 
         /// <summary>
         /// Result of last "get file info" call
         /// </summary>
         private GetFileInfoRunResult _getFileInfoRunResult;
+        private AutoResetEvent _getFileInfoWaitHandle = new AutoResetEvent(false);
 
         /// <summary>
         /// Result of last "create directory" call
         /// </summary>
         private CreateDirectoryRunResult _createDirectoryRunResult;
+        private AutoResetEvent _createDirectoryWaitHandle = new AutoResetEvent(false);
 
         /// <summary>
         /// Result of last "delete directory" call
         /// </summary>
         private DeleteDirectoryRunResult _deleteDirectoryRunResult;
+        private AutoResetEvent _deleteDirectoryWaitHandle = new AutoResetEvent(false);
 
         /// <summary>
         /// Result of last "create file" call
         /// </summary>
         private CreateFileRunResult _createFileRunResult;
+        private AutoResetEvent _createFileWaitHandle = new AutoResetEvent(false);
 
         /// <summary>
         /// Result of last "delete file" call
         /// </summary>
         private DeleteFileRunResult _deleteFileRunResult;
+        private AutoResetEvent _deleteFileWaitHandle = new AutoResetEvent(false);
 
         /// <summary>
         /// Result of last "update file" call
         /// </summary>
         private UpdateFileRunResult _updateFileRunResult;
+        private AutoResetEvent _updateFileWaitHandle = new AutoResetEvent(false);
 
         /// <summary>
         /// Result of last "truncate file" call
         /// </summary>
         private TruncateFileRunResult _truncateFileRunResult;
+        private AutoResetEvent _truncateFileWaitHandle = new AutoResetEvent(false);
 
         /// <summary>
-        /// Reult of "set timestamp" command
+        /// Result of "set timestamp" command
         /// </summary>
         private SetTimestampsRunResult _setTimestampsRunResult;
+        private AutoResetEvent _setTimestampsWaitHandle = new AutoResetEvent(false);
+
+        /// <summary>
+        /// Result of "move file/directory" command
+        /// </summary>
+        private MoveRunResult _moveRunResult;
+        private AutoResetEvent _moveWaitHandle = new AutoResetEvent(false);
+
+        /// <summary>
+        /// Result of "get disk space" command
+        /// </summary>
+        private GetDiskSpaceRunResult _getDiskSpaceRunResult;
+        private AutoResetEvent _getDiskSpaceWaitHandle = new AutoResetEvent(false);
+
+        /// <summary>
+        /// To make multithreaded calls synchronous single-threaded
+        /// </summary>
+        private AutoResetEvent _syncWaitHandle = new AutoResetEvent(true);
 
         public ClientService(IClientSideMessagesProcessor clienSideMessagesProcessor,
             ICommandToServerHeaderGenerator commandGenerator,
@@ -100,61 +121,73 @@ namespace longtooth.Common.Implementations.ClientService
             var response = _clientSideMessagesProcessor.ParseMessage(decodedMessage);
             var runResult = await response.RunAsync();
 
+            _syncWaitHandle.Set();
+
             switch (runResult.ResponseToCommand)
             {
                 case CommandType.GetMountpoints:
                     _mountpoints = (runResult as GetMountpointsRunResult).Mountpoints;
-                    _stopWaitHandle.Set();
+                    _getMountpointsWaitHandle.Set();
                     break;
 
                 case CommandType.GetDirectoryContent:
                     _directoryContent = runResult as GetDirectoryContentRunResult;
-                    _stopWaitHandle.Set();
+                    _getDirectoryContentWaitHandle.Set();
                     break;
 
                 case CommandType.DownloadFile:
                     _downloadFileRunResult = runResult as DownloadFileRunResult;
-                    _stopWaitHandle.Set();
+                    _downloadFileWaitHandle.Set();
                     break;
 
                 case CommandType.GetFileInfo:
                     _getFileInfoRunResult = runResult as GetFileInfoRunResult;
-                    _stopWaitHandle.Set();
+                    _getFileInfoWaitHandle.Set();
                     break;
 
                 case CommandType.CreateDirectory:
                     _createDirectoryRunResult = runResult as CreateDirectoryRunResult;
-                    _stopWaitHandle.Set();
+                    _createDirectoryWaitHandle.Set();
                     break;
 
                 case CommandType.DeleteDirectory:
                     _deleteDirectoryRunResult = runResult as DeleteDirectoryRunResult;
-                    _stopWaitHandle.Set();
+                    _deleteDirectoryWaitHandle.Set();
                     break;
 
                 case CommandType.CreateFile:
                     _createFileRunResult = runResult as CreateFileRunResult;
-                    _stopWaitHandle.Set();
+                    _createFileWaitHandle.Set();
                     break;
 
                 case CommandType.DeleteFile:
                     _deleteFileRunResult = runResult as DeleteFileRunResult;
-                    _stopWaitHandle.Set();
+                    _deleteFileWaitHandle.Set();
                     break;
 
                 case CommandType.UpdateFile:
                     _updateFileRunResult = runResult as UpdateFileRunResult;
-                    _stopWaitHandle.Set();
+                    _updateFileWaitHandle.Set();
                     break;
 
                 case CommandType.TruncateFile:
                     _truncateFileRunResult = runResult as TruncateFileRunResult;
-                    _stopWaitHandle.Set();
+                    _truncateFileWaitHandle.Set();
                     break;
 
                 case CommandType.SetTimestamps:
                     _setTimestampsRunResult = runResult as SetTimestampsRunResult;
-                    _stopWaitHandle.Set();
+                    _setTimestampsWaitHandle.Set();
+                    break;
+
+                case CommandType.Move:
+                    _moveRunResult = runResult as MoveRunResult;
+                    _moveWaitHandle.Set();
+                    break;
+
+                case CommandType.GetDiskSpace:
+                    _getDiskSpaceRunResult = runResult as GetDiskSpaceRunResult;
+                    _getDiskSpaceWaitHandle.Set();
                     break;
 
                 default:
@@ -164,6 +197,9 @@ namespace longtooth.Common.Implementations.ClientService
 
         private async Task PrepareAndSendCommand(IReadOnlyCollection<byte> commandMessage)
         {
+            _syncWaitHandle.WaitOne();
+            _syncWaitHandle.Reset();
+
             var encodedMessage = _messagesProcessor.PrepareMessageToSend(new List<byte>(commandMessage));
             await _client.SendAsync(encodedMessage);
         }
@@ -192,7 +228,7 @@ namespace longtooth.Common.Implementations.ClientService
             {
                 // Enumerating mountpoints
                 await PrepareAndSendCommand(_commandGenerator.GenerateGetMountpointsCommand());
-                _stopWaitHandle.WaitOne();
+                _getMountpointsWaitHandle.WaitOne();
 
                 var content = _mountpoints
                     .Select(mp => new FilesystemItemDto(true,
@@ -220,7 +256,7 @@ namespace longtooth.Common.Implementations.ClientService
             // Ordinary directory or file, trying to get directory first
             await PrepareAndSendCommand(
                 _commandGenerator.GenerateGetDirectoryContentCommand(LocalPathToServerSidePath(path)));
-            _stopWaitHandle.WaitOne();
+            _getDirectoryContentWaitHandle.WaitOne();
 
             if (_directoryContent.DirectoryContent.IsSuccessful)
             {
@@ -281,7 +317,7 @@ namespace longtooth.Common.Implementations.ClientService
         {
             await PrepareAndSendCommand(
                 _commandGenerator.GetFileInfoCommand(LocalPathToServerSidePath(path)));
-            _stopWaitHandle.WaitOne();
+            _getFileInfoWaitHandle.WaitOne();
 
             var fileInfo = _getFileInfoRunResult.GetFileInfoResult;
 
@@ -309,7 +345,7 @@ namespace longtooth.Common.Implementations.ClientService
         {
             await PrepareAndSendCommand(
                 _commandGenerator.GenerateDownloadCommand(LocalPathToServerSidePath(path), offset, (int)maxLength));
-            _stopWaitHandle.WaitOne();
+            _downloadFileWaitHandle.WaitOne();
 
             if (!_downloadFileRunResult.File.IsSuccessful)
             {
@@ -324,7 +360,7 @@ namespace longtooth.Common.Implementations.ClientService
         {
             await PrepareAndSendCommand(
                 _commandGenerator.CreateDirectoryCommand(LocalPathToServerSidePath(path)));
-            _stopWaitHandle.WaitOne();
+            _createDirectoryWaitHandle.WaitOne();
 
             return _createDirectoryRunResult.CreateDirectoryResult.IsSuccessful;
         }
@@ -333,7 +369,7 @@ namespace longtooth.Common.Implementations.ClientService
         {
             await PrepareAndSendCommand(
                 _commandGenerator.DeleteDirectoryCommand(LocalPathToServerSidePath(path)));
-            _stopWaitHandle.WaitOne();
+            _deleteDirectoryWaitHandle.WaitOne();
 
             return _deleteDirectoryRunResult.DeleteDirectoryResult.IsSuccessful;
         }
@@ -342,7 +378,7 @@ namespace longtooth.Common.Implementations.ClientService
         {
             await PrepareAndSendCommand(
                 _commandGenerator.CreateFileCommand(LocalPathToServerSidePath(path)));
-            _stopWaitHandle.WaitOne();
+            _createFileWaitHandle.WaitOne();
 
             return _createFileRunResult.CreateFileResult.IsSuccessful;
         }
@@ -351,7 +387,7 @@ namespace longtooth.Common.Implementations.ClientService
         {
             await PrepareAndSendCommand(
                 _commandGenerator.DeleteFileCommand(LocalPathToServerSidePath(path)));
-            _stopWaitHandle.WaitOne();
+            _deleteFileWaitHandle.WaitOne();
 
             return _deleteFileRunResult.DeleteFileResult.IsSuccessful;
         }
@@ -360,7 +396,7 @@ namespace longtooth.Common.Implementations.ClientService
         {
             await PrepareAndSendCommand(
                 _commandGenerator.UpdateFileCommand(LocalPathToServerSidePath(path), (long)offset, buffer.ToArray()));
-            _stopWaitHandle.WaitOne();
+            _updateFileWaitHandle.WaitOne();
 
             return _updateFileRunResult.UpdateFileResult;
         }
@@ -369,7 +405,7 @@ namespace longtooth.Common.Implementations.ClientService
         {
             await PrepareAndSendCommand(
                 _commandGenerator.TruncateFileCommand(LocalPathToServerSidePath(path), newSize));
-            _stopWaitHandle.WaitOne();
+            _truncateFileWaitHandle.WaitOne();
 
             return _truncateFileRunResult.TruncateFileResult.IsSuccessful;
         }
@@ -378,9 +414,27 @@ namespace longtooth.Common.Implementations.ClientService
         {
             await PrepareAndSendCommand(
                 _commandGenerator.SetTimestampsCommand(LocalPathToServerSidePath(path), atime, ctime, mtime));
-            _stopWaitHandle.WaitOne();
+            _setTimestampsWaitHandle.WaitOne();
 
             return _setTimestampsRunResult.SetTimestampsResult.IsSuccessful;
+        }
+
+        public async Task<bool> MoveAsync(string from, string to, bool isOverwrite)
+        {
+            await PrepareAndSendCommand(
+                _commandGenerator.MoveCommand(LocalPathToServerSidePath(from), LocalPathToServerSidePath(to), isOverwrite));
+            _moveWaitHandle.WaitOne();
+
+            return _moveRunResult.MoveResult.IsSuccessful;
+        }
+
+        public async Task<GetDiskSpaceResultDto> GetDiskSpaceAsync(string path)
+        {
+            await PrepareAndSendCommand(
+                _commandGenerator.GetDiskSpaceCommand(LocalPathToServerSidePath(path)));
+            _getDiskSpaceWaitHandle.WaitOne();
+
+            return _getDiskSpaceRunResult.GetDiskSpaceResult;
         }
     }
 }

@@ -1,27 +1,18 @@
-﻿using Avalonia.Controls;
-using longtooth.Client.Abstractions.DTOs;
+﻿using longtooth.Client.Abstractions.DTOs;
 using longtooth.Client.Abstractions.Interfaces;
-using longtooth.Common.Abstractions.DTOs;
-using longtooth.Common.Abstractions.DTOs.Responses;
 using longtooth.Common.Abstractions.Enums;
+using longtooth.Common.Abstractions.Interfaces.ClientService;
 using longtooth.Common.Abstractions.Interfaces.Logger;
 using longtooth.Common.Abstractions.Interfaces.MessagesProcessor;
 using longtooth.Common.Abstractions.Models;
-using longtooth.Common.Implementations.Helpers;
-using longtooth.Desktop.DTOs;
 using longtooth.Protocol.Abstractions.Interfaces;
-using longtooth.Vfs.Linux.Abstractions.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using ReactiveUI;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.IO;
-using System.Linq;
 using System.Net;
 using System.Reactive;
 using System.Threading.Tasks;
-using longtooth.Common.Abstractions.Interfaces.ClientService;
 
 namespace longtooth.Desktop.ViewModels
 {
@@ -34,13 +25,8 @@ namespace longtooth.Desktop.ViewModels
         private string _serverPort;
         private string _consoleText;
         private int _consoleCaretIndex;
-        private ObservableCollection<MountpointDto> _mountpoints = new();
-        private ObservableCollection<DirectoryContentItemDto> _directoryContent = new();
-        private string _currentDirectory;
-        private FileDto _currentFile;
-        private double _progressValue;
-        private string _newDirectoryName;
         private string _localMountpoint;
+        private string _diskLetter;
 
         /// <summary>
         /// Server IP
@@ -79,66 +65,18 @@ namespace longtooth.Desktop.ViewModels
         }
 
         /// <summary>
-        /// Mountpoints, exported by server
-        /// </summary>
-        public ObservableCollection<MountpointDto> Mountpoints
-        {
-            get => _mountpoints;
-            set => this.RaiseAndSetIfChanged(ref _mountpoints, value);
-        }
-
-        /// <summary>
-        /// Directories and files of current level
-        /// </summary>
-        public ObservableCollection<DirectoryContentItemDto> DirectoryContent
-        {
-            get => _directoryContent;
-            set => this.RaiseAndSetIfChanged(ref _directoryContent, value);
-        }
-
-        /// <summary>
-        /// Current directory
-        /// </summary>
-        public string CurrentDirectory
-        {
-            get => _currentDirectory;
-            set => this.RaiseAndSetIfChanged(ref _currentDirectory, value);
-        }
-
-        /// <summary>
-        /// Current file
-        /// </summary>
-        public FileDto CurrentFile
-        {
-            get => _currentFile;
-            set => this.RaiseAndSetIfChanged(ref _currentFile, value);
-        }
-
-        /// <summary>
-        /// Current progressbar value [0-1]
-        /// </summary>
-        public double ProgressValue
-        {
-            get => _progressValue;
-            set => this.RaiseAndSetIfChanged(ref _progressValue, value);
-        }
-
-        /// <summary>
-        /// New directory name
-        /// </summary>
-        public string NewDirectoryName
-        {
-            get => _newDirectoryName;
-            set => this.RaiseAndSetIfChanged(ref _newDirectoryName, value);
-        }
-
-        /// <summary>
         /// FUSE will be mounted here
         /// </summary>
         public string LocalMountpoint
         {
             get => _localMountpoint;
             set => this.RaiseAndSetIfChanged(ref _localMountpoint, value);
+        }
+
+        public string DiskLetter
+        {
+            get => _diskLetter;
+            set => this.RaiseAndSetIfChanged(ref _diskLetter, value);
         }
 
         #endregion
@@ -156,44 +94,9 @@ namespace longtooth.Desktop.ViewModels
         public ReactiveCommand<Unit, Unit> DisconnectAsyncCommand { get; }
 
         /// <summary>
-        /// Ping server
-        /// </summary>
-        public ReactiveCommand<Unit, Unit> PingAsyncCommand { get; }
-
-        /// <summary>
         /// Disconnect from server gracefully
         /// </summary>
         public ReactiveCommand<Unit, Unit> GracefulDisconnectAsyncCommand { get; }
-
-        /// <summary>
-        /// Command to list mountpoints
-        /// </summary>
-        public ReactiveCommand<Unit, Unit> GetMountpointsAsyncCommand { get; }
-
-        /// <summary>
-        /// Download current file
-        /// </summary>
-        public ReactiveCommand<Unit, Unit> DownloadFileAsyncCommand { get; }
-
-        /// <summary>
-        /// Upload a file
-        /// </summary>
-        public ReactiveCommand<Unit, Unit> UploadFileAsyncCommand { get; }
-
-        /// <summary>
-        /// Delete current file
-        /// </summary>
-        public ReactiveCommand<Unit, Unit> DeleteFileAsyncCommand { get; }
-
-        /// <summary>
-        /// Create new directory
-        /// </summary>
-        public ReactiveCommand<Unit, Unit> CreateDirectoryAsyncCommand { get; }
-
-        /// <summary>
-        /// Delete current directory
-        /// </summary>
-        public ReactiveCommand<Unit, Unit> DeleteDirectoryAsyncCommand { get; }
 
         /// <summary>
         /// Mount FUSE
@@ -204,6 +107,16 @@ namespace longtooth.Desktop.ViewModels
         /// Umount FUSE
         /// </summary>
         public ReactiveCommand<Unit, Unit> UnmountFuseAsyncCommand { get; }
+
+        /// <summary>
+        /// Mount Dokan
+        /// </summary>
+        public ReactiveCommand<Unit, Unit> MountDokanAsyncCommand { get; }
+
+        /// <summary>
+        /// Unmount Dokan
+        /// </summary>
+        public ReactiveCommand<Unit, Unit> UnmountDokanAsyncCommand { get; }
 
         #endregion
 
@@ -217,19 +130,11 @@ namespace longtooth.Desktop.ViewModels
         private readonly IMessagesProcessor _messagesProcessor;
         private readonly ICommandToServerHeaderGenerator _commandGenerator;
         private readonly IClientSideMessagesProcessor _clientSideMessagesProcessor;
-        private readonly IVfsManager _vfs;
+        private readonly longtooth.Vfs.Linux.Abstractions.Interfaces.IVfsManager _vfsLinux;
         private readonly IClientService _clientService;
+        private readonly longtooth.Vfs.Windows.Abstractions.Interfaces.IVfsManager _vfsWindows;
 
-        private const int DownloadChunkSize = 1000000;
-        private long _alreadyDownloaded;
-        private List<byte> _downloadedContent;
-
-        private const int UploadChunkSize = 1000000;
-        private string _pathToUpload;
-        private long _alreadyUploaded;
-        private List<byte> _contentToUpload;
-
-        public MainWindowViewModel(MainModel model) : base()
+        public MainWindowViewModel(MainModel model)
         {
             _mainModel = model ?? throw new ArgumentNullException(nameof(model));
 
@@ -245,7 +150,8 @@ namespace longtooth.Desktop.ViewModels
             _commandGenerator = Program.Di.GetService<ICommandToServerHeaderGenerator>();
             _clientSideMessagesProcessor = Program.Di.GetService<IClientSideMessagesProcessor>();
 
-            _vfs = Program.Di.GetService<IVfsManager>();
+            _vfsLinux = Program.Di.GetService<longtooth.Vfs.Linux.Abstractions.Interfaces.IVfsManager>();
+            _vfsWindows = Program.Di.GetService<longtooth.Vfs.Windows.Abstractions.Interfaces.IVfsManager>();
 
             _clientService = Program.Di.GetService<IClientService>();
 
@@ -253,25 +159,15 @@ namespace longtooth.Desktop.ViewModels
 
             #region Initialization
 
-            //_messagesProcessor.SetupOnNewMessageDelegate(OnNewMessageAsync);
-            _messagesProcessor.SetupOnNewMessageDelegate(_clientService.OnNewMessageAsync);
+            _messagesProcessor.SetupOnNewMessageDelegate(OnNewMessageAsync);
 
             // TODO : Remove me, debug
             LocalMountpoint = @"/home/fossa/longtooth-mountpoint";
-
+            DiskLetter = @"X";
+            
             _logger.SetLoggingFunction(AddLineToConsole);
 
-            ProgressValue = 0;
-
             ServerPort = "5934";
-
-            CurrentDirectory = @"N/A";
-            CurrentFile = new FileDto()
-            {
-                Name = @"N/A",
-                FullPath = "",
-                Size = 0
-            };
 
             #endregion
 
@@ -279,16 +175,14 @@ namespace longtooth.Desktop.ViewModels
 
             ConnectAsyncCommand = ReactiveCommand.Create(ConnectAsync);
             DisconnectAsyncCommand = ReactiveCommand.Create(DisconnectAsync);
-            PingAsyncCommand = ReactiveCommand.Create(PingAsync);
+
             GracefulDisconnectAsyncCommand = ReactiveCommand.Create(GracefulDisconnectAsync);
-            GetMountpointsAsyncCommand = ReactiveCommand.Create(GetMountpointsAsync);
-            DownloadFileAsyncCommand = ReactiveCommand.Create(DownloadFileAsync);
-            UploadFileAsyncCommand = ReactiveCommand.Create(UploadFileAsync);
-            DeleteFileAsyncCommand = ReactiveCommand.Create(DeleteFileAsync);
-            CreateDirectoryAsyncCommand = ReactiveCommand.Create(CreateDirectoryAsync);
-            DeleteDirectoryAsyncCommand = ReactiveCommand.Create(DeleteDirectoryAsync);
+
             MountFuseAsyncCommand = ReactiveCommand.Create(MountFuseAsync);
             UnmountFuseAsyncCommand = ReactiveCommand.Create(UnmountFuseAsync);
+
+            MountDokanAsyncCommand = ReactiveCommand.Create(MountDokanAsync);
+            UnmountDokanAsyncCommand = ReactiveCommand.Create(UnmountDokanAsync);
 
             #endregion
         }
@@ -327,7 +221,7 @@ namespace longtooth.Desktop.ViewModels
             ConsoleCaretIndex = ConsoleText.Length;
         }
 
-        private async void OnNewMessageAsync(IReadOnlyCollection<byte> decodedMessage)
+        private async Task OnNewMessageAsync(IReadOnlyCollection<byte> decodedMessage)
         {
             var response = _clientSideMessagesProcessor.ParseMessage(decodedMessage);
             var runResult = await response.RunAsync();
@@ -343,153 +237,9 @@ namespace longtooth.Desktop.ViewModels
                     await _logger.LogInfoAsync("Disconnected");
                     break;
 
-                case CommandType.GetMountpoints:
-                    var getMountpointsResponse = runResult as GetMountpointsRunResult;
-                    Mountpoints = new ObservableCollection<MountpointDto>(getMountpointsResponse.Mountpoints);
-                    break;
-
-                case CommandType.GetDirectoryContent:
-                    var getDirectoryContentResponse = runResult as GetDirectoryContentRunResult;
-                    if (!getDirectoryContentResponse.DirectoryContent.IsSuccessful)
-                    {
-                        await _logger.LogErrorAsync("Failed to get directory content!");
-                        return;
-                    }
-
-                    DirectoryContent = new ObservableCollection<DirectoryContentItemDto>(getDirectoryContentResponse.DirectoryContent.Items);
-                    break;
-
-                case CommandType.DownloadFile:
-                    var fileResponse = runResult as DownloadFileRunResult;
-                    if (!fileResponse.File.IsSuccessful)
-                    {
-                        await _logger.LogErrorAsync("Failed download file!");
-                        return;
-                    }
-
-                    _alreadyDownloaded += (int)fileResponse.File.Length;
-
-                    ProgressValue = _alreadyDownloaded / (double)CurrentFile.Size;
-
-                    _downloadedContent.AddRange(fileResponse.File.Content);
-
-                    if (_alreadyDownloaded == CurrentFile.Size)
-                    {
-                        // Done
-                        ProgressValue = 0;
-                        File.WriteAllBytes(CurrentFile.Name, _downloadedContent.ToArray());
-                    }
-                    else
-                    {
-                        // Next chunk
-                        var chunkSize = CurrentFile.Size - _alreadyDownloaded;
-                        if (chunkSize > DownloadChunkSize)
-                        {
-                            chunkSize = DownloadChunkSize;
-                        }
-
-                        await PrepareAndSendCommand(_commandGenerator.GenerateDownloadCommand(CurrentFile.FullPath,
-                            _alreadyDownloaded, (int)chunkSize));
-                    }
-
-                    break;
-
-                case CommandType.CreateFile:
-                    var createFileResponse = runResult as CreateFileRunResult;
-                    if (!createFileResponse.CreateFileResult.IsSuccessful)
-                    {
-                        await _logger.LogErrorAsync("Failed to create file!");
-                        return;
-                    }
-
-                    await _logger.LogInfoAsync("File created, going to upload...");
-
-                    // Uploading file
-                    _alreadyUploaded = 0;
-                    ProgressValue = 0;
-                    if (_contentToUpload.Count > UploadChunkSize)
-                    {
-                        // Multichunk
-                        var uploadBuffer = _contentToUpload.GetRange(0, UploadChunkSize);
-                        await PrepareAndSendCommand(_commandGenerator.UpdateFileCommand(_pathToUpload, 0, uploadBuffer.ToArray()));
-                    }
-                    else
-                    {
-                        // Single chunk
-                        await PrepareAndSendCommand(_commandGenerator.UpdateFileCommand(_pathToUpload, 0, _contentToUpload.ToArray()));
-                    }
-
-                    break;
-
-                case CommandType.UpdateFile:
-                    var updateFileResponse = runResult as UpdateFileRunResult;
-                    if (!updateFileResponse.UpdateFileResult.IsSuccessful)
-                    {
-                        await _logger.LogErrorAsync("Failed to update file!");
-                        return;
-                    }
-
-                    _alreadyUploaded += (int)updateFileResponse.UpdateFileResult.BytesWritten;
-                    ProgressValue = _alreadyUploaded / (double)_contentToUpload.Count;
-
-                    if (_alreadyUploaded == _contentToUpload.Count)
-                    {
-                        // Done
-                        ProgressValue = 0;
-                        await _logger.LogInfoAsync("File updated!");
-                    }
-                    else
-                    {
-                        var uploadBytesCount = _contentToUpload.Count - _alreadyUploaded;
-                        if (uploadBytesCount > UploadChunkSize)
-                        {
-                            uploadBytesCount = UploadChunkSize;
-                        }
-
-                        var uploadBuffer = _contentToUpload.GetRange((int)_alreadyUploaded, (int)uploadBytesCount);
-                        await PrepareAndSendCommand(_commandGenerator.UpdateFileCommand(_pathToUpload, _alreadyUploaded, uploadBuffer.ToArray()));
-                    }
-
-                    break;
-
-                case CommandType.DeleteFile:
-                    var deleteFileResponse = runResult as DeleteFileRunResult;
-
-                    if (!deleteFileResponse.DeleteFileResult.IsSuccessful)
-                    {
-                        await _logger.LogErrorAsync("Failed to delete file");
-                    }
-
-                    await _logger.LogInfoAsync("File successfully deleted");
-
-                    break;
-
-                case CommandType.DeleteDirectory:
-                    var deleteDirectoryResponse = runResult as DeleteDirectoryRunResult;
-
-                    if (!deleteDirectoryResponse.DeleteDirectoryResult.IsSuccessful)
-                    {
-                        await _logger.LogErrorAsync("Failed to delete directory");
-                    }
-
-                    await _logger.LogInfoAsync("Directory successfully deleted");
-
-                    break;
-
-                case CommandType.CreateDirectory:
-                    var createDirectoryResponse = runResult as CreateDirectoryRunResult;
-
-                    if (!createDirectoryResponse.CreateDirectoryResult.IsSuccessful)
-                    {
-                        await _logger.LogErrorAsync("Failed to create directory");
-                    }
-
-                    await _logger.LogInfoAsync("Directory successfully created");
-
-                    break;
-
                 default:
-                    throw new InvalidOperationException("Incorrect command type in response!");
+                    await _clientService.OnNewMessageAsync(decodedMessage);
+                    break;
             }
         }
 
@@ -523,160 +273,11 @@ namespace longtooth.Desktop.ViewModels
             await PrepareAndSendCommand(exitCommandMessage);
         }
 
-        /// <summary>
-        /// Get mountpoints list
-        /// </summary>
-        private async void GetMountpointsAsync()
-        {
-            var getMountpointsMessage = _commandGenerator.GenerateGetMountpointsCommand();
-
-            await PrepareAndSendCommand(getMountpointsMessage);
-        }
-
-        /// <summary>
-        /// Mountpoint changed - need to display content for given mountpoint
-        /// </summary>
-        public async Task OnMountpointChangedAsync(string serverSidePath)
-        {
-            CurrentDirectory = serverSidePath;
-
-            var getDirectoryContentCommand = _commandGenerator.GenerateGetDirectoryContentCommand(CurrentDirectory);
-
-            await PrepareAndSendCommand(getDirectoryContentCommand);
-        }
-
-        /// <summary>
-        /// Called when user clicks on file or directory
-        /// </summary>
-        public async Task OnDirectoryContentCellChangedAsync(DirectoryContentItemDto directoryItem)
-        {
-            if (!directoryItem.IsDirectory)
-            {
-                // File
-                CurrentFile = new FileDto()
-                {
-                    Name = directoryItem.Name,
-                    FullPath = FilesHelper.AppendFilename(CurrentDirectory, directoryItem.Name),
-                    Size = directoryItem.Size
-                };
-                return;
-            }
-
-            // Directory
-            if (directoryItem.IsDirectory && directoryItem.Name.Equals(".."))
-            {
-                CurrentDirectory = FilesHelper.MoveUp(CurrentDirectory);
-            }
-            else
-            {
-                CurrentDirectory = FilesHelper.MoveDown(CurrentDirectory, directoryItem.Name);
-            }
-
-            var getDirectoryContentCommand = _commandGenerator.GenerateGetDirectoryContentCommand(CurrentDirectory);
-
-            await PrepareAndSendCommand(getDirectoryContentCommand);
-        }
-
-        /// <summary>
-        /// Download file
-        /// </summary>
-        private async void DownloadFileAsync()
-        {
-            if (CurrentFile.Name.Equals(@"N/A"))
-            {
-                return;
-            }
-
-            ProgressValue = 0;
-
-            _alreadyDownloaded = 0;
-            _downloadedContent = new List<byte>();
-
-            IReadOnlyCollection<byte> downloadCommand;
-
-            if (CurrentFile.Size > DownloadChunkSize)
-            {
-                // Multichunk download
-                downloadCommand = _commandGenerator.GenerateDownloadCommand(CurrentFile.FullPath, 0, DownloadChunkSize);
-            }
-            else
-            {
-                // Single chunk download
-                downloadCommand = _commandGenerator.GenerateDownloadCommand(CurrentFile.FullPath, 0, (int)CurrentFile.Size);
-            }
-
-            await PrepareAndSendCommand(downloadCommand);
-        }
-
-        /// <summary>
-        /// Upload file
-        /// </summary>
-        private async void UploadFileAsync()
-        {
-            var dialog = new OpenFileDialog();
-            dialog.Filters.Add(new FileDialogFilter() { Name = "Any file", Extensions = { "*" } });
-            dialog.AllowMultiple = false;
-
-            var dialogResult = await dialog.ShowAsync(Program.GetMainWindow());
-
-            if (dialogResult == null)
-            {
-                return;
-            }
-
-            var pathToFile = dialogResult.FirstOrDefault();
-            var filename = Path.GetFileName(pathToFile);
-
-            var remotePath = CurrentDirectory + $@"/{ filename }";
-
-            var content = File.ReadAllBytes(pathToFile);
-
-            _alreadyUploaded = 0;
-            _pathToUpload = remotePath;
-            _contentToUpload = content.ToList<byte>();
-
-            var createCommand = _commandGenerator.CreateFileCommand(remotePath);
-            await PrepareAndSendCommand(createCommand);
-        }
-
-        private async void DeleteFileAsync()
-        {
-            if (CurrentFile.Name == @"N/A")
-            {
-                return;
-            }
-
-            var deleteCommand = _commandGenerator.DeleteFileCommand(CurrentFile.FullPath);
-            await PrepareAndSendCommand(deleteCommand);
-        }
-
-        private async void DeleteDirectoryAsync()
-        {
-            if (CurrentDirectory == @"N/A")
-            {
-                return;
-            }
-
-            var deleteCommand = _commandGenerator.DeleteDirectoryCommand(CurrentDirectory);
-            await PrepareAndSendCommand(deleteCommand);
-        }
-
-        private async void CreateDirectoryAsync()
-        {
-            if (NewDirectoryName.Equals(string.Empty))
-            {
-                return;
-            }
-
-            var createDirectoryCommand = _commandGenerator.CreateDirectoryCommand(CurrentDirectory + @"/" + NewDirectoryName);
-            await PrepareAndSendCommand(createDirectoryCommand);
-        }
-
         private async void MountFuseAsync()
         {
             try
             {
-                await _vfs.MountAsync(LocalMountpoint);
+                await _vfsLinux.MountAsync(LocalMountpoint);
             }
             catch (Exception ex)
             {
@@ -686,7 +287,24 @@ namespace longtooth.Desktop.ViewModels
 
         private async void UnmountFuseAsync()
         {
-            await _vfs.UnmountAsync();
+            await _vfsLinux.UnmountAsync();
+        }
+
+        private async void MountDokanAsync()
+        {
+            try
+            {
+                await _vfsWindows.MountAsync(DiskLetter);
+            }
+            catch (Exception ex)
+            {
+                await _logger.LogErrorAsync(ex.Message);
+            }
+        }
+
+        private async void UnmountDokanAsync()
+        {
+            await _vfsWindows.UnmountAsync();
         }
     }
 }

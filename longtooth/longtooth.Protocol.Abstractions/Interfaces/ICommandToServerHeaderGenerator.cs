@@ -72,5 +72,15 @@ namespace longtooth.Protocol.Abstractions.Interfaces
         /// Generate "set timestamps" command
         /// </summary>
         IReadOnlyCollection<byte> SetTimestampsCommand(string path, DateTime atime, DateTime ctime, DateTime mtime);
+
+        /// <summary>
+        /// Generates "move file or directory" command.
+        /// </summary>
+        IReadOnlyCollection<byte> MoveCommand(string from, string to, bool isOverwrite);
+
+        /// <summary>
+        /// Generates "get disk space by path" command.
+        /// </summary>
+        IReadOnlyCollection<byte> GetDiskSpaceCommand(string path);
     }
 }

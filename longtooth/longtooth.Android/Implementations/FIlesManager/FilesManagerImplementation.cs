@@ -569,5 +569,69 @@ namespace longtooth.Droid.Implementations.FilesManager
 
             return new SetTimestampsResultDto(true);
         }
+
+        public async Task<MoveResultDto> MoveAsync(string from, string to, bool isOverwrite)
+        {
+            _ = from ?? throw new ArgumentNullException(nameof(from));
+            _ = to ?? throw new ArgumentNullException(nameof(to));
+
+            var fromDirectory = Path.GetDirectoryName(from);
+            var toDirectory = Path.GetDirectoryName(to);
+
+            if (!IsDirectoryBelongsToMountpoints(fromDirectory))
+            {
+                return new MoveResultDto(false);
+            }
+
+            if (!IsDirectoryBelongsToMountpoints(toDirectory))
+            {
+                return new MoveResultDto(false);
+            }
+
+            try
+            {
+                // Deleting existing stuff if needed
+                if (File.Exists(to) && isOverwrite)
+                {
+                    File.Delete(to);
+                }
+
+                if (Directory.Exists(to) && isOverwrite)
+                {
+                    Directory.Delete(to, true);
+                }
+
+                Directory.Move(from, to);
+
+                return new MoveResultDto(true);
+            }
+            catch(Exception)
+            {
+                return new MoveResultDto(false);
+            }
+        }
+
+        public async Task<GetDiskSpaceResultDto> GetDiskSpaceAsync(string path)
+        {
+            _ = path ?? throw new ArgumentNullException(nameof(path));
+            try
+            {
+                var normalizedPath = FilesHelper.NormalizePath(path);
+
+                if (!IsDirectoryBelongsToMountpoints(normalizedPath))
+                {
+                    // Non-exported directory
+                    return new GetDiskSpaceResultDto(false, 0, 0);
+                }
+
+                var diskInfo = new DriveInfo(normalizedPath);
+
+                return new GetDiskSpaceResultDto(true, diskInfo.TotalSize, diskInfo.TotalFreeSpace);
+            }
+            catch (Exception)
+            {
+                return new GetDiskSpaceResultDto(false, 0, 0);
+            }
+        }
     }
 }

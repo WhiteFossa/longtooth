@@ -53,5 +53,7 @@
     <ProjectReference Include="..\longtooth.Protocol.Implementations\longtooth.Protocol.Implementations.csproj" />
     <ProjectReference Include="..\longtooth.Vfs.Linux.Abstractions\longtooth.Vfs.Linux.Abstractions.csproj" />
     <ProjectReference Include="..\longtooth.Vfs.Linux.Implementations\longtooth.Vfs.Linux.Implementations.csproj" />
+    <ProjectReference Include="..\longtooth.Vfs.Windows.Abstractions\longtooth.Vfs.Windows.Abstractions.csproj" />
+    <ProjectReference Include="..\longtooth.Vfs.Windows.Implementations\longtooth.Vfs.Windows.Implementations.csproj" />
   </ItemGroup>
 </Project>

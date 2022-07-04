@@ -149,5 +149,27 @@ namespace longtooth.Protocol.Implementations.Implementations
 
             return EncodeCommand(setTimestampsCommand, null);
         }
+
+        public IReadOnlyCollection<byte> MoveCommand(string from, string to, bool isOverwrite)
+        {
+            var moveCommand = new MoveCommand(from,
+                to,
+                isOverwrite,
+                null,
+                null,
+                null);
+
+            return EncodeCommand(moveCommand, null);
+        }
+
+        public IReadOnlyCollection<byte> GetDiskSpaceCommand(string path)
+        {
+            var getDiskSpaceCommand = new GetDiskSpaceCommand(path,
+                null,
+                null,
+                null);
+
+            return EncodeCommand(getDiskSpaceCommand, null);
+        }
     }
 }

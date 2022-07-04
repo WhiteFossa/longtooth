@@ -69,5 +69,15 @@
         /// Set timestamps for file / directory
         /// </summary>
         SetTimestamps = 12,
+
+        /// <summary>
+        /// Move file / directory
+        /// </summary>
+        Move = 13,
+
+        /// <summary>
+        /// Get disk total / free space
+        /// </summary>
+        GetDiskSpace = 14,
     }
 }
