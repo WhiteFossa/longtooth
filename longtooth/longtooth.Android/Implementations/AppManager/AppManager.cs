@@ -9,6 +9,7 @@ namespace longtooth.Droid.Implementations.AppManager
         {
             var activity = MainActivity.Instance as Activity;
             activity.Finish();
+            System.Diagnostics.Process.GetCurrentProcess().Kill(); // Dirty, but 100% sure to quit
         }
     }
 }
