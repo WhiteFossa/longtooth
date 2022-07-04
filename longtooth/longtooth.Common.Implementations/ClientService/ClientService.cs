@@ -94,6 +94,12 @@ namespace longtooth.Common.Implementations.ClientService
         private AutoResetEvent _moveWaitHandle = new AutoResetEvent(false);
 
         /// <summary>
+        /// Result of "get disk space" command
+        /// </summary>
+        private GetDiskSpaceRunResult _getDiskSpaceRunResult;
+        private AutoResetEvent _getDiskSpaceWaitHandle = new AutoResetEvent(false);
+
+        /// <summary>
         /// To make multithreaded calls synchronous single-threaded
         /// </summary>
         private AutoResetEvent _syncWaitHandle = new AutoResetEvent(true);
@@ -177,6 +183,11 @@ namespace longtooth.Common.Implementations.ClientService
                 case CommandType.Move:
                     _moveRunResult = runResult as MoveRunResult;
                     _moveWaitHandle.Set();
+                    break;
+
+                case CommandType.GetDiskSpace:
+                    _getDiskSpaceRunResult = runResult as GetDiskSpaceRunResult;
+                    _getDiskSpaceWaitHandle.Set();
                     break;
 
                 default:
@@ -415,6 +426,15 @@ namespace longtooth.Common.Implementations.ClientService
             _moveWaitHandle.WaitOne();
 
             return _moveRunResult.MoveResult.IsSuccessful;
+        }
+
+        public async Task<GetDiskSpaceResultDto> GetDiskSpaceAsync(string path)
+        {
+            await PrepareAndSendCommand(
+                _commandGenerator.GetDiskSpaceCommand(LocalPathToServerSidePath(path)));
+            _getDiskSpaceWaitHandle.WaitOne();
+
+            return _getDiskSpaceRunResult.GetDiskSpaceResult;
         }
     }
 }

@@ -318,10 +318,23 @@ namespace longtooth.Vfs.Windows.Implementations.Implementations
 
         public NtStatus GetDiskFreeSpace(out long freeBytesAvailable, out long totalNumberOfBytes, out long totalNumberOfFreeBytes, IDokanFileInfo info)
         {
-            // TODO: Request disk space from phone
-            freeBytesAvailable = 512 * 1024 * 1024;
-            totalNumberOfBytes = 1024 * 1024 * 1024;
-            totalNumberOfFreeBytes = 512 * 1024 * 1024;
+            // Calculating space for the first mountpoint
+            var mountpoints = _clientService.GetDirectoryContentAsync(@"/").Result;
+            if (!mountpoints.IsExist || mountpoints.Content.Count == 0)
+            {
+                freeBytesAvailable = 0;
+                totalNumberOfBytes = 0;
+                totalNumberOfFreeBytes = 0;
+                return DokanResult.Error;
+            }
+
+            var firstMountpoint = mountpoints.Content.First();
+
+            var diskSpace = _clientService.GetDiskSpaceAsync(firstMountpoint.Path).Result;
+
+            freeBytesAvailable = diskSpace.FreeSpace;
+            totalNumberOfBytes = diskSpace.DiskSize;
+            totalNumberOfFreeBytes = diskSpace.FreeSpace;
 
             return DokanResult.Success;
         }

@@ -128,5 +128,12 @@ namespace longtooth.Protocol.Implementations.Implementations
 
             return EncodeResponse(moveResponse, null);
         }
+
+        public IReadOnlyCollection<byte> GenerateGetDiskSpaceResponse(GetDiskSpaceResultDto getDiskSpaceResultDto)
+        {
+            var getDiskSpaceResponce = new GetDiskSpaceResponse(getDiskSpaceResultDto);
+
+            return EncodeResponse(getDiskSpaceResponce, null);
+        }
     }
 }

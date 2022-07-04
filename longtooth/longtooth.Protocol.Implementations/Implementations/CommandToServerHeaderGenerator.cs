@@ -161,5 +161,15 @@ namespace longtooth.Protocol.Implementations.Implementations
 
             return EncodeCommand(moveCommand, null);
         }
+
+        public IReadOnlyCollection<byte> GetDiskSpaceCommand(string path)
+        {
+            var getDiskSpaceCommand = new GetDiskSpaceCommand(path,
+                null,
+                null,
+                null);
+
+            return EncodeCommand(getDiskSpaceCommand, null);
+        }
     }
 }

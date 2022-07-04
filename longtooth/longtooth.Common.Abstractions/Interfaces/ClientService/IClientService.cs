@@ -70,5 +70,10 @@ namespace longtooth.Common.Abstractions.Interfaces.ClientService
         /// Move file / directory
         /// </summary>
         Task<bool> MoveAsync(string from, string to, bool isOverwrite);
+
+        /// <summary>
+        /// Get space of disk, where path reside
+        /// </summary>
+        Task<GetDiskSpaceResultDto> GetDiskSpaceAsync(string path);
     }
 }

@@ -93,5 +93,10 @@ namespace longtooth.Common.Abstractions.Interfaces.FilesManager
         /// Move file / directory
         /// </summary>
         Task<MoveResultDto> MoveAsync(string from, string to, bool isOverwrite);
+
+        /// <summary>
+        /// Get disk space for given path
+        /// </summary>
+        Task<GetDiskSpaceResultDto> GetDiskSpaceAsync(string path);
     }
 }

@@ -79,5 +79,10 @@ namespace longtooth.Protocol.Abstractions.Interfaces
         /// Generate response for file / directory move
         /// </summary>
         IReadOnlyCollection<byte> GenerateMoveResponse(MoveResultDto moveResultDto);
+
+        /// <summary>
+        /// Generate response for "get disk space" command
+        /// </summary>
+        IReadOnlyCollection<byte> GenerateGetDiskSpaceResponse(GetDiskSpaceResultDto getDiskSpaceResultDto);
     }
 }

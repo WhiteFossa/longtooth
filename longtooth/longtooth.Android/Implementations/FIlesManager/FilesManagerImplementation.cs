@@ -610,5 +610,28 @@ namespace longtooth.Droid.Implementations.FilesManager
                 return new MoveResultDto(false);
             }
         }
+
+        public async Task<GetDiskSpaceResultDto> GetDiskSpaceAsync(string path)
+        {
+            _ = path ?? throw new ArgumentNullException(nameof(path));
+            try
+            {
+                var normalizedPath = FilesHelper.NormalizePath(path);
+
+                if (!IsDirectoryBelongsToMountpoints(normalizedPath))
+                {
+                    // Non-exported directory
+                    return new GetDiskSpaceResultDto(false, 0, 0);
+                }
+
+                var diskInfo = new DriveInfo(normalizedPath);
+
+                return new GetDiskSpaceResultDto(true, diskInfo.TotalSize, diskInfo.TotalFreeSpace);
+            }
+            catch (Exception)
+            {
+                return new GetDiskSpaceResultDto(false, 0, 0);
+            }
+        }
     }
 }

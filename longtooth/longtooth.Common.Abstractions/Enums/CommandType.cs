@@ -74,5 +74,10 @@
         /// Move file / directory
         /// </summary>
         Move = 13,
+
+        /// <summary>
+        /// Get disk total / free space
+        /// </summary>
+        GetDiskSpace = 14,
     }
 }
