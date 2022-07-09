@@ -5,6 +5,7 @@ using longtooth.Common.Abstractions.Interfaces.MessagesProtocol;
 using longtooth.Common.Implementations.Extensions;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace longtooth.Common.Implementations.MessagesProtocol
 {
@@ -16,26 +17,15 @@ namespace longtooth.Common.Implementations.MessagesProtocol
         private static readonly Guid MessageBeginSignature = new Guid("c733cfea-6bd8-47d0-863a-b189bca260a5");
 
         /// <summary>
-        /// All messages must end with this GUID
-        /// </summary>
-        private static readonly Guid MessageEndSignature = new Guid("3ae63b06-866e-43c2-9357-be92374e1050");
-
-        /// <summary>
         /// Byte representation of MessageBeginSignature
         /// </summary>
         private readonly IReadOnlyCollection<byte> MessageBeginSignatureArray;
-
-        /// <summary>
-        /// Byte representation of MessageEndSignature
-        /// </summary>
-        private readonly IReadOnlyCollection<byte> MessageEndSignatureArray;
 
         private readonly IDataCompressor _dataCompressor;
 
         public MessagesProtocol(IDataCompressor dataCompressor)
         {
             MessageBeginSignatureArray = new List<byte>(MessageBeginSignature.ToByteArray());
-            MessageEndSignatureArray = new List<byte>(MessageEndSignature.ToByteArray());
 
             _dataCompressor = dataCompressor;
         }
@@ -46,7 +36,7 @@ namespace longtooth.Common.Implementations.MessagesProtocol
 
             var compressedMessage = _dataCompressor.Compress(message);
 
-            if (compressedMessage.Count + MessageBeginSignatureArray.Count + MessageEndSignatureArray.Count > Constants.MaxPacketSize)
+            if (compressedMessage.Count + MessageBeginSignatureArray.Count + sizeof(int) > Constants.MaxPacketSize)
             {
                 throw new ArgumentOutOfRangeException(nameof(message));
             }
@@ -54,8 +44,8 @@ namespace longtooth.Common.Implementations.MessagesProtocol
             var result = new List<byte>();
 
             result.AddRange(MessageBeginSignatureArray);
+            result.AddRange(BitConverter.GetBytes(compressedMessage.Count));
             result.AddRange(compressedMessage);
-            result.AddRange(MessageEndSignatureArray);
 
             return result;
         }
@@ -64,23 +54,30 @@ namespace longtooth.Common.Implementations.MessagesProtocol
         {
             _ = buffer ?? throw new ArgumentNullException(nameof(buffer));
 
-            // We must have both message begin and message end signatures, end must be later than begin
-            var messageStartIndex = buffer.FindFirstSubarray(MessageBeginSignatureArray);
+            int messageStartIndex = buffer.FindFirstSubarray(MessageBeginSignatureArray);
 
             if (messageStartIndex == -1)
             {
                 return new FirstMessageDto(null, buffer);
             }
 
-            var messageEndIndex = buffer.FindFirstSubarray(MessageEndSignatureArray);
+            int headerSize = MessageBeginSignatureArray.Count + sizeof(int);
 
-            if (messageEndIndex == -1 || messageEndIndex <= messageStartIndex)
+            // Do we have size for message size?
+            if (messageStartIndex + headerSize > buffer.Count)
             {
                 return new FirstMessageDto(null, buffer);
             }
 
-            var startIndex = messageStartIndex + MessageBeginSignatureArray.Count;
-            var length = messageEndIndex - messageStartIndex - MessageBeginSignatureArray.Count;
+            int length = BitConverter.ToInt32(buffer.ToArray(), messageStartIndex + MessageBeginSignatureArray.Count);
+
+            // Do we have full message?
+            if (messageStartIndex + headerSize + length > buffer.Count)
+            {
+                return new FirstMessageDto(null, buffer);
+            }
+
+            int startIndex = messageStartIndex + headerSize;
 
             var bufferAsList = new List<byte>(buffer);
             var compressedMessage = bufferAsList.GetRange(startIndex, length);
@@ -88,7 +85,7 @@ namespace longtooth.Common.Implementations.MessagesProtocol
             var message = _dataCompressor.Decompress(compressedMessage);
 
             // Removing message from buffer
-            var remainingLength = messageEndIndex + MessageEndSignatureArray.Count;
+            int remainingLength = startIndex + length;
             var newBuffer = bufferAsList.GetRange(0, messageStartIndex);
             newBuffer.AddRange(bufferAsList.GetRange(remainingLength, buffer.Count - remainingLength));
 
