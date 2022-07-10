@@ -30,22 +30,23 @@ namespace longtooth.Common.Implementations.MessagesProtocol
             _dataCompressor = dataCompressor;
         }
 
-        public IReadOnlyCollection<byte> GenerateMessage(IReadOnlyCollection<byte> message)
+        public byte[] GenerateMessage(IReadOnlyCollection<byte> message)
         {
             _ = message ?? throw new ArgumentNullException(nameof(message));
 
             var compressedMessage = _dataCompressor.Compress(message);
 
-            if (compressedMessage.Count + MessageBeginSignatureArray.Count + sizeof(int) > Constants.MaxPacketSize)
+            var resultSize = compressedMessage.Count + MessageBeginSignatureArray.Count + sizeof(int);
+
+            if (resultSize > Constants.MaxPacketSize)
             {
                 throw new ArgumentOutOfRangeException(nameof(message));
             }
 
-            var result = new List<byte>();
-
-            result.AddRange(MessageBeginSignatureArray);
-            result.AddRange(BitConverter.GetBytes(compressedMessage.Count));
-            result.AddRange(compressedMessage);
+            var result = new byte[resultSize];
+            MessageBeginSignatureArray.ToArray().CopyTo(result, 0);
+            BitConverter.GetBytes(compressedMessage.Count).CopyTo(result, MessageBeginSignatureArray.Count);
+            compressedMessage.ToArray().CopyTo(result, MessageBeginSignatureArray.Count + sizeof(int));
 
             return result;
         }

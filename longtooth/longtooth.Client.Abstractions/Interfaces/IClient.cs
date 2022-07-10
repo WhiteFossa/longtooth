@@ -24,7 +24,7 @@ namespace longtooth.Client.Abstractions.Interfaces
         /// <summary>
         /// Sends message to a server
         /// </summary>
-        Task SendAsync(IReadOnlyCollection<byte> message);
+        Task SendAsync(byte[] message);
 
         /// <summary>
         /// Disconnect from server (hard, forced)

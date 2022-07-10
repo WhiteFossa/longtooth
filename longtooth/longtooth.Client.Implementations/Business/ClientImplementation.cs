@@ -76,15 +76,13 @@ namespace longtooth.Client.Implementations.Business
             _isDisconnectRequired = true;
         }
 
-        public async Task SendAsync(IReadOnlyCollection<byte> message)
+        public async Task SendAsync(byte[] message)
         {
-            var buffer = message.ToArray();
-
             var totalSent = 0;
 
-            while(totalSent < buffer.Length)
+            while(totalSent < message.Length)
             {
-                var bytesSent = _socket.Send(buffer, totalSent, buffer.Length - totalSent, SocketFlags.None);
+                var bytesSent = _socket.Send(message, totalSent, message.Length - totalSent, SocketFlags.None);
 
                 totalSent += bytesSent;
             }

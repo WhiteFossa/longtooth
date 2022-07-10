@@ -26,7 +26,7 @@ namespace longtooth.Common.Implementations.MessagesProcessor
             _onNewMessage = handler ?? throw new ArgumentNullException(nameof(handler));
         }
 
-        public IReadOnlyCollection<byte> PrepareMessageToSend(IReadOnlyCollection<byte> messageToSend)
+        public byte[] PrepareMessageToSend(IReadOnlyCollection<byte> messageToSend)
         {
             return _messagesProtocol.GenerateMessage(messageToSend);
         }

@@ -11,7 +11,7 @@ namespace longtooth.Common.Abstractions.Interfaces.MessagesProtocol
         /// <summary>
         /// Encode message. Encoded message is ready to be pushed to socket
         /// </summary>
-        IReadOnlyCollection<byte> GenerateMessage(IReadOnlyCollection<byte> message);
+        byte[] GenerateMessage(IReadOnlyCollection<byte> message);
 
         /// <summary>
         /// Searches buffer for the first message
