@@ -12,77 +12,77 @@ namespace longtooth.Protocol.Abstractions.Interfaces
         /// <summary>
         /// Generates response to ping command
         /// </summary>
-        IReadOnlyCollection<byte> GeneratePingResponse();
+        byte[] GeneratePingResponse();
 
         /// <summary>
         /// Generates response to exit command
         /// </summary>
         /// <returns></returns>
-        IReadOnlyCollection<byte> GenerateExitResponse();
+        byte[] GenerateExitResponse();
 
         /// <summary>
         /// Generates response with the list of server's mountpoints
         /// </summary>
-        IReadOnlyCollection<byte> GenerateGetMountpointsResponse(IReadOnlyCollection<MountpointDto> mountpoints);
+        byte[] GenerateGetMountpointsResponse(IReadOnlyCollection<MountpointDto> mountpoints);
 
         /// <summary>
         /// Generates directory content response
         /// </summary>
-        IReadOnlyCollection<byte> GenerateGetDirectoryContentResponse(DirectoryContentDto directoryContent);
+        byte[] GenerateGetDirectoryContentResponse(DirectoryContentDto directoryContent);
 
         /// <summary>
         /// Generates response for downloaded file
         /// </summary>
-        IReadOnlyCollection<byte> GenerateDownloadFileResponse(DownloadedFileWithContentDto file);
+        byte[] GenerateDownloadFileResponse(DownloadedFileWithContentDto file);
 
         /// <summary>
         /// Generate response for file creation
         /// </summary>
-        IReadOnlyCollection<byte> GenerateCreateFileResponse(CreateFileResultDto fileCreationResult);
+        byte[] GenerateCreateFileResponse(CreateFileResultDto fileCreationResult);
 
         /// <summary>
         /// Generate response for file update
         /// </summary>
-        IReadOnlyCollection<byte> GenerateUpdateFileResponse(UpdateFileResultDto updateFileResult);
+        byte[] GenerateUpdateFileResponse(UpdateFileResultDto updateFileResult);
 
         /// <summary>
         /// Generate response for file delete
         /// </summary>
-        IReadOnlyCollection<byte> GenerateDeleteFileResponse(DeleteFileResultDto deleteFileResult);
+        byte[] GenerateDeleteFileResponse(DeleteFileResultDto deleteFileResult);
 
         /// <summary>
         /// Generate response for directory deletion
         /// </summary>
-        IReadOnlyCollection<byte> GenerateDeleteDirectoryResponse(DeleteDirectoryResultDto deleteDirectoryResult);
+        byte[] GenerateDeleteDirectoryResponse(DeleteDirectoryResultDto deleteDirectoryResult);
 
         /// <summary>
         /// Generate response for directory creation
         /// </summary>
-        IReadOnlyCollection<byte> GenerateCreateDirectoryResponse(CreateDirectoryResultDto createDirectoryResult);
+        byte[] GenerateCreateDirectoryResponse(CreateDirectoryResultDto createDirectoryResult);
 
         /// <summary>
         /// Generate response for file information
         /// </summary>
-        IReadOnlyCollection<byte> GenerateGetFileInfoResponse(GetFileInfoResultDto fileInfoResultDto);
+        byte[] GenerateGetFileInfoResponse(GetFileInfoResultDto fileInfoResultDto);
 
         /// <summary>
         /// Generate response for file truncation / grow
         /// </summary>
-        IReadOnlyCollection<byte> GenerateTruncateFileResponse(TruncateFileResultDto truncateFileResultDto);
+        byte[] GenerateTruncateFileResponse(TruncateFileResultDto truncateFileResultDto);
 
         /// <summary>
         /// Generate response for timestamps setting
         /// </summary>
-        IReadOnlyCollection<byte> GenerateSetTimestampsResponse(SetTimestampsResultDto setTimestampsResultDto);
+        byte[] GenerateSetTimestampsResponse(SetTimestampsResultDto setTimestampsResultDto);
 
         /// <summary>
         /// Generate response for file / directory move
         /// </summary>
-        IReadOnlyCollection<byte> GenerateMoveResponse(MoveResultDto moveResultDto);
+        byte[] GenerateMoveResponse(MoveResultDto moveResultDto);
 
         /// <summary>
         /// Generate response for "get disk space" command
         /// </summary>
-        IReadOnlyCollection<byte> GenerateGetDiskSpaceResponse(GetDiskSpaceResultDto getDiskSpaceResultDto);
+        byte[] GenerateGetDiskSpaceResponse(GetDiskSpaceResultDto getDiskSpaceResultDto);
     }
 }

@@ -195,12 +195,12 @@ namespace longtooth.Common.Implementations.ClientService
             }
         }
 
-        private async Task PrepareAndSendCommand(IReadOnlyCollection<byte> commandMessage)
+        private async Task PrepareAndSendCommand(byte[] commandMessage)
         {
             _syncWaitHandle.WaitOne();
             _syncWaitHandle.Reset();
 
-            var encodedMessage = _messagesProcessor.PrepareMessageToSend(new List<byte>(commandMessage));
+            var encodedMessage = _messagesProcessor.PrepareMessageToSend(commandMessage);
             await _client.SendAsync(encodedMessage);
         }
 

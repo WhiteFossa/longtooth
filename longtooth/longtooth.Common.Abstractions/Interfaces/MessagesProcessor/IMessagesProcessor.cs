@@ -24,7 +24,7 @@ namespace longtooth.Common.Abstractions.Interfaces.MessagesProcessor
         /// <summary>
         /// Prepare message to be sent. Feed the result of this call to socket
         /// </summary>
-        byte[] PrepareMessageToSend(IReadOnlyCollection<byte> messageToSend);
+        byte[] PrepareMessageToSend(byte[] messageToSend);
 
         /// <summary>
         /// Call this when new message comes from socket (for client, calls hanlder when full message is received)

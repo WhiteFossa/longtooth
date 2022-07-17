@@ -30,13 +30,13 @@ namespace longtooth.Common.Implementations.MessagesProtocol
             _dataCompressor = dataCompressor;
         }
 
-        public byte[] GenerateMessage(IReadOnlyCollection<byte> message)
+        public byte[] GenerateMessage(byte[] message)
         {
             _ = message ?? throw new ArgumentNullException(nameof(message));
 
             var compressedMessage = _dataCompressor.Compress(message);
 
-            var resultSize = compressedMessage.Count + MessageBeginSignatureArray.Count + sizeof(int);
+            var resultSize = compressedMessage.Length + MessageBeginSignatureArray.Count + sizeof(int);
 
             if (resultSize > Constants.MaxPacketSize)
             {
@@ -45,8 +45,8 @@ namespace longtooth.Common.Implementations.MessagesProtocol
 
             var result = new byte[resultSize];
             MessageBeginSignatureArray.ToArray().CopyTo(result, 0);
-            BitConverter.GetBytes(compressedMessage.Count).CopyTo(result, MessageBeginSignatureArray.Count);
-            compressedMessage.ToArray().CopyTo(result, MessageBeginSignatureArray.Count + sizeof(int));
+            BitConverter.GetBytes(compressedMessage.Length).CopyTo(result, MessageBeginSignatureArray.Count);
+            compressedMessage.CopyTo(result, MessageBeginSignatureArray.Count + sizeof(int));
 
             return result;
         }

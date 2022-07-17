@@ -243,9 +243,9 @@ namespace longtooth.Desktop.ViewModels
             }
         }
 
-        private async Task PrepareAndSendCommand(IReadOnlyCollection<byte> commandMessage)
+        private async Task PrepareAndSendCommand(byte[] commandMessage)
         {
-            var encodedMessage = _messagesProcessor.PrepareMessageToSend(new List<byte>(commandMessage));
+            var encodedMessage = _messagesProcessor.PrepareMessageToSend(commandMessage);
             await _client.SendAsync(encodedMessage);
         }
 

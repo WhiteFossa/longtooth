@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace longtooth.Protocol.Abstractions.DataStructures
 {
@@ -45,20 +46,21 @@ namespace longtooth.Protocol.Abstractions.DataStructures
             }
         }
 
-        public IReadOnlyCollection<byte> ToDataPacket()
+        public byte[] ToDataPacket()
         {
-            var result = new List<byte>();
+            var resultSize = 2 * sizeof(int) + HeaderSize + BinaryDataSize;
+            var result = new byte[resultSize];
 
-            result.AddRange(BitConverter.GetBytes(HeaderSize));
-            result.AddRange(Header);
-            result.AddRange(BitConverter.GetBytes(BinaryDataSize));
+            BitConverter.GetBytes(HeaderSize).CopyTo(result, 0); // Header size
+            Header.ToArray().CopyTo(result, sizeof(int)); // Header
+            BitConverter.GetBytes(BinaryDataSize).CopyTo(result, sizeof(int) + HeaderSize); // Binary data size
 
             if (BinaryDataSize != 0)
             {
-                result.AddRange(BinaryData);
+                BinaryData.ToArray().CopyTo(result, 2 * sizeof(int) + HeaderSize); // Binary data
             }
 
-            return result.ToArray();
+            return result;
         }
     }
 }

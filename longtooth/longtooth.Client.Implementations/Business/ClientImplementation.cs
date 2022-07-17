@@ -1,13 +1,8 @@
 ﻿using longtooth.Client.Abstractions.DTOs;
 using longtooth.Client.Abstractions.Interfaces;
 using longtooth.Common.Abstractions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.Text;
-using System.Threading.Tasks;
 using static longtooth.Client.Abstractions.Interfaces.IClient;
 
 namespace longtooth.Client.Implementations.Business

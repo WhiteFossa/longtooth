@@ -18,40 +18,34 @@ namespace longtooth.Common.Implementations.DataCompressor
         /// </summary>
         private const CompressionAlgorithm Algorithm = CompressionAlgorithm.Deflate;
 
-        public IReadOnlyCollection<byte> Compress(IReadOnlyCollection<byte> dataToCompress)
+        public byte[] Compress(byte[] dataToCompress)
         {
-            var result = new List<byte>();
-
             var header = Encoding.UTF8.GetBytes(JsonSerializer.Serialize<CompressionHeader>(new CompressionHeader(Algorithm)));
 
-            // Header length
             var headerLength = header.Length;
-            result.AddRange(BitConverter.GetBytes(headerLength));
+            var headerLengthAsArray = BitConverter.GetBytes(headerLength);
 
-            // Header
-            result.AddRange(header);
+            var compressedPayload = CompressPayload(dataToCompress);
 
-            // Payload
-            result.AddRange(CompressPayload(dataToCompress));
+            var result = new byte[sizeof(int) + headerLength + compressedPayload.Length];
+            headerLengthAsArray.CopyTo(result, 0); // Header length
+            header.CopyTo(result, sizeof(int)); // Header
+            compressedPayload.CopyTo(result, sizeof(int) + headerLength); // Payload
 
             return result;
         }
 
-        private IReadOnlyCollection<byte> CompressPayload(IReadOnlyCollection<byte> payloadToCompress)
+        private byte[] CompressPayload(byte[] payloadToCompress)
         {
-            byte[] compressedPayload = null;
-
-            using (var inputStream = new MemoryStream(payloadToCompress.ToArray(), true))
+            using (var inputStream = new MemoryStream(payloadToCompress, true))
             using (var compressedStream = new MemoryStream())
             using (var compressor = new DeflateStream(compressedStream, CompressionMode.Compress))
             {
                 inputStream.CopyTo(compressor);
                 compressor.Close();
 
-                compressedPayload = compressedStream.ToArray();
+                return compressedStream.ToArray();
             }
-
-            return new List<byte>(compressedPayload);
         }
 
         public IReadOnlyCollection<byte> Decompress(IReadOnlyCollection<byte> dataToDecompress)
