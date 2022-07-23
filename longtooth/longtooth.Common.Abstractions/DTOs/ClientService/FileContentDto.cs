@@ -21,9 +21,9 @@ namespace longtooth.Common.Abstractions.DTOs.ClientService
         /// <summary>
         /// File content
         /// </summary>
-        public IReadOnlyCollection<byte> Content { get; private set; }
+        public byte[] Content { get; private set; }
 
-        public FileContentDto(bool isExist, bool isInRagne, IReadOnlyCollection<byte> content)
+        public FileContentDto(bool isExist, bool isInRagne, byte[] content)
         {
             IsExist = isExist;
             IsInRagne = isInRagne;

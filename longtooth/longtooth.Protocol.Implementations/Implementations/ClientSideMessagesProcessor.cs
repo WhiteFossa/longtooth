@@ -45,7 +45,7 @@ namespace longtooth.Protocol.Implementations.Implementations
                     return GetDirectoryContentResponse.Parse(stringHeader, payload);
 
                 case CommandType.DownloadFile:
-                    return DownloadFileResponse.Parse(stringHeader, payload);
+                    return DownloadFileResponse.Parse(stringHeader, payload.ToArray()); // TODO: Fixme, I'm slow
 
                 case CommandType.CreateFile:
                     return CreateFileResponse.Parse(stringHeader, payload);

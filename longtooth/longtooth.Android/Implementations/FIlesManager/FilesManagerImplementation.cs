@@ -175,12 +175,12 @@ namespace longtooth.Droid.Implementations.FilesManager
                 if (!IsDirectoryBelongsToMountpoints(targetDirectory))
                 {
                     // Non-exported directory
-                    return new DownloadedFileWithContentDto(false, 0, 0, new List<byte>());
+                    return new DownloadedFileWithContentDto(false, 0, 0, new byte[0]);
                 }
 
                 if (!File.Exists(path))
                 {
-                    return new DownloadedFileWithContentDto(false, 0, 0, new List<byte>());
+                    return new DownloadedFileWithContentDto(false, 0, 0, new byte[0]);
                 }
 
                 var toRead = Math.Min(length, MaxReadBlockSize);
@@ -193,7 +193,7 @@ namespace longtooth.Droid.Implementations.FilesManager
                     var newPosition = stream.Seek((long)start, SeekOrigin.Begin);
                     if (newPosition != (long)start)
                     {
-                        return new DownloadedFileWithContentDto(false, 0, 0, new List<byte>());
+                        return new DownloadedFileWithContentDto(false, 0, 0, new byte[0]);
                     }
 
                     // We can't guarantee that length of bytes will be read
@@ -207,14 +207,16 @@ namespace longtooth.Droid.Implementations.FilesManager
 
                 if (bytesRead < toRead)
                 {
-                    return new DownloadedFileWithContentDto(true, start, bytesRead, buffer.ToList().GetRange(0, bytesRead));
+                    var result = new byte[bytesRead];
+                    Array.Copy(buffer, result, bytesRead);
+                    return new DownloadedFileWithContentDto(true, start, bytesRead, result);
                 }
 
-                return new DownloadedFileWithContentDto(true, start, bytesRead, buffer.ToList());
+                return new DownloadedFileWithContentDto(true, start, bytesRead, buffer);
             }
             catch (Exception)
             {
-                return new DownloadedFileWithContentDto(false, 0, 0, new List<byte>());
+                return new DownloadedFileWithContentDto(false, 0, 0, new byte[0]);
             }
         }
 

@@ -32,12 +32,12 @@ namespace longtooth.Common.Abstractions.DTOs
         /// Content
         /// </summary>
         [JsonPropertyName("Content")]
-        public IReadOnlyCollection<byte> Content { get; private set; }
+        public byte[] Content { get; private set; }
 
         public DownloadedFileWithContentDto(bool isSuccessful,
             long startPosition,
             int length,
-            IReadOnlyCollection<byte> content)
+            byte[] content)
         {
             IsSuccessful = isSuccessful;
             StartPosition = startPosition;

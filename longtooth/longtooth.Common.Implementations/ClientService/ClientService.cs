@@ -349,7 +349,7 @@ namespace longtooth.Common.Implementations.ClientService
 
             if (!_downloadFileRunResult.File.IsSuccessful)
             {
-                return new FileContentDto(false, false, new List<byte>());
+                return new FileContentDto(false, false, new byte[0]);
             }
 
             return new FileContentDto(true, true, _downloadFileRunResult.File.Content);
