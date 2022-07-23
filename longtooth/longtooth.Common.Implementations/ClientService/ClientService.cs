@@ -392,10 +392,10 @@ namespace longtooth.Common.Implementations.ClientService
             return _deleteFileRunResult.DeleteFileResult.IsSuccessful;
         }
 
-        public async Task<UpdateFileResultDto> UpdateFileContentAsync(string path, ulong offset, IReadOnlyCollection<byte> buffer)
+        public async Task<UpdateFileResultDto> UpdateFileContentAsync(string path, ulong offset, byte[] buffer)
         {
             await PrepareAndSendCommand(
-                _commandGenerator.UpdateFileCommand(LocalPathToServerSidePath(path), (long)offset, buffer.ToArray()));
+                _commandGenerator.UpdateFileCommand(LocalPathToServerSidePath(path), (long)offset, buffer));
             _updateFileWaitHandle.WaitOne();
 
             return _updateFileRunResult.UpdateFileResult;

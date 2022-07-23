@@ -23,7 +23,7 @@ namespace longtooth.Protocol.Abstractions.Responses
             TruncateFileResult = truncateFileResult ?? throw new ArgumentNullException(nameof(truncateFileResult));
         }
 
-        public static TruncateFileResponse Parse(string header, IReadOnlyCollection<byte> payload)
+        public static TruncateFileResponse Parse(string header, byte[] payload)
         {
             _ = header ?? throw new ArgumentNullException(nameof(header));
 

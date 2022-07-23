@@ -23,7 +23,7 @@ namespace longtooth.Protocol.Abstractions.Responses
             SetTimestampsResult = setTimestampsResult ?? throw new ArgumentNullException(nameof(setTimestampsResult));
         }
 
-        public static SetTimestampsResponse Parse(string header, IReadOnlyCollection<byte> payload)
+        public static SetTimestampsResponse Parse(string header, byte[] payload)
         {
             _ = header ?? throw new ArgumentNullException(nameof(header));
 

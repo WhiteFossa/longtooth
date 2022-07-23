@@ -13,7 +13,7 @@ namespace longtooth.Protocol.Abstractions.Responses
     /// </summary>
     public class PingResponse : ResponseHeader
     {
-        public static PingResponse Parse(string header, IReadOnlyCollection<byte> payload)
+        public static PingResponse Parse(string header, byte[] payload)
         {
             _ = header ?? throw new ArgumentNullException(nameof(header));
 

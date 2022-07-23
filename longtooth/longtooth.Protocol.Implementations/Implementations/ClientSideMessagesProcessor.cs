@@ -28,7 +28,7 @@ namespace longtooth.Protocol.Implementations.Implementations
             var header = JsonSerializer.Deserialize<ResponseHeader>(stringHeader); // Initially to generic header
 
             var payloadSize = BitConverter.ToInt32(messageAsList.GetRange(4 + headerSize, 4).ToArray());
-            var payload = messageAsList.GetRange(8 + headerSize, message.Count - 8 - headerSize);
+            var payload = messageAsList.GetRange(8 + headerSize, message.Count - 8 - headerSize).ToArray(); // TODO: Fixme, I'm slow
 
             switch (header.Command)
             {
@@ -45,7 +45,7 @@ namespace longtooth.Protocol.Implementations.Implementations
                     return GetDirectoryContentResponse.Parse(stringHeader, payload);
 
                 case CommandType.DownloadFile:
-                    return DownloadFileResponse.Parse(stringHeader, payload.ToArray()); // TODO: Fixme, I'm slow
+                    return DownloadFileResponse.Parse(stringHeader, payload);
 
                 case CommandType.CreateFile:
                     return CreateFileResponse.Parse(stringHeader, payload);
