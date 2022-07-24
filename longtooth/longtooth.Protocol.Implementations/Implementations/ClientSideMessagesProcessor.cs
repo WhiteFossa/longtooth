@@ -11,7 +11,7 @@ namespace longtooth.Protocol.Implementations.Implementations
 {
     public class ClientSideMessagesProcessor : IClientSideMessagesProcessor
     {
-        public ResponseHeader ParseMessage(IReadOnlyCollection<byte> message)
+        public ResponseHeader ParseMessage(byte[] message)
         {
             var messageAsList = new List<byte>(message); // Could we do it in a more efficient way?
 
@@ -28,7 +28,7 @@ namespace longtooth.Protocol.Implementations.Implementations
             var header = JsonSerializer.Deserialize<ResponseHeader>(stringHeader); // Initially to generic header
 
             var payloadSize = BitConverter.ToInt32(messageAsList.GetRange(4 + headerSize, 4).ToArray());
-            var payload = messageAsList.GetRange(8 + headerSize, message.Count - 8 - headerSize).ToArray(); // TODO: Fixme, I'm slow
+            var payload = messageAsList.GetRange(8 + headerSize, payloadSize).ToArray(); // TODO: Fixme, I'm slow
 
             switch (header.Command)
             {

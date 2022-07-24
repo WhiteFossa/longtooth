@@ -8,7 +8,7 @@ namespace longtooth.Common.Abstractions.Interfaces.MessagesProcessor
     /// <summary>
     /// Will be called when new message is decoded
     /// </summary>
-    public delegate Task OnNewMessageDelegate(IReadOnlyCollection<byte> decodedMessage);
+    public delegate Task OnNewMessageDelegate(byte[] decodedMessage);
 
     /// <summary>
     /// Interface to process low-level messages
@@ -29,12 +29,12 @@ namespace longtooth.Common.Abstractions.Interfaces.MessagesProcessor
         /// <summary>
         /// Call this when new message comes from socket (for client, calls hanlder when full message is received)
         /// </summary>
-        void OnNewMessageArrive(IReadOnlyCollection<byte> newMessage);
+        void OnNewMessageArrive(byte[] newMessage);
 
         /// <summary>
         /// Like OnNewMessageArrive(), but don't call handler. Instead returns message when it received or null if
         /// message isn't completely arrived yet
         /// </summary>
-        IReadOnlyCollection<byte> OnNewMessageArriveServer(IReadOnlyCollection<byte> newMessage);
+        byte[] OnNewMessageArriveServer(byte[] newMessage);
     }
 }

@@ -17,6 +17,6 @@ namespace longtooth.Common.Abstractions.Interfaces.DataCompressor
         /// <summary>
         /// Decompress data
         /// </summary>
-        IReadOnlyCollection<byte> Decompress(IReadOnlyCollection<byte> dataToDecompress);
+        byte[] Decompress(byte[] dataToDecompress);
     }
 }

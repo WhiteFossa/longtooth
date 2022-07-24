@@ -10,14 +10,14 @@ namespace longtooth.Common.Abstractions.DTOs.MessagesProtocol
         /// <summary>
         /// Extracted message (can be null, if buffer contain no messages)
         /// </summary>
-        public IReadOnlyCollection<byte> Message { get; private set; }
+        public byte[] Message { get; private set; }
 
         /// <summary>
         /// Buffer without message (i.e. message is cut from buffer)
         /// </summary>
-        public IReadOnlyCollection<byte> NewBuffer { get; private set; }
+        public byte[] NewBuffer { get; private set; }
 
-        public FirstMessageDto(IReadOnlyCollection<byte> message, IReadOnlyCollection<byte> newBuffer)
+        public FirstMessageDto(byte[] message, byte[] newBuffer)
         {
             Message = message;
             NewBuffer = newBuffer;

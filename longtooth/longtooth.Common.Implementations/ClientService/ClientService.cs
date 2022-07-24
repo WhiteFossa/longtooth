@@ -116,7 +116,7 @@ namespace longtooth.Common.Implementations.ClientService
             _client = client;
         }
 
-        public async Task OnNewMessageAsync(IReadOnlyCollection<byte> decodedMessage)
+        public async Task OnNewMessageAsync(byte[] decodedMessage)
         {
             var response = _clientSideMessagesProcessor.ParseMessage(decodedMessage);
             var runResult = await response.RunAsync();

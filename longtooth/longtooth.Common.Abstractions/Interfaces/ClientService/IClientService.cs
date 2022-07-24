@@ -14,7 +14,7 @@ namespace longtooth.Common.Abstractions.Interfaces.ClientService
         /// <summary>
         /// Call this method when decoded message comes from server
         /// </summary>
-        Task OnNewMessageAsync(IReadOnlyCollection<byte> decodedMessage);
+        Task OnNewMessageAsync(byte[] decodedMessage);
 
         /// <summary>
         /// Called by VFS, returning the contents for given directory

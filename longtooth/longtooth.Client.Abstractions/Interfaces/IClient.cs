@@ -9,7 +9,7 @@ namespace longtooth.Client.Abstractions.Interfaces
         /// <summary>
         /// Delegate, called when server responses to a message
         /// </summary>
-        public delegate void OnResponseDelegate(IReadOnlyCollection<byte> response);
+        public delegate void OnResponseDelegate(byte[] response);
 
         /// <summary>
         /// Call this before any other operations

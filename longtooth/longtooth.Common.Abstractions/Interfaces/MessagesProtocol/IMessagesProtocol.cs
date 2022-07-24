@@ -16,6 +16,6 @@ namespace longtooth.Common.Abstractions.Interfaces.MessagesProtocol
         /// <summary>
         /// Searches buffer for the first message
         /// </summary>
-        FirstMessageDto ExtractFirstMessage(IReadOnlyCollection<byte> buffer);
+        FirstMessageDto ExtractFirstMessage(byte[] buffer);
     }
 }

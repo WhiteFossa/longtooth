@@ -8,7 +8,7 @@ namespace longtooth.Server.Abstractions.Interfaces
     /// <summary>
     /// Delegate, called when new data comes from client
     /// </summary>
-    public delegate Task<ResponseDto> OnNewDataReadDelegate(IReadOnlyCollection<byte> data);
+    public delegate Task<ResponseDto> OnNewDataReadDelegate(byte[] data);
 
     /// <summary>
     /// Longtooth server

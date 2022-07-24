@@ -117,7 +117,9 @@ namespace longtooth.Server.Implementations.Business
 
                 if (bytesRead > 0)
                 {
-                    var responseToClient = await _readCallback(new List<byte>(connectionState.ReadBuffer).GetRange(0, bytesRead));
+                    var callbackBuffer = new byte[bytesRead];
+                    Array.Copy(connectionState.ReadBuffer, 0, callbackBuffer, 0, bytesRead);
+                    var responseToClient = await _readCallback(callbackBuffer);
 
                     // Sending answer if needed
                     if (responseToClient.NeedToSendResponse)

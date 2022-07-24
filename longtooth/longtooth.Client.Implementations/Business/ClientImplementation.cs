@@ -122,7 +122,7 @@ namespace longtooth.Client.Implementations.Business
                     Array.Copy(_readBuffer, result, bytesRead);
 
                     _ = _responseHandler ?? throw new InvalidOperationException("Call SetupResponseCallback() first!");
-                    _responseHandler(new List<byte>(result));
+                    _responseHandler(result);
                 }
                 catch (SocketException)
                 {

@@ -1,7 +1,6 @@
 ﻿using longtooth.Common.Abstractions.Interfaces.MessagesProcessor;
 using longtooth.Common.Abstractions.Interfaces.MessagesProtocol;
 using System;
-using System.Collections.Generic;
 
 namespace longtooth.Common.Implementations.MessagesProcessor
 {
@@ -14,7 +13,7 @@ namespace longtooth.Common.Implementations.MessagesProcessor
         /// <summary>
         /// Here we accumulate data from socket till we get full message
         /// </summary>
-        private List<byte> _accumulator = new List<byte>();
+        private byte[] _accumulator = new byte[0];
 
         public MessagesProcessor(IMessagesProtocol messagesProtocol)
         {
@@ -31,17 +30,20 @@ namespace longtooth.Common.Implementations.MessagesProcessor
             return _messagesProtocol.GenerateMessage(messageToSend);
         }
 
-        public void OnNewMessageArrive(IReadOnlyCollection<byte> newMessage)
+        public void OnNewMessageArrive(byte[] newMessage)
         {
             _ = _onNewMessage ?? throw new InvalidOperationException("Messages processor isn't set up.");
             _ = newMessage ?? throw new ArgumentNullException(nameof(newMessage));
 
-            _accumulator.AddRange(newMessage);
+            var newAccumulator = new byte[_accumulator.Length + newMessage.Length];
+            _accumulator.CopyTo(newAccumulator, 0);
+            newMessage.CopyTo(newAccumulator, _accumulator.Length);
+            _accumulator = newAccumulator;
 
             while(true)
             {
                 var decodedMessage = _messagesProtocol.ExtractFirstMessage(_accumulator);
-                _accumulator = new List<byte>(decodedMessage.NewBuffer);
+                _accumulator = decodedMessage.NewBuffer;
 
                 if (decodedMessage.Message == null)
                 {
@@ -52,16 +54,19 @@ namespace longtooth.Common.Implementations.MessagesProcessor
             };
         }
 
-        public IReadOnlyCollection<byte> OnNewMessageArriveServer(IReadOnlyCollection<byte> newMessage)
+        public byte[] OnNewMessageArriveServer(byte[] newMessage)
         {
             _ = newMessage ?? throw new ArgumentNullException(nameof(newMessage));
 
-            _accumulator.AddRange(newMessage);
+            var newAccumulator = new byte[_accumulator.Length + newMessage.Length];
+            _accumulator.CopyTo(newAccumulator, 0);
+            newMessage.CopyTo(newAccumulator, _accumulator.Length);
+            _accumulator = newAccumulator;
 
             while (true)
             {
                 var decodedMessage = _messagesProtocol.ExtractFirstMessage(_accumulator);
-                _accumulator = new List<byte>(decodedMessage.NewBuffer);
+                _accumulator = decodedMessage.NewBuffer;
 
                 if (decodedMessage.Message == null)
                 {
