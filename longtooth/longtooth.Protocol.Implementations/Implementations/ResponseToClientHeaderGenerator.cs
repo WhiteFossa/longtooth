@@ -19,7 +19,7 @@ namespace longtooth.Protocol.Implementations.Implementations
             _messagesProcessor = messagesProcessor;
         }
 
-        private byte[] EncodeResponse(object response, IReadOnlyCollection<byte> binaryData)
+        private byte[] EncodeResponse(object response, byte[] binaryData)
         {
             var header = JsonSerializer.Serialize(response);
             var serializedHeader = Encoding.UTF8.GetBytes(header);

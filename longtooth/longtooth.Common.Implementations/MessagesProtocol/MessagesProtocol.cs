@@ -70,7 +70,7 @@ namespace longtooth.Common.Implementations.MessagesProtocol
                 return new FirstMessageDto(null, buffer);
             }
 
-            int length = BitConverter.ToInt32(buffer.ToArray(), messageStartIndex + MessageBeginSignatureArray.Count);
+            int length = BitConverter.ToInt32(buffer, messageStartIndex + MessageBeginSignatureArray.Count);
 
             // Do we have full message?
             if (messageStartIndex + headerSize + length > buffer.Length)
