@@ -77,12 +77,12 @@ namespace longtooth.Protocol.Implementations.Implementations
         {
             var updateFileCommand = new UpdateFileCommand(path,
                 startPosition,
-                dataToWrite.ToList(),
+                dataToWrite,
                 null,
                 null,
                 null);
 
-            return EncodeCommand(updateFileCommand, updateFileCommand.Content.ToArray());
+            return EncodeCommand(updateFileCommand, updateFileCommand.Content);
         }
 
         public byte[] DeleteFileCommand(string path)
