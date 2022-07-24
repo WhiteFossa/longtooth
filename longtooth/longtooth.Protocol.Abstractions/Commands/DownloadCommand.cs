@@ -55,7 +55,7 @@ namespace longtooth.Protocol.Abstractions.Commands
             IResponseToClientHeaderGenerator responseToClientHeaderGenerator,
             IFilesManager filesManager) : base(CommandType.DownloadFile)
         {
-            FilePath = filePath ?? throw new ArgumentNullException(nameof(filePath)); ;
+            FilePath = filePath ?? throw new ArgumentNullException(nameof(filePath));
             StartPosition = startPosition;
             ReadLength = readLength;
 
@@ -64,7 +64,7 @@ namespace longtooth.Protocol.Abstractions.Commands
             _filesManager = filesManager;
         }
 
-        public async Task<ResponseDto> ParseAsync(string header, IReadOnlyCollection<byte> payload)
+        public async Task<ResponseDto> ParseAsync(string header, byte[] payload)
         {
             // Do work here
             var parsedHeader = JsonSerializer.Deserialize<DownloadCommand>(header);

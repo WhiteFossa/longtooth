@@ -54,7 +54,7 @@ namespace longtooth.Common.Abstractions.Interfaces.FilesManager
         /// <summary>
         /// Update file starting from given position
         /// </summary>
-        Task<UpdateFileResultDto> UpdateFileAsync(string path, long start, IReadOnlyCollection<byte> data);
+        Task<UpdateFileResultDto> UpdateFileAsync(string path, long start, byte[] data);
 
         /// <summary>
         /// Delete file
