@@ -186,7 +186,7 @@ namespace longtooth.ViewModels
             if (decodedMessage == null)
             {
                 // We aren't ready to response now
-                return new ResponseDto(false, false, new List<byte>());
+                return new ResponseDto(false, false, new byte[0]);
             }
 
             return await _serverSideMessagesProcessor.ParseMessageAsync(decodedMessage);
