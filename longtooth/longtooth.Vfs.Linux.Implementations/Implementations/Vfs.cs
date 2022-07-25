@@ -134,9 +134,9 @@ namespace longtooth.Vfs.Linux.Implementations.Implementations
                 return -EINVAL;
             }
 
-            fileContent.Content.ToArray().CopyTo(buffer);
+            fileContent.Content.CopyTo(buffer);
 
-            return fileContent.Content.Count();
+            return fileContent.Content.Length;
         }
 
         public override int ReadDir(ReadOnlySpan<byte> path, ulong offset, ReadDirFlags flags, DirectoryContent content,
