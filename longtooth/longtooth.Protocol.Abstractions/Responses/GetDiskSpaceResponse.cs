@@ -23,7 +23,7 @@ namespace longtooth.Protocol.Abstractions.Responses
             GetDiskSpaceResult = getDiskSpaceResult ?? throw new ArgumentNullException(nameof(getDiskSpaceResult));
         }
 
-        public static GetDiskSpaceResponse Parse(string header, IReadOnlyCollection<byte> payload)
+        public static GetDiskSpaceResponse Parse(string header, byte[] payload)
         {
             _ = header ?? throw new ArgumentNullException(nameof(header));
 

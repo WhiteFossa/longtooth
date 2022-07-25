@@ -22,7 +22,7 @@ namespace longtooth.Protocol.Abstractions.Commands
             _responseToClientHeaderGenerator = responseToClientHeaderGenerator;
         }
 
-        public ResponseDto Parse(string header, IReadOnlyCollection<byte> payload)
+        public ResponseDto Parse(string header, byte[] payload)
         {
             // Do work here
             var response = _responseToClientHeaderGenerator.GenerateExitResponse();

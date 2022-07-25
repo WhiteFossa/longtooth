@@ -30,27 +30,28 @@ namespace longtooth.Common.Implementations.MessagesProtocol
             _dataCompressor = dataCompressor;
         }
 
-        public IReadOnlyCollection<byte> GenerateMessage(IReadOnlyCollection<byte> message)
+        public byte[] GenerateMessage(byte[] message)
         {
             _ = message ?? throw new ArgumentNullException(nameof(message));
 
             var compressedMessage = _dataCompressor.Compress(message);
 
-            if (compressedMessage.Count + MessageBeginSignatureArray.Count + sizeof(int) > Constants.MaxPacketSize)
+            var resultSize = compressedMessage.Length + MessageBeginSignatureArray.Count + sizeof(int);
+
+            if (resultSize > Constants.MaxPacketSize)
             {
                 throw new ArgumentOutOfRangeException(nameof(message));
             }
 
-            var result = new List<byte>();
-
-            result.AddRange(MessageBeginSignatureArray);
-            result.AddRange(BitConverter.GetBytes(compressedMessage.Count));
-            result.AddRange(compressedMessage);
+            var result = new byte[resultSize];
+            MessageBeginSignatureArray.ToArray().CopyTo(result, 0);
+            BitConverter.GetBytes(compressedMessage.Length).CopyTo(result, MessageBeginSignatureArray.Count);
+            compressedMessage.CopyTo(result, MessageBeginSignatureArray.Count + sizeof(int));
 
             return result;
         }
 
-        public FirstMessageDto ExtractFirstMessage(IReadOnlyCollection<byte> buffer)
+        public FirstMessageDto ExtractFirstMessage(byte[] buffer)
         {
             _ = buffer ?? throw new ArgumentNullException(nameof(buffer));
 
@@ -64,30 +65,32 @@ namespace longtooth.Common.Implementations.MessagesProtocol
             int headerSize = MessageBeginSignatureArray.Count + sizeof(int);
 
             // Do we have size for message size?
-            if (messageStartIndex + headerSize > buffer.Count)
+            if (messageStartIndex + headerSize > buffer.Length)
             {
                 return new FirstMessageDto(null, buffer);
             }
 
-            int length = BitConverter.ToInt32(buffer.ToArray(), messageStartIndex + MessageBeginSignatureArray.Count);
+            int length = BitConverter.ToInt32(buffer, messageStartIndex + MessageBeginSignatureArray.Count);
 
             // Do we have full message?
-            if (messageStartIndex + headerSize + length > buffer.Count)
+            if (messageStartIndex + headerSize + length > buffer.Length)
             {
                 return new FirstMessageDto(null, buffer);
             }
 
             int startIndex = messageStartIndex + headerSize;
 
-            var bufferAsList = new List<byte>(buffer);
-            var compressedMessage = bufferAsList.GetRange(startIndex, length);
-
+            var compressedMessage = new byte[length];
+            Array.Copy(buffer, startIndex, compressedMessage, 0, length);
             var message = _dataCompressor.Decompress(compressedMessage);
 
             // Removing message from buffer
-            int remainingLength = startIndex + length;
-            var newBuffer = bufferAsList.GetRange(0, messageStartIndex);
-            newBuffer.AddRange(bufferAsList.GetRange(remainingLength, buffer.Count - remainingLength));
+            var remainingLength = startIndex + length;
+            var newBufferLength = messageStartIndex + buffer.Length - remainingLength;
+            var newBuffer = new byte[newBufferLength];
+
+            Array.Copy(buffer, newBuffer, messageStartIndex);
+            Array.Copy(buffer, remainingLength, newBuffer, messageStartIndex, buffer.Length - remainingLength);
 
             return new FirstMessageDto(message, newBuffer);
         }

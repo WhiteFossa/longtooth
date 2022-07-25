@@ -32,7 +32,7 @@ namespace longtooth.Protocol.Abstractions.Commands
         /// Update content
         /// </summary>
         [JsonIgnore]
-        public IReadOnlyCollection<byte> Content { get; private set; }
+        public byte[] Content { get; private set; }
 
         private readonly IMessagesProcessor _messagesProcessor;
         private readonly IResponseToClientHeaderGenerator _responseToClientHeaderGenerator;
@@ -48,7 +48,7 @@ namespace longtooth.Protocol.Abstractions.Commands
 
         public UpdateFileCommand(string filePath,
             long startPosition,
-            IReadOnlyCollection<byte> content,
+            byte[] content,
             IMessagesProcessor messagesProcessor,
             IResponseToClientHeaderGenerator responseToClientHeaderGenerator,
             IFilesManager filesManager) : base(CommandType.UpdateFile)
@@ -62,7 +62,7 @@ namespace longtooth.Protocol.Abstractions.Commands
             _filesManager = filesManager;
         }
 
-        public async Task<ResponseDto> ParseAsync(string header, IReadOnlyCollection<byte> payload)
+        public async Task<ResponseDto> ParseAsync(string header, byte[] payload)
         {
             // Do work here
             var parsedHeader = JsonSerializer.Deserialize<UpdateFileCommand>(header);

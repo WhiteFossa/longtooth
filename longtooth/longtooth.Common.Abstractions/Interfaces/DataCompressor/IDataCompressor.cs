@@ -12,11 +12,11 @@ namespace longtooth.Common.Abstractions.Interfaces.DataCompressor
         /// <summary>
         /// Compress data and add compression header
         /// </summary>
-        IReadOnlyCollection<byte> Compress(IReadOnlyCollection<byte> dataToCompress);
+        byte[] Compress(byte[] dataToCompress);
 
         /// <summary>
         /// Decompress data
         /// </summary>
-        IReadOnlyCollection<byte> Decompress(IReadOnlyCollection<byte> dataToDecompress);
+        byte[] Decompress(byte[] dataToDecompress);
     }
 }

@@ -19,7 +19,7 @@ namespace longtooth.Protocol.Implementations.Implementations
             _messagesProcessor = messagesProcessor;
         }
 
-        private IReadOnlyCollection<byte> EncodeResponse(object response, IReadOnlyCollection<byte> binaryData)
+        private byte[] EncodeResponse(object response, byte[] binaryData)
         {
             var header = JsonSerializer.Serialize(response);
             var serializedHeader = Encoding.UTF8.GetBytes(header);
@@ -29,35 +29,35 @@ namespace longtooth.Protocol.Implementations.Implementations
             return message.ToDataPacket();
         }
 
-        public IReadOnlyCollection<byte> GeneratePingResponse()
+        public byte[] GeneratePingResponse()
         {
             var pingResponse = new PingResponse();
 
             return EncodeResponse(pingResponse, null);
         }
 
-        public IReadOnlyCollection<byte> GenerateExitResponse()
+        public byte[] GenerateExitResponse()
         {
             var exitResponse = new ExitResponse();
 
             return EncodeResponse(exitResponse, null);
         }
 
-        public IReadOnlyCollection<byte> GenerateGetMountpointsResponse(IReadOnlyCollection<MountpointDto> mountpoints)
+        public byte[] GenerateGetMountpointsResponse(IReadOnlyCollection<MountpointDto> mountpoints)
         {
             var getMountpointsResponse = new GetMountpointsResponse(mountpoints);
 
             return EncodeResponse(getMountpointsResponse, null);
         }
 
-        public IReadOnlyCollection<byte> GenerateGetDirectoryContentResponse(DirectoryContentDto directoryContent)
+        public byte[] GenerateGetDirectoryContentResponse(DirectoryContentDto directoryContent)
         {
             var getDirectoryContentResponse = new GetDirectoryContentResponse(directoryContent);
 
             return EncodeResponse(getDirectoryContentResponse, null);
         }
 
-        public IReadOnlyCollection<byte> GenerateDownloadFileResponse(DownloadedFileWithContentDto file)
+        public byte[] GenerateDownloadFileResponse(DownloadedFileWithContentDto file)
         {
             var metadata = new DownloadedFileDto(file.IsSuccessful, file.StartPosition, file.Length);
 
@@ -66,70 +66,70 @@ namespace longtooth.Protocol.Implementations.Implementations
             return EncodeResponse(downloadFileResponse, downloadFileResponse.FileContent);
         }
 
-        public IReadOnlyCollection<byte> GenerateCreateFileResponse(CreateFileResultDto fileCreationResult)
+        public byte[] GenerateCreateFileResponse(CreateFileResultDto fileCreationResult)
         {
             var createFileResponse = new CreateFileResponse(fileCreationResult);
 
             return EncodeResponse(createFileResponse, null);
         }
 
-        public IReadOnlyCollection<byte> GenerateUpdateFileResponse(UpdateFileResultDto updateFileResult)
+        public byte[] GenerateUpdateFileResponse(UpdateFileResultDto updateFileResult)
         {
             var updateFileResponse = new UpdateFileResponse(updateFileResult);
 
             return EncodeResponse(updateFileResponse, null);
         }
 
-        public IReadOnlyCollection<byte> GenerateDeleteFileResponse(DeleteFileResultDto deleteFileResult)
+        public byte[] GenerateDeleteFileResponse(DeleteFileResultDto deleteFileResult)
         {
             var deleteFileResponse = new DeleteFileResponse(deleteFileResult);
 
             return EncodeResponse(deleteFileResponse, null);
         }
 
-        public IReadOnlyCollection<byte> GenerateDeleteDirectoryResponse(DeleteDirectoryResultDto deleteDirectoryResult)
+        public byte[] GenerateDeleteDirectoryResponse(DeleteDirectoryResultDto deleteDirectoryResult)
         {
             var deleteDirectoryResponse = new DeleteDirectoryResponse(deleteDirectoryResult);
 
             return EncodeResponse(deleteDirectoryResponse, null);
         }
 
-        public IReadOnlyCollection<byte> GenerateCreateDirectoryResponse(CreateDirectoryResultDto createDirectoryResult)
+        public byte[] GenerateCreateDirectoryResponse(CreateDirectoryResultDto createDirectoryResult)
         {
             var createDirectoryResponse = new CreateDirectoryResponse(createDirectoryResult);
 
             return EncodeResponse(createDirectoryResponse, null);
         }
 
-        public IReadOnlyCollection<byte> GenerateGetFileInfoResponse(GetFileInfoResultDto fileInfoResultDto)
+        public byte[] GenerateGetFileInfoResponse(GetFileInfoResultDto fileInfoResultDto)
         {
             var createDirectoryResponse = new GetFileInfoResponse(fileInfoResultDto);
 
             return EncodeResponse(createDirectoryResponse, null);
         }
 
-        public IReadOnlyCollection<byte> GenerateTruncateFileResponse(TruncateFileResultDto truncateFileResultDto)
+        public byte[] GenerateTruncateFileResponse(TruncateFileResultDto truncateFileResultDto)
         {
             var truncateFileResponse = new TruncateFileResponse(truncateFileResultDto);
 
             return EncodeResponse(truncateFileResponse, null);
         }
 
-        public IReadOnlyCollection<byte> GenerateSetTimestampsResponse(SetTimestampsResultDto setTimestampsResultDto)
+        public byte[] GenerateSetTimestampsResponse(SetTimestampsResultDto setTimestampsResultDto)
         {
             var setTimestampsResponse = new SetTimestampsResponse(setTimestampsResultDto);
 
             return EncodeResponse(setTimestampsResponse, null);
         }
 
-        public IReadOnlyCollection<byte> GenerateMoveResponse(MoveResultDto moveResultDto)
+        public byte[] GenerateMoveResponse(MoveResultDto moveResultDto)
         {
             var moveResponse = new MoveResponse(moveResultDto);
 
             return EncodeResponse(moveResponse, null);
         }
 
-        public IReadOnlyCollection<byte> GenerateGetDiskSpaceResponse(GetDiskSpaceResultDto getDiskSpaceResultDto)
+        public byte[] GenerateGetDiskSpaceResponse(GetDiskSpaceResultDto getDiskSpaceResultDto)
         {
             var getDiskSpaceResponce = new GetDiskSpaceResponse(getDiskSpaceResultDto);
 

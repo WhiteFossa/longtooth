@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace longtooth.Protocol.Abstractions.DataStructures
 {
@@ -16,7 +17,7 @@ namespace longtooth.Protocol.Abstractions.DataStructures
         /// <summary>
         /// Header itself
         /// </summary>
-        public IReadOnlyCollection<byte> Header { get; private set; }
+        public byte[] Header { get; private set; }
 
         /// <summary>
         /// Binary data size
@@ -26,12 +27,12 @@ namespace longtooth.Protocol.Abstractions.DataStructures
         /// <summary>
         /// Binary data
         /// </summary>
-        public IReadOnlyCollection<byte> BinaryData { get; private set; }
+        public byte[] BinaryData { get; private set; }
 
-        public Message(IReadOnlyCollection<byte> header, IReadOnlyCollection<byte> binaryData)
+        public Message(byte[] header, byte[] binaryData)
         {
             Header = header ?? throw new ArgumentNullException(nameof(header));
-            HeaderSize = Header.Count;
+            HeaderSize = Header.Length;
 
             if (binaryData == null)
             {
@@ -40,25 +41,28 @@ namespace longtooth.Protocol.Abstractions.DataStructures
             }
             else
             {
-                BinaryDataSize = binaryData.Count;
+                BinaryDataSize = binaryData.Length;
                 BinaryData = binaryData;
             }
         }
 
-        public IReadOnlyCollection<byte> ToDataPacket()
+        public byte[] ToDataPacket()
         {
-            var result = new List<byte>();
+            var resultSize = 2 * sizeof(int) + HeaderSize + BinaryDataSize;
+            var result = new byte[resultSize];
 
-            result.AddRange(BitConverter.GetBytes(HeaderSize));
-            result.AddRange(Header);
-            result.AddRange(BitConverter.GetBytes(BinaryDataSize));
+            BitConverter.GetBytes(HeaderSize).CopyTo(result, 0); // Header size
+
+            Array.Copy(Header, 0, result, sizeof(int), Header.Length); // Header
+
+            BitConverter.GetBytes(BinaryDataSize).CopyTo(result, sizeof(int) + HeaderSize); // Binary data size
 
             if (BinaryDataSize != 0)
             {
-                result.AddRange(BinaryData);
+                Array.Copy(BinaryData, 0, result, 2 * sizeof(int) + HeaderSize, BinaryData.Length); // Binary data
             }
 
-            return result.ToArray();
+            return result;
         }
     }
 }

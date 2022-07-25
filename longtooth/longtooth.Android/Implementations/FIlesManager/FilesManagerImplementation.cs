@@ -175,12 +175,12 @@ namespace longtooth.Droid.Implementations.FilesManager
                 if (!IsDirectoryBelongsToMountpoints(targetDirectory))
                 {
                     // Non-exported directory
-                    return new DownloadedFileWithContentDto(false, 0, 0, new List<byte>());
+                    return new DownloadedFileWithContentDto(false, 0, 0, new byte[0]);
                 }
 
                 if (!File.Exists(path))
                 {
-                    return new DownloadedFileWithContentDto(false, 0, 0, new List<byte>());
+                    return new DownloadedFileWithContentDto(false, 0, 0, new byte[0]);
                 }
 
                 var toRead = Math.Min(length, MaxReadBlockSize);
@@ -193,7 +193,7 @@ namespace longtooth.Droid.Implementations.FilesManager
                     var newPosition = stream.Seek((long)start, SeekOrigin.Begin);
                     if (newPosition != (long)start)
                     {
-                        return new DownloadedFileWithContentDto(false, 0, 0, new List<byte>());
+                        return new DownloadedFileWithContentDto(false, 0, 0, new byte[0]);
                     }
 
                     // We can't guarantee that length of bytes will be read
@@ -207,14 +207,16 @@ namespace longtooth.Droid.Implementations.FilesManager
 
                 if (bytesRead < toRead)
                 {
-                    return new DownloadedFileWithContentDto(true, start, bytesRead, buffer.ToList().GetRange(0, bytesRead));
+                    var result = new byte[bytesRead];
+                    Array.Copy(buffer, result, bytesRead);
+                    return new DownloadedFileWithContentDto(true, start, bytesRead, result);
                 }
 
-                return new DownloadedFileWithContentDto(true, start, bytesRead, buffer.ToList());
+                return new DownloadedFileWithContentDto(true, start, bytesRead, buffer);
             }
             catch (Exception)
             {
-                return new DownloadedFileWithContentDto(false, 0, 0, new List<byte>());
+                return new DownloadedFileWithContentDto(false, 0, 0, new byte[0]);
             }
         }
 
@@ -267,7 +269,7 @@ namespace longtooth.Droid.Implementations.FilesManager
             return isChildDirectory;
         }
 
-        public async Task<UpdateFileResultDto> UpdateFileAsync(string path, long start, IReadOnlyCollection<byte> data)
+        public async Task<UpdateFileResultDto> UpdateFileAsync(string path, long start, byte[] data)
         {
             try
             {
@@ -289,7 +291,7 @@ namespace longtooth.Droid.Implementations.FilesManager
 
                 using (var stream = new FileStream(path, FileMode.Open))
                 {
-                    var newPosition = stream.Seek((long)start, SeekOrigin.Begin);
+                    var newPosition = stream.Seek(start, SeekOrigin.Begin);
 
                     if (newPosition != (long)start)
                     {
@@ -297,10 +299,10 @@ namespace longtooth.Droid.Implementations.FilesManager
                         return new UpdateFileResultDto(false, 0);
                     }
 
-                    stream.Write(data.ToArray(), 0, data.Count);
+                    stream.Write(data, 0, data.Length);
                 }
 
-                return new UpdateFileResultDto(true, data.Count());
+                return new UpdateFileResultDto(true, data.Length);
             }
             catch (Exception)
             {

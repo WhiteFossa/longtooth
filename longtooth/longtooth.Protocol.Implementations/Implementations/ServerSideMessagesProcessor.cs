@@ -28,24 +28,29 @@ namespace longtooth.Protocol.Implementations.Implementations
             _filesManager = filesManager;
         }
 
-        public async Task<ResponseDto> ParseMessageAsync(IReadOnlyCollection<byte> message)
+        public async Task<ResponseDto> ParseMessageAsync(byte[] message)
         {
-            var messageAsList = new List<byte>(message);
+            var headerSizeBytes = new byte[sizeof(int)];
+            Array.Copy(message, 0, headerSizeBytes, 0, sizeof(int));
+            var headerSize = BitConverter.ToInt32(headerSizeBytes);
 
-            var headerSize = BitConverter.ToInt32(messageAsList.GetRange(0, sizeof(Int32)).ToArray(), 0);
-
-            if ((headerSize + 2 * sizeof(Int32)) > messageAsList.Count)
+            if ((headerSize + 2 * sizeof(int)) > message.Length)
             {
                 throw new ArgumentException("Message is too short!", nameof(message));
             }
 
-            var binaryHeader = messageAsList.GetRange(4, headerSize);
-            var stringHeader = Encoding.UTF8.GetString(binaryHeader.ToArray());
+            var binaryHeader = new byte[headerSize];
+            Array.Copy(message, sizeof(int), binaryHeader, 0, headerSize);
+            var stringHeader = Encoding.UTF8.GetString(binaryHeader);
 
             var header = JsonSerializer.Deserialize<CommandHeader>(stringHeader); // Initially to generic header
 
-            var payloadSize = BitConverter.ToInt32(messageAsList.GetRange(4 + headerSize, 4).ToArray());
-            var payload = messageAsList.GetRange(8 + headerSize, message.Count - 8 - headerSize);
+            var payloadSizeBytes = new byte[sizeof(int)];
+            Array.Copy(message, sizeof(int) + headerSize, payloadSizeBytes, 0, sizeof(int));
+            var payloadSize = BitConverter.ToInt32(payloadSizeBytes);
+
+            var payload = new byte[payloadSize];
+            Array.Copy(message, 2 * sizeof(int) + headerSize, payload, 0, message.Length - 2 * sizeof(int) - headerSize);
 
             ResponseDto result;
             switch (header.Command)

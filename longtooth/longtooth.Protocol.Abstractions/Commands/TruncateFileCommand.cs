@@ -1,13 +1,12 @@
-using System.Collections.Generic;
-using System.Text.Json;
-using System.Text.Json.Serialization;
-using System.Threading.Tasks;
 using longtooth.Common.Abstractions.Enums;
 using longtooth.Common.Abstractions.Interfaces.FilesManager;
 using longtooth.Common.Abstractions.Interfaces.MessagesProcessor;
 using longtooth.Protocol.Abstractions.DataStructures;
 using longtooth.Protocol.Abstractions.Interfaces;
 using longtooth.Server.Abstractions.DTOs;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using System.Threading.Tasks;
 
 namespace longtooth.Protocol.Abstractions.Commands
 {
@@ -50,7 +49,7 @@ namespace longtooth.Protocol.Abstractions.Commands
             _filesManager = filesManager;
         }
 
-        public async Task<ResponseDto> ParseAsync(string header, IReadOnlyCollection<byte> payload)
+        public async Task<ResponseDto> ParseAsync(string header, byte[] payload)
         {
             // Do work here
             var parsedHeader = JsonSerializer.Deserialize<TruncateFileCommand>(header);

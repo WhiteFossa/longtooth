@@ -24,7 +24,7 @@ namespace longtooth.Protocol.Abstractions.Responses
             GetFileInfoResult = getFileInfoResult;
         }
 
-        public static GetFileInfoResponse Parse(string header, IReadOnlyCollection<byte> payload)
+        public static GetFileInfoResponse Parse(string header, byte[] payload)
         {
             _ = header ?? throw new ArgumentNullException(nameof(header));
 

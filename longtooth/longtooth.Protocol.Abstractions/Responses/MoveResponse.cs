@@ -23,7 +23,7 @@ namespace longtooth.Protocol.Abstractions.Responses
             MoveResult = moveResult ?? throw new ArgumentNullException(nameof(moveResult));
         }
 
-        public static MoveResponse Parse(string header, IReadOnlyCollection<byte> payload)
+        public static MoveResponse Parse(string header, byte[] payload)
         {
             _ = header ?? throw new ArgumentNullException(nameof(header));
 

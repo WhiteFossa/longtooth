@@ -23,7 +23,7 @@ namespace longtooth.Protocol.Abstractions.Responses
             Content = content ?? throw new ArgumentNullException(nameof(content));
         }
 
-        public static GetDirectoryContentResponse Parse(string header, IReadOnlyCollection<byte> payload)
+        public static GetDirectoryContentResponse Parse(string header, byte[] payload)
         {
             _ = header ?? throw new ArgumentNullException(nameof(header));
 

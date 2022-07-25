@@ -18,60 +18,54 @@ namespace longtooth.Common.Implementations.DataCompressor
         /// </summary>
         private const CompressionAlgorithm Algorithm = CompressionAlgorithm.Deflate;
 
-        public IReadOnlyCollection<byte> Compress(IReadOnlyCollection<byte> dataToCompress)
+        public byte[] Compress(byte[] dataToCompress)
         {
-            var result = new List<byte>();
-
             var header = Encoding.UTF8.GetBytes(JsonSerializer.Serialize<CompressionHeader>(new CompressionHeader(Algorithm)));
 
-            // Header length
             var headerLength = header.Length;
-            result.AddRange(BitConverter.GetBytes(headerLength));
+            var headerLengthAsArray = BitConverter.GetBytes(headerLength);
 
-            // Header
-            result.AddRange(header);
+            var compressedPayload = CompressPayload(dataToCompress);
 
-            // Payload
-            result.AddRange(CompressPayload(dataToCompress));
+            var result = new byte[sizeof(int) + headerLength + compressedPayload.Length];
+            headerLengthAsArray.CopyTo(result, 0); // Header length
+            header.CopyTo(result, sizeof(int)); // Header
+            compressedPayload.CopyTo(result, sizeof(int) + headerLength); // Payload
 
             return result;
         }
 
-        private IReadOnlyCollection<byte> CompressPayload(IReadOnlyCollection<byte> payloadToCompress)
+        private byte[] CompressPayload(byte[] payloadToCompress)
         {
-            byte[] compressedPayload = null;
-
-            using (var inputStream = new MemoryStream(payloadToCompress.ToArray(), true))
+            using (var inputStream = new MemoryStream(payloadToCompress, true))
             using (var compressedStream = new MemoryStream())
             using (var compressor = new DeflateStream(compressedStream, CompressionMode.Compress))
             {
                 inputStream.CopyTo(compressor);
                 compressor.Close();
 
-                compressedPayload = compressedStream.ToArray();
+                return compressedStream.ToArray();
             }
-
-            return new List<byte>(compressedPayload);
         }
 
-        public IReadOnlyCollection<byte> Decompress(IReadOnlyCollection<byte> dataToDecompress)
+        public byte[] Decompress(byte[] dataToDecompress)
         {
             // Header length
-            var dataToDecompressAsList = new List<byte>(dataToDecompress.ToArray()); // TODO: Can we do it without copying?
-
-            var headerLengthAsBytesList = dataToDecompressAsList.GetRange(0, sizeof(int));
-            var headerLength = BitConverter.ToInt32(headerLengthAsBytesList.ToArray());
+            var headerLengthBytes = new byte[sizeof(int)];
+            Array.Copy(dataToDecompress, 0, headerLengthBytes, 0, sizeof(int));
+            var headerLength = BitConverter.ToInt32(headerLengthBytes);
 
             var headerLengthPlusHeaderLength = sizeof(int) + headerLength;
 
-            if (headerLengthPlusHeaderLength > dataToDecompress.Count)
+            if (headerLengthPlusHeaderLength > dataToDecompress.Length)
             {
                 throw new ArgumentException("To short data array for decompression!", nameof(dataToDecompress));
             }
 
             // Header
-            var headerAsBytesList = dataToDecompressAsList.GetRange(sizeof(int), headerLength);
-            var header = JsonSerializer.Deserialize<CompressionHeader>(Encoding.UTF8.GetString(headerAsBytesList.ToArray()));
+            var headerBytes = new byte[headerLength];
+            Array.Copy(dataToDecompress, sizeof(int), headerBytes, 0, headerLength);
+            var header = JsonSerializer.Deserialize<CompressionHeader>(Encoding.UTF8.GetString(headerBytes));
 
             if (header == null || header.Algorithm != Algorithm)
             {
@@ -80,15 +74,16 @@ namespace longtooth.Common.Implementations.DataCompressor
 
             // Payload
             var payloadLength = dataToDecompress.Count() - headerLengthPlusHeaderLength;
-            var payload = dataToDecompressAsList.GetRange(headerLengthPlusHeaderLength, payloadLength);
-            return DecompressPayload(payload);
+            var payloadBytes = new byte[payloadLength];
+            Array.Copy(dataToDecompress, headerLengthPlusHeaderLength, payloadBytes, 0, payloadLength);
+            return DecompressPayload(payloadBytes);
         }
 
-        private IReadOnlyCollection<byte> DecompressPayload(IReadOnlyCollection<byte> payloadToDecompress)
+        private byte[] DecompressPayload(byte[] payloadToDecompress)
         {
             byte[] decompressedPayload = null;
             using (var output = new MemoryStream())
-            using (var compressStream = new MemoryStream(payloadToDecompress.ToArray()))
+            using (var compressStream = new MemoryStream(payloadToDecompress))
             using (var decompressor = new DeflateStream(compressStream, CompressionMode.Decompress))
             {
                 decompressor.CopyTo(output);

@@ -24,7 +24,7 @@ namespace longtooth.Protocol.Abstractions.Responses
             DeleteFileResult = deleteFileResult;
         }
 
-        public static DeleteFileResponse Parse(string header, IReadOnlyCollection<byte> payload)
+        public static DeleteFileResponse Parse(string header, byte[] payload)
         {
             _ = header ?? throw new ArgumentNullException(nameof(header));
 

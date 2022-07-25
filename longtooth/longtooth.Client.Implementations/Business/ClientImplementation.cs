@@ -1,13 +1,8 @@
 ﻿using longtooth.Client.Abstractions.DTOs;
 using longtooth.Client.Abstractions.Interfaces;
 using longtooth.Common.Abstractions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.Text;
-using System.Threading.Tasks;
 using static longtooth.Client.Abstractions.Interfaces.IClient;
 
 namespace longtooth.Client.Implementations.Business
@@ -76,15 +71,13 @@ namespace longtooth.Client.Implementations.Business
             _isDisconnectRequired = true;
         }
 
-        public async Task SendAsync(IReadOnlyCollection<byte> message)
+        public async Task SendAsync(byte[] message)
         {
-            var buffer = message.ToArray();
-
             var totalSent = 0;
 
-            while(totalSent < buffer.Length)
+            while(totalSent < message.Length)
             {
-                var bytesSent = _socket.Send(buffer, totalSent, buffer.Length - totalSent, SocketFlags.None);
+                var bytesSent = _socket.Send(message, totalSent, message.Length - totalSent, SocketFlags.None);
 
                 totalSent += bytesSent;
             }
@@ -129,7 +122,7 @@ namespace longtooth.Client.Implementations.Business
                     Array.Copy(_readBuffer, result, bytesRead);
 
                     _ = _responseHandler ?? throw new InvalidOperationException("Call SetupResponseCallback() first!");
-                    _responseHandler(new List<byte>(result));
+                    _responseHandler(result);
                 }
                 catch (SocketException)
                 {

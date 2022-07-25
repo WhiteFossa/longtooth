@@ -116,7 +116,7 @@ namespace longtooth.Common.Implementations.ClientService
             _client = client;
         }
 
-        public async Task OnNewMessageAsync(IReadOnlyCollection<byte> decodedMessage)
+        public async Task OnNewMessageAsync(byte[] decodedMessage)
         {
             var response = _clientSideMessagesProcessor.ParseMessage(decodedMessage);
             var runResult = await response.RunAsync();
@@ -195,12 +195,12 @@ namespace longtooth.Common.Implementations.ClientService
             }
         }
 
-        private async Task PrepareAndSendCommand(IReadOnlyCollection<byte> commandMessage)
+        private async Task PrepareAndSendCommand(byte[] commandMessage)
         {
             _syncWaitHandle.WaitOne();
             _syncWaitHandle.Reset();
 
-            var encodedMessage = _messagesProcessor.PrepareMessageToSend(new List<byte>(commandMessage));
+            var encodedMessage = _messagesProcessor.PrepareMessageToSend(commandMessage);
             await _client.SendAsync(encodedMessage);
         }
 
@@ -349,7 +349,7 @@ namespace longtooth.Common.Implementations.ClientService
 
             if (!_downloadFileRunResult.File.IsSuccessful)
             {
-                return new FileContentDto(false, false, new List<byte>());
+                return new FileContentDto(false, false, new byte[0]);
             }
 
             return new FileContentDto(true, true, _downloadFileRunResult.File.Content);
@@ -392,10 +392,10 @@ namespace longtooth.Common.Implementations.ClientService
             return _deleteFileRunResult.DeleteFileResult.IsSuccessful;
         }
 
-        public async Task<UpdateFileResultDto> UpdateFileContentAsync(string path, ulong offset, IReadOnlyCollection<byte> buffer)
+        public async Task<UpdateFileResultDto> UpdateFileContentAsync(string path, ulong offset, byte[] buffer)
         {
             await PrepareAndSendCommand(
-                _commandGenerator.UpdateFileCommand(LocalPathToServerSidePath(path), (long)offset, buffer.ToArray()));
+                _commandGenerator.UpdateFileCommand(LocalPathToServerSidePath(path), (long)offset, buffer));
             _updateFileWaitHandle.WaitOne();
 
             return _updateFileRunResult.UpdateFileResult;

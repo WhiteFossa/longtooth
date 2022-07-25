@@ -23,7 +23,7 @@ namespace longtooth.Protocol.Abstractions.Responses
             Mountpoints = mountpoints ?? throw new ArgumentNullException(nameof(mountpoints));
         }
 
-        public static GetMountpointsResponse Parse(string header, IReadOnlyCollection<byte> payload)
+        public static GetMountpointsResponse Parse(string header, byte[] payload)
         {
             _ = header ?? throw new ArgumentNullException(nameof(header));
 

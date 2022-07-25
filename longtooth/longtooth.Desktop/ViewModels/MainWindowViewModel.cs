@@ -206,7 +206,7 @@ namespace longtooth.Desktop.ViewModels
             await _client.DisconnectAsync();
         }
 
-        private async void OnServerResponse(IReadOnlyCollection<byte> response)
+        private async void OnServerResponse(byte[] response)
         {
             _messagesProcessor.OnNewMessageArrive(response);
         }
@@ -221,7 +221,7 @@ namespace longtooth.Desktop.ViewModels
             ConsoleCaretIndex = ConsoleText.Length;
         }
 
-        private async Task OnNewMessageAsync(IReadOnlyCollection<byte> decodedMessage)
+        private async Task OnNewMessageAsync(byte[] decodedMessage)
         {
             var response = _clientSideMessagesProcessor.ParseMessage(decodedMessage);
             var runResult = await response.RunAsync();
@@ -243,9 +243,9 @@ namespace longtooth.Desktop.ViewModels
             }
         }
 
-        private async Task PrepareAndSendCommand(IReadOnlyCollection<byte> commandMessage)
+        private async Task PrepareAndSendCommand(byte[] commandMessage)
         {
-            var encodedMessage = _messagesProcessor.PrepareMessageToSend(new List<byte>(commandMessage));
+            var encodedMessage = _messagesProcessor.PrepareMessageToSend(commandMessage);
             await _client.SendAsync(encodedMessage);
         }
 

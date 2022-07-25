@@ -432,15 +432,15 @@ namespace longtooth.Vfs.Windows.Implementations.Implementations
                     return DokanResult.Error;
                 }
 
-                if (content.Content.Count == 0)
+                if (content.Content.Count() == 0)
                 {
                     // End of file
                     break;
                 }
 
-                Array.Copy(content.Content.ToArray(), 0, buffer, alreadyRead, content.Content.Count);
+                Array.Copy(content.Content, 0, buffer, alreadyRead, content.Content.Count());
 
-                alreadyRead += content.Content.Count;
+                alreadyRead += content.Content.Count();
             }
 
             bytesRead = alreadyRead;
